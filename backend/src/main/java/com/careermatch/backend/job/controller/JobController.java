@@ -1,6 +1,7 @@
 package com.careermatch.backend.job.controller;
 
 import com.careermatch.backend.common.ApiResponse;
+import com.careermatch.backend.ai.service.GroqService;
 import com.careermatch.backend.job.dto.JobRequest;
 import com.careermatch.backend.job.dto.JobResponse;
 import com.careermatch.backend.job.entity.Job;
@@ -15,6 +16,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
@@ -25,6 +27,7 @@ import java.util.stream.Collectors;
 public class JobController {
 
     private final JobService jobService;
+    private final GroqService groqService;
 
     @PostMapping
     @PreAuthorize("hasAuthority('ROLE_RECRUITER')")
@@ -45,10 +48,24 @@ public class JobController {
 
     @DeleteMapping("/{jobId}")
     @PreAuthorize("hasAuthority('ROLE_RECRUITER')")
-    @Operation(summary = "Remove a job posting from the system")
+    @Operation(summary = "Remove a job posting from the system (ownership validated)")
     public ResponseEntity<ApiResponse<String>> deleteJob(@PathVariable("jobId") UUID jobId) {
-        jobService.deleteJob(jobId);
+        String email = SecurityContextHolder.getContext().getAuthentication().getName();
+        jobService.deleteJob(jobId, email);
         return ResponseEntity.ok(ApiResponse.success("Job deleted successfully", "Deleted"));
+    }
+
+    @PatchMapping("/{jobId}/status")
+    @PreAuthorize("hasAuthority('ROLE_RECRUITER')")
+    @Operation(summary = "Change job status: DRAFT | ACTIVE | PAUSED | CLOSED")
+    public ResponseEntity<ApiResponse<JobResponse>> updateJobStatus(
+            @PathVariable("jobId") UUID jobId,
+            @RequestBody Map<String, String> body
+    ) {
+        String email = SecurityContextHolder.getContext().getAuthentication().getName();
+        String newStatus = body.getOrDefault("status", "");
+        Job job = jobService.updateJobStatus(jobId, newStatus, email);
+        return ResponseEntity.ok(ApiResponse.success("Job status updated to " + newStatus, mapToResponse(job)));
     }
 
     @GetMapping("/{jobId}")
@@ -67,6 +84,26 @@ public class JobController {
                 .collect(Collectors.toList());
         return ResponseEntity.ok(ApiResponse.success(response));
     }
+    @GetMapping("/my")
+    @PreAuthorize("hasAuthority('ROLE_RECRUITER')")
+    @Operation(summary = "Get all jobs posted by the current recruiter's company")
+    public ResponseEntity<ApiResponse<List<JobResponse>>> getMyJobs() {
+        String email = SecurityContextHolder.getContext().getAuthentication().getName();
+        List<Job> jobs = jobService.getJobsByRecruiter(email);
+        List<JobResponse> response = jobs.stream()
+                .map(this::mapToResponse)
+                .collect(Collectors.toList());
+        return ResponseEntity.ok(ApiResponse.success(response));
+    }
+
+    @PostMapping("/ai-assist")
+    @PreAuthorize("hasAuthority('ROLE_RECRUITER')")
+    @Operation(summary = "Use AI to auto-generate job description, skills and experience from a brief role prompt")
+    public ResponseEntity<ApiResponse<String>> aiAssistJob(@RequestBody Map<String, String> body) {
+        String prompt = body.getOrDefault("prompt", "");
+        String result = groqService.generateJobDetails(prompt);
+        return ResponseEntity.ok(ApiResponse.success("AI generation complete", result));
+    }
 
     private JobResponse mapToResponse(Job job) {
         return JobResponse.builder()
@@ -79,6 +116,11 @@ public class JobController {
                 .jobType(job.getJobType().name())
                 .experienceLevel(job.getExperienceLevel())
                 .salaryRange(job.getSalaryRange())
+                .requiredSkills(job.getRequiredSkills())
+                .preferredSkills(job.getPreferredSkills())
+                .workMode(job.getWorkMode())
+                .educationLevel(job.getEducationLevel())
+                .sponsorshipAvailable(job.getSponsorshipAvailable())
                 .status(job.getStatus().name())
                 .createdAt(job.getCreatedAt())
                 .build();

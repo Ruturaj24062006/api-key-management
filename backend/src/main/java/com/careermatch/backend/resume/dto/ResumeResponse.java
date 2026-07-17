@@ -11,5 +11,7 @@ public class ResumeResponse {
     private UUID id;
     private String fileUrl;
     private boolean isCurrent;
+    private String parsedText;
+    private String extractedJson;
     private LocalDateTime createdAt;
 }

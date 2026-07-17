@@ -19,14 +19,14 @@ public interface JobRepository extends JpaRepository<Job, UUID> {
         WITH vector_search AS (
           SELECT id, ROW_NUMBER() OVER (ORDER BY embedding <=> cast(:queryVector as vector)) as rank
           FROM jobs
-          WHERE status = 'PUBLISHED' AND embedding IS NOT NULL
+          WHERE status = 'ACTIVE' AND embedding IS NOT NULL
           ORDER BY embedding <=> cast(:queryVector as vector)
           LIMIT 100
         ),
         fts_search AS (
           SELECT id, ROW_NUMBER() OVER (ORDER BY ts_rank(fts, plainto_tsquery('english', :queryText)) DESC) as rank
           FROM jobs
-          WHERE status = 'PUBLISHED' AND fts @@ plainto_tsquery('english', :queryText)
+          WHERE status = 'ACTIVE' AND fts @@ plainto_tsquery('english', :queryText)
           ORDER BY ts_rank(fts, plainto_tsquery('english', :queryText)) DESC
           LIMIT 100
         )

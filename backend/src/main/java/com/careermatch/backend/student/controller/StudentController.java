@@ -37,6 +37,14 @@ public class StudentController {
         return ResponseEntity.ok(ApiResponse.success(profile));
     }
 
+    @GetMapping("/{studentId}")
+    @PreAuthorize("hasAnyAuthority('ROLE_STUDENT', 'ROLE_RECRUITER')")
+    @Operation(summary = "Get a student profile by their unique ID")
+    public ResponseEntity<ApiResponse<StudentProfileDto>> getProfileById(@PathVariable("studentId") UUID studentId) {
+        StudentProfileDto profile = studentService.getProfile(studentId);
+        return ResponseEntity.ok(ApiResponse.success(profile));
+    }
+
     @PutMapping("/profile")
     @PreAuthorize("hasAuthority('ROLE_STUDENT')")
     @Operation(summary = "Save and update student profile and onboarding details")

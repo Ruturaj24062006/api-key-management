@@ -18,6 +18,12 @@ public class JobResponse {
     private String jobType;
     private String experienceLevel;
     private String salaryRange;
+    private String requiredSkills;
+    private String preferredSkills;
+    private String workMode;
+    private String educationLevel;
+    private Boolean sponsorshipAvailable;
     private String status;
     private LocalDateTime createdAt;
 }
+

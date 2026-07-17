@@ -1,0 +1,106 @@
+<main class="onboarding-wrapper container animate-fade-in">
+  <div class="onboarding-card-wrapper glass-card">
+    
+    <!-- Step Progress Line -->
+    <div class="progress-stepper" *ngIf="currentStep() <= 3">
+      <div class="step-indicator" [class.active]="currentStep() >= 1">
+        <span class="step-number">1</span>
+        <span class="step-text">Company Profile</span>
+      </div>
+      <div class="step-connector-line" [class.active]="currentStep() >= 2"></div>
+      <div class="step-indicator" [class.active]="currentStep() >= 2">
+        <span class="step-number">2</span>
+        <span class="step-text">Company Details</span>
+      </div>
+      <div class="step-connector-line" [class.active]="currentStep() >= 3"></div>
+      <div class="step-indicator" [class.active]="currentStep() >= 3">
+        <span class="step-number">3</span>
+        <span class="step-text">Verification</span>
+      </div>
+    </div>
+
+    <!-- Error Alert Box -->
+    <div class="alert alert-danger animate-fade-in" *ngIf="errorMessage()">
+      {{ errorMessage() }}
+    </div>
+
+    <!-- STEP 1: Company Profile -->
+    <div class="step-container animate-scale-up" *ngIf="currentStep() === 1">
+      <div class="step-header">
+        <h2>Create Company Profile</h2>
+        <p>Enter the basic profile details of your organization to get started.</p>
+      </div>
+
+      <div class="form-grid">
+        <div class="form-group">
+          <label class="form-label-bold">Company Name <span class="required-star">*</span></label>
+          <input type="text" [(ngModel)]="profile.companyName" placeholder="e.g. Google" class="form-control onboard-input">
+        </div>
+
+        <div class="form-group">
+          <label class="form-label-bold">Logo URL (Optional)</label>
+          <input type="text" [(ngModel)]="profile.logoUrl" placeholder="e.g. https://google.com/logo.png" class="form-control onboard-input">
+        </div>
+
+        <div class="form-group">
+          <label class="form-label-bold">Website URL (Optional)</label>
+          <input type="text" [(ngModel)]="profile.websiteUrl" placeholder="e.g. https://google.com" class="form-control onboard-input">
+        </div>
+      </div>
+    </div>
+
+    <!-- STEP 2: Company Details -->
+    <div class="step-container animate-scale-up" *ngIf="currentStep() === 2">
+      <div class="step-header">
+        <h2>Enter Company Details</h2>
+        <p>Provide specific background information and details about your company structure.</p>
+      </div>
+
+      <div class="form-grid">
+        <div class="form-group">
+          <label class="form-label-bold">Recruiter Job Title <span class="required-star">*</span></label>
+          <input type="text" [(ngModel)]="profile.jobTitle" placeholder="e.g. Talent Acquisition Lead" class="form-control onboard-input">
+        </div>
+
+        <div class="form-group">
+          <label class="form-label-bold">Industry Sector <span class="required-star">*</span></label>
+          <input type="text" [(ngModel)]="profile.industry" placeholder="e.g. Software Engineering / IT" class="form-control onboard-input">
+        </div>
+
+        <div class="form-group">
+          <label class="form-label-bold">HQ Location / Work Mode <span class="required-star">*</span></label>
+          <input type="text" [(ngModel)]="profile.location" placeholder="e.g. Pune, Hybrid" class="form-control onboard-input">
+        </div>
+
+        <div class="form-group full-width-field">
+          <label class="form-label-bold">Company Description (Optional)</label>
+          <textarea [(ngModel)]="profile.description" placeholder="Write a brief overview describing your company mission and tech stack..." class="form-control onboard-textarea" rows="4"></textarea>
+        </div>
+      </div>
+    </div>
+
+    <!-- STEP 3: Verification Loader -->
+    <div class="step-container text-center animate-scale-up pad-vertical-lg" *ngIf="currentStep() === 3">
+      <div class="verification-loader-box">
+        <div class="spinner-loader lg-spinner"></div>
+        <h2 class="verifying-title">Verifying Credentials</h2>
+        <p class="verifying-subtitle">Connecting with registries & validating domain authorizations...</p>
+        
+        <div class="verification-steps-timeline">
+          <div class="ver-step-item checked">✓ Matching organization database records</div>
+          <div class="ver-step-item checked">✓ Checking email domain validation</div>
+          <div class="ver-step-item active">⏳ Awaiting corporate verification status...</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Form Navigation Footer Actions -->
+    <div class="onboarding-nav-footer" *ngIf="currentStep() < 3">
+      <button type="button" class="btn btn-secondary btn-nav" (click)="prevStep()" [disabled]="currentStep() === 1">Back</button>
+      <button type="button" class="btn btn-primary btn-nav" (click)="nextStep()">
+        {{ currentStep() === 2 ? 'Submit for Verification' : 'Next' }}
+      </button>
+    </div>
+
+  </div>
+</main>

@@ -31,7 +31,7 @@ public class ScoringService {
     }
 
     // Technical Fit (40%) - Skill tags overlap
-    private double calculateTechnicalFit(Student student, Job job) {
+    public double calculateTechnicalFit(Student student, Job job) {
         if (student.getSkills() == null || student.getSkills().isEmpty()) {
             return 0.0;
         }
@@ -53,7 +53,7 @@ public class ScoringService {
     }
 
     // Project Fit (20%) - Project technologies / descriptions matching job
-    private double calculateProjectFit(Student student, Job job) {
+    public double calculateProjectFit(Student student, Job job) {
         if (student.getProjects() == null || student.getProjects().isEmpty()) {
             return 0.0;
         }
@@ -77,7 +77,7 @@ public class ScoringService {
     }
 
     // Experience Fit (15%) - Years of experience vs job requirements
-    private double calculateExperienceFit(Student student, Job job) {
+    public double calculateExperienceFit(Student student, Job job) {
         double years = calculateYearsOfExperience(student);
         String expLevel = job.getExperienceLevel() != null ? job.getExperienceLevel().toUpperCase() : "ENTRY_LEVEL";
 
@@ -94,7 +94,7 @@ public class ScoringService {
     }
 
     // Domain Fit (10%) - Overlap of major/education and experience domain with job title
-    private double calculateDomainFit(Student student, Job job) {
+    public double calculateDomainFit(Student student, Job job) {
         String jobTitle = job.getTitle().toLowerCase();
         double score = 0.0;
 
@@ -126,7 +126,7 @@ public class ScoringService {
     }
 
     // Behavioral Fit (10%) - Soft skills keyword matching
-    private double calculateBehavioralFit(Student student, Job job) {
+    public double calculateBehavioralFit(Student student, Job job) {
         String searchArea = ((student.getBio() != null ? student.getBio() : "") + " " + 
                 student.getExperience().stream().map(e -> e.getDescription() != null ? e.getDescription() : "").collect(Collectors.joining(" "))).toLowerCase();
 
@@ -145,7 +145,7 @@ public class ScoringService {
     }
 
     // Education & Certifications Fit (5%)
-    private double calculateEduCertFit(Student student) {
+    public double calculateEduCertFit(Student student) {
         double score = 0.0;
 
         // GPA component (2.5%)

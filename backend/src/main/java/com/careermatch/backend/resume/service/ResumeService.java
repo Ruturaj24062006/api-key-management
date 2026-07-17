@@ -2,6 +2,7 @@ package com.careermatch.backend.resume.service;
 
 import com.careermatch.backend.ai.service.EmbeddingService;
 import com.careermatch.backend.ai.service.GroqService;
+import com.careermatch.backend.exception.BadRequestException;
 import com.careermatch.backend.exception.ResourceNotFoundException;
 import com.careermatch.backend.resume.dto.ExtractedProfile;
 import com.careermatch.backend.resume.entity.Resume;
@@ -61,12 +62,8 @@ public class ResumeService {
             String jsonProfile = groqService.extractResumeProfile(parsedText);
             resume.setExtractedJson(jsonProfile);
 
-            // 5. Populate student profile details
+            // 5. Mark other student resumes as inactive
             Student student = resume.getStudent();
-            ExtractedProfile profile = objectMapper.readValue(jsonProfile, ExtractedProfile.class);
-            updateStudentProfile(student, profile);
-
-            // 6. Mark other student resumes as inactive
             resumeRepository.findByStudentId(student.getId()).forEach(r -> {
                 if (!r.getId().equals(resumeId)) {
                     r.setCurrent(false);
@@ -80,6 +77,27 @@ public class ResumeService {
         } catch (Exception e) {
             log.error("Failed to process resume ID: {}. Error: {}", resumeId, e.getMessage(), e);
             throw new RuntimeException("Resume processing error: " + e.getMessage(), e);
+        }
+    }
+
+    @Transactional
+    public void confirmResumeExtractedProfile(UUID resumeId) {
+        log.info("Confirming resume extraction for resume ID: {}", resumeId);
+        Resume resume = resumeRepository.findById(resumeId)
+                .orElseThrow(() -> new ResourceNotFoundException("Resume not found: " + resumeId));
+
+        if (resume.getExtractedJson() == null || resume.getExtractedJson().isBlank()) {
+            throw new BadRequestException("Resume parsing has not completed or has no extracted data.");
+        }
+
+        try {
+            Student student = resume.getStudent();
+            ExtractedProfile profile = objectMapper.readValue(resume.getExtractedJson(), ExtractedProfile.class);
+            updateStudentProfile(student, profile);
+            log.info("Student profile updated from resume extraction for student ID: {}", student.getId());
+        } catch (Exception e) {
+            log.error("Failed to update student profile from resume ID: {}", resumeId, e);
+            throw new RuntimeException("Failed to parse extracted JSON and update profile: " + e.getMessage(), e);
         }
     }
 

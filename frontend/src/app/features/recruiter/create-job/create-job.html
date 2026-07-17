@@ -1,0 +1,185 @@
+<app-navbar></app-navbar>
+
+<main class="create-job-wrapper container animate-fade-in">
+
+  <!-- Header -->
+  <div class="page-header-row">
+    <div>
+      <h1 class="page-title">Post a New Job</h1>
+      <p class="page-subtitle">Fill in the job details across 3 steps, or let AI generate a draft for you.</p>
+    </div>
+    <button class="btn btn-ghost btn-sm" (click)="goToDashboard()">← Back to Dashboard</button>
+  </div>
+
+  <!-- Progress Stepper -->
+  <div class="progress-stepper" *ngIf="currentStep() <= 3">
+    <div class="step-indicator" [class.active]="currentStep() >= 1">
+      <span class="step-number">1</span>
+      <span class="step-text">Basic Info</span>
+    </div>
+    <div class="step-connector-line" [class.active]="currentStep() >= 2"></div>
+    <div class="step-indicator" [class.active]="currentStep() >= 2">
+      <span class="step-number">2</span>
+      <span class="step-text">Skills & Requirements</span>
+    </div>
+    <div class="step-connector-line" [class.active]="currentStep() >= 3"></div>
+    <div class="step-indicator" [class.active]="currentStep() >= 3">
+      <span class="step-number">3</span>
+      <span class="step-text">Job Details</span>
+    </div>
+  </div>
+
+  <!-- Alert Row -->
+  <div class="alert alert-danger animate-fade-in" *ngIf="errorMessage()">{{ errorMessage() }}</div>
+  <div class="alert alert-success animate-fade-in" *ngIf="successMessage()">{{ successMessage() }}</div>
+
+  <!-- AI Assist Panel (always visible on Step 1) -->
+  <div class="ai-assist-panel glass-card animate-fade-in" *ngIf="currentStep() === 1">
+    <div class="ai-assist-header">
+      <div class="ai-badge">✦ AI Assist</div>
+      <h3>Generate Job Details with AI</h3>
+      <p>Describe the role in plain language and AI will draft your description, required skills, and experience requirements.</p>
+    </div>
+    <div class="ai-prompt-row">
+      <input type="text" [(ngModel)]="aiPrompt" placeholder="e.g. Backend Developer with Java and Spring Boot" class="form-control ai-prompt-input">
+      <button type="button" class="btn btn-primary ai-generate-btn" (click)="useAiAssist()" [disabled]="isAiLoading()">
+        <span *ngIf="!isAiLoading()">Generate ✦</span>
+        <span *ngIf="isAiLoading()" class="dot-typing"><span></span><span></span><span></span></span>
+      </button>
+    </div>
+  </div>
+
+  <div class="form-card glass-card animate-scale-up">
+
+    <!-- ═══════════ STEP 1: Basic Info ═══════════ -->
+    <div class="step-content" *ngIf="currentStep() === 1">
+      <div class="step-section-header">
+        <h2>Basic Job Information</h2>
+        <p>Start with the core role details. These are visible first to candidates.</p>
+      </div>
+
+      <div class="form-grid">
+        <div class="form-group full-width-field">
+          <label class="form-label-bold">Job Title <span class="required-star">*</span></label>
+          <input type="text" [(ngModel)]="job.title" placeholder="e.g. Senior Backend Developer" class="form-control onboard-input">
+        </div>
+
+        <div class="form-group">
+          <label class="form-label-bold">Employment Type <span class="required-star">*</span></label>
+          <select [(ngModel)]="job.jobType" class="form-control onboard-input">
+            <option *ngFor="let t of jobTypes" [value]="t">{{ t.replace('_', ' ') }}</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label-bold">Work Mode</label>
+          <select [(ngModel)]="job.workMode" class="form-control onboard-input">
+            <option *ngFor="let m of workModes" [value]="m">{{ m }}</option>
+          </select>
+        </div>
+
+        <div class="form-group full-width-field">
+          <label class="form-label-bold">Job Description <span class="required-star">*</span></label>
+          <textarea [(ngModel)]="job.description" placeholder="Describe the role, responsibilities, and what the team does..." class="form-control onboard-textarea" rows="6"></textarea>
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══════════ STEP 2: Skills & Requirements ═══════════ -->
+    <div class="step-content" *ngIf="currentStep() === 2">
+      <div class="step-section-header">
+        <h2>Skills & Requirements</h2>
+        <p>Define what candidates must know and what they ideally should know.</p>
+      </div>
+
+      <div class="form-grid">
+        <div class="form-group full-width-field">
+          <label class="form-label-bold">Required Skills <span class="required-star">*</span></label>
+          <input type="text" [(ngModel)]="job.requiredSkills" placeholder="e.g. Java, Spring Boot, PostgreSQL, REST APIs" class="form-control onboard-input">
+          <span class="form-hint">Enter comma-separated skills that are mandatory for this role.</span>
+        </div>
+
+        <div class="form-group full-width-field">
+          <label class="form-label-bold">Preferred Skills</label>
+          <input type="text" [(ngModel)]="job.preferredSkills" placeholder="e.g. Docker, Kubernetes, AWS, Redis" class="form-control onboard-input">
+          <span class="form-hint">Nice-to-have skills — candidates with these get a boost in match score.</span>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label-bold">Experience Level</label>
+          <input type="text" [(ngModel)]="job.experienceLevel" placeholder="e.g. 2-4 years, Entry-level, Senior" class="form-control onboard-input">
+        </div>
+
+        <div class="form-group">
+          <label class="form-label-bold">Education Level</label>
+          <input type="text" [(ngModel)]="job.educationLevel" placeholder="e.g. Bachelor's in CS, Any Degree" class="form-control onboard-input">
+        </div>
+
+        <div class="form-group full-width-field">
+          <label class="form-label-bold">General Requirements</label>
+          <textarea [(ngModel)]="job.requirements" placeholder="Additional qualifications, certifications, or role-specific requirements..." class="form-control onboard-textarea" rows="4"></textarea>
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══════════ STEP 3: Location, Salary & Details ═══════════ -->
+    <div class="step-content" *ngIf="currentStep() === 3">
+      <div class="step-section-header">
+        <h2>Compensation & Location</h2>
+        <p>Add final details to attract the right candidates.</p>
+      </div>
+
+      <div class="form-grid">
+        <div class="form-group">
+          <label class="form-label-bold">Location / Headquarters</label>
+          <input type="text" [(ngModel)]="job.location" placeholder="e.g. Pune, Maharashtra" class="form-control onboard-input">
+        </div>
+
+        <div class="form-group">
+          <label class="form-label-bold">Salary Range</label>
+          <input type="text" [(ngModel)]="job.salaryRange" placeholder="e.g. ₹8 LPA – ₹14 LPA" class="form-control onboard-input">
+        </div>
+
+        <div class="form-group full-width-field">
+          <label class="form-label-bold sponsorship-label">
+            <input type="checkbox" [(ngModel)]="job.sponsorshipAvailable" class="sponsorship-checkbox">
+            <span>Sponsorship / Relocation Available</span>
+          </label>
+          <p class="form-hint">Check this if your company provides visa or relocation sponsorship.</p>
+        </div>
+      </div>
+
+      <!-- Preview Card -->
+      <div class="job-preview-box glass-card">
+        <div class="preview-header">
+          <h3>📋 Job Preview</h3>
+          <p class="preview-badge">{{ job.jobType.replace('_', ' ') }} · {{ job.workMode }}</p>
+        </div>
+        <h2 class="preview-job-title">{{ job.title || 'Untitled Role' }}</h2>
+        <p class="preview-location">{{ job.location || 'Location not set' }} · {{ job.salaryRange || 'Salary not specified' }}</p>
+        <div class="preview-skills-row" *ngIf="job.requiredSkills">
+          <span *ngFor="let skill of job.requiredSkills.split(',').slice(0, 5)" class="skill-chip">{{ skill.trim() }}</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══════════ STEP 4: Success ═══════════ -->
+    <div class="step-content text-center success-state" *ngIf="currentStep() === 4">
+      <div class="success-checkmark">✓</div>
+      <h2 class="success-title">Job Posted Successfully!</h2>
+      <p class="success-subtitle">Your job listing is now live and candidates will start receiving AI-powered match scores automatically.</p>
+      <button class="btn btn-primary" (click)="goToDashboard()">Go to Dashboard</button>
+    </div>
+
+    <!-- Navigation Footer -->
+    <div class="step-nav-footer" *ngIf="currentStep() <= 3">
+      <button type="button" class="btn btn-secondary btn-nav" (click)="prevStep()" [disabled]="currentStep() === 1">Back</button>
+      <button type="button" class="btn btn-primary btn-nav" (click)="currentStep() < 3 ? nextStep() : submitJob()" [disabled]="isLoading()">
+        <span *ngIf="!isLoading()">{{ currentStep() === 3 ? 'Post Job' : 'Continue' }}</span>
+        <span *ngIf="isLoading()" class="dot-typing"><span></span><span></span><span></span></span>
+      </button>
+    </div>
+
+  </div>
+
+</main>

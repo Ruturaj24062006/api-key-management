@@ -64,9 +64,21 @@ export class StudentProfileService {
     return this.http.put<any>(`${this.studentsUrl}/profile`, profile);
   }
 
+  getProfileById(studentId: string): Observable<any> {
+    return this.http.get<any>(`${this.studentsUrl}/${studentId}`);
+  }
+
   uploadResume(file: File): Observable<any> {
     const formData = new FormData();
     formData.append('file', file);
     return this.http.post<any>(`${this.resumeUrl}/upload`, formData);
+  }
+
+  getLatestResume(): Observable<any> {
+    return this.http.get<any>(`${this.resumeUrl}/latest`);
+  }
+
+  confirmResume(resumeId: string): Observable<any> {
+    return this.http.post<any>(`${this.resumeUrl}/${resumeId}/confirm`, {});
   }
 }

@@ -142,6 +142,39 @@ public class GroqService {
         }
     }
 
+    public String askAiQuestion(String contextJson, String question) {
+        if ("mock-groq-key".equals(apiKey) || apiKey.isBlank()) {
+            log.warn("Using mock response because Groq API Key is not set");
+            String q = question.toLowerCase();
+            if (q.contains("why did i get") || q.contains("why did i receive") || q.contains("score")) {
+                return "You received this score because your technical background aligns closely with the core stack (Java, Spring Boot, PostgreSQL) and you have matching enterprise-grade API projects. However, you're slightly penalized for lacking specific DevOps container tools (Docker/Kubernetes) mentioned in the requirements.";
+            } else if (q.contains("missing") || q.contains("skills")) {
+                return "You are missing Docker and Kubernetes containerization skills, which are listed in the job requirements. Expanding your profile to include these will maximize your match potential.";
+            } else if (q.contains("should i apply") || q.contains("apply")) {
+                return "Yes, you should absolutely apply! A compatibility match of this strength indicates that you possess the primary software engineering capabilities needed. DevOps tool gaps can typically be learned on the job.";
+            } else if (q.contains("improve") || q.contains("chances") || q.contains("how can i")) {
+                return "To improve your chances, highlight any container experience in your bio or add a simple microservices project using Docker Compose to your GitHub portfolio.";
+            } else if (q.contains("interview") || q.contains("questions")) {
+                return "Here are 3 practice interview questions for this role:\n1. How do you design REST endpoints to support high concurrency under Spring Boot?\n2. What is the difference between an index scan and a sequential scan in PostgreSQL?\n3. Explain how you would write a Dockerfile to package a multi-module Maven project.";
+            }
+            return "Based on your student profile and job requirements, this role is a strong match. You have matching Java/Spring Boot experience. Try adding container skills to improve your rating!";
+        }
+
+        String systemPrompt = """
+                You are an expert career advisory AI. Answer the student's question about a job recommendation.
+                You are provided with context containing:
+                1. Student Profile & Resume Data
+                2. Job Description & Requirements
+                3. Personal Match Score & Breakdown Fit Points
+                
+                Provide a clear, direct, professional, and highly encouraging answer to the student's question.
+                Keep it concise (1-2 short paragraphs max).
+                """;
+
+        String userPrompt = String.format("CONTEXT:\n%s\n\nSTUDENT QUESTION:\n%s", contextJson, question);
+        return callGroq(systemPrompt, userPrompt, false);
+    }
+
     private String getMockProfileJson() {
         return """
                 {
@@ -173,4 +206,33 @@ public class GroqService {
                 }
                 """;
     }
+
+    public String generateJobDetails(String briefPrompt) {
+        if ("mock-groq-key".equals(apiKey) || apiKey.isBlank()) {
+            log.warn("Using mock job generation because Groq API Key is not set");
+            return """
+                    {
+                      "description": "We are looking for a skilled Backend Developer with expertise in Java and Spring Boot to join our engineering team. You will design, develop and maintain high-performance REST APIs, work with databases, and collaborate with frontend developers.",
+                      "requiredSkills": "Java, Spring Boot, PostgreSQL, REST APIs, Maven",
+                      "preferredSkills": "Docker, Kubernetes, Redis, AWS, Microservices",
+                      "experienceLevel": "2-4 years of professional experience"
+                    }
+                    """;
+        }
+
+        String systemPrompt = """
+                You are an expert job description writer. Given a brief role description, generate a detailed job posting.
+                Return ONLY a JSON object with these exact fields:
+                {
+                  "description": "Full multi-paragraph job description",
+                  "requiredSkills": "Comma-separated list of required technical skills",
+                  "preferredSkills": "Comma-separated list of preferred/nice-to-have skills",
+                  "experienceLevel": "e.g. 2-4 years, Entry-level, Senior"
+                }
+                Do not include any other text or explanation outside the JSON.
+                """;
+
+        return callGroq(systemPrompt, "Role brief: " + briefPrompt, true);
+    }
 }
+

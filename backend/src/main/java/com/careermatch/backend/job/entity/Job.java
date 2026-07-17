@@ -51,6 +51,21 @@ public class Job {
     @Column(name = "salary_range")
     private String salaryRange;
 
+    @Column(name = "required_skills", columnDefinition = "TEXT")
+    private String requiredSkills; // comma-separated list
+
+    @Column(name = "preferred_skills", columnDefinition = "TEXT")
+    private String preferredSkills; // comma-separated list
+
+    @Column(name = "work_mode")
+    private String workMode; // REMOTE, HYBRID, ONSITE
+
+    @Column(name = "education_level")
+    private String educationLevel;
+
+    @Column(name = "sponsorship_available")
+    private Boolean sponsorshipAvailable;
+
     @Builder.Default
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)

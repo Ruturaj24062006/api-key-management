@@ -8,9 +8,9 @@ spring:
     name: career-match-backend
 
   datasource:
-    url: jdbc:postgresql://${DB_HOST:localhost}:${DB_PORT:5432}/${DB_NAME:careermatch}
-    username: ${DB_USER:postgres}
-    password: ${DB_PASSWORD:password}
+    url: jdbc:postgresql://aws-1-ap-south-1.pooler.supabase.com:5432/postgres
+    username: postgres.qacuyhktzqhfqtswsrgs
+    password: "atharvbhavsar%27s%20Project"
     driver-class-name: org.postgresql.Driver
   
   jpa:
@@ -25,9 +25,21 @@ spring:
   data:
     redis:
       url: ${REDIS_URL:redis://localhost:6379}
-    
   rabbitmq:
     addresses: ${RABBITMQ_URL:amqp://localhost:5672}
+    host: ${RABBITMQ_HOST:localhost}
+    port: ${RABBITMQ_PORT:5672}
+    username: ${RABBITMQ_USER:guest}
+    password: ${RABBITMQ_PASSWORD:guest}
+    listener:
+      simple:
+        retry:
+          enabled: true
+          max-attempts: 3
+          initial-interval: 2000ms
+          multiplier: 2.0
+          max-interval: 10000ms
+          default-requeue-rejected: false
 
   servlet:
     multipart:
@@ -37,23 +49,23 @@ spring:
 # JWT, Local Storage, Resend, and Supabase Configuration
 app:
   jwt:
-    secret: ${JWT_SECRET:404E635266556A586E3272357538782F413F4428472B4B6250645367566B5970} # Matches Supabase JWT Secret in Cloud
+    secret: ${JWT_SECRET:404E635266556A586E3272357538782F413F4428472B4B6250645367566B5970}
     accessTokenExpirationMs: 86400000 # 24 Hours
     refreshTokenExpirationMs: 604800000 # 7 Days
   upload:
     dir: ${UPLOAD_DIR:uploads}
   resend:
-    apiKey: ${RESEND_API_KEY:mock-resend-key}
+    apiKey: ${RESEND_API_KEY:re_Fw4SSiqX_HWNBiBYRkD1G7H72RjMV5Axw}
     from: ${RESEND_FROM_EMAIL:onboarding@resend.dev}
 
 supabase:
-  url: ${SUPABASE_URL:https://your-project.supabase.co}
-  anonKey: ${SUPABASE_ANON_KEY:mock-anon-key}
+  url: ${SUPABASE_URL:https://qacuyhktzqhfqtswsrgs.supabase.co}
+  anonKey: ${SUPABASE_ANON_KEY:eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFhY3V5aGt0enFoZnF0c3dzcmdzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODQzMDczOTYsImV4cCI6MjA5OTg4MzM5Nn0.x77cJeG0Z_YUmdvMOX9OCWojEpgkqBZuld70J60v94Y}
 
 # Groq API Configuration
 groq:
   api:
-    key: ${GROQ_API_KEY:mock-groq-key}
+    key: ${GROQ_API_KEY:}
     url: https://api.groq.com/openai/v1/chat/completions
   model: ${GROQ_MODEL:llama-3.3-70b-versatile}
 

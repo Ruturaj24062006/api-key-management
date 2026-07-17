@@ -1,5 +1,6 @@
 import { Component } from '@angular/core';
 import { NgFor } from '@angular/common';
+import { RouterLink } from '@angular/router';
 import { Navbar } from '../../shared/components/navbar/navbar';
 import { Footer } from '../../shared/components/footer/footer';
 import { JobCard, JobCardSkill } from '../../shared/components/job-card/job-card';
@@ -19,7 +20,7 @@ interface LandingFeatureRow {
 
 @Component({
   selector: 'app-landing',
-  imports: [NgFor, Navbar, Footer, JobCard],
+  imports: [NgFor, RouterLink, Navbar, Footer, JobCard],
   templateUrl: './landing.html',
   styleUrl: './landing.css'
 })

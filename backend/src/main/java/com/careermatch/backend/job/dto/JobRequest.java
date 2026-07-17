@@ -21,4 +21,10 @@ public class JobRequest {
 
     private String experienceLevel;
     private String salaryRange;
+    private String requiredSkills;
+    private String preferredSkills;
+    private String workMode;
+    private String educationLevel;
+    private Boolean sponsorshipAvailable;
 }
+

@@ -1,0 +1,230 @@
+<app-navbar></app-navbar>
+
+<main class="rjm-wrapper container animate-fade-in">
+
+  <!-- Header -->
+  <div class="rjm-header-row">
+    <div>
+      <h1 class="rjm-title">Job Management</h1>
+      <p class="rjm-subtitle">Create, edit and manage the lifecycle of all your job postings.</p>
+    </div>
+    <div class="rjm-header-actions">
+      <button class="btn btn-ghost btn-sm" (click)="router.navigate(['/recruiter/dashboard'])">← Dashboard</button>
+      <button class="btn btn-primary btn-sm" (click)="router.navigate(['/recruiter/jobs/create'])">+ Post New Job</button>
+    </div>
+  </div>
+
+  <!-- Alerts -->
+  <div class="alert alert-success animate-fade-in" *ngIf="successMessage()">{{ successMessage() }}</div>
+  <div class="alert alert-danger animate-fade-in" *ngIf="errorMessage()">{{ errorMessage() }}</div>
+
+  <!-- Summary Chips -->
+  <div class="status-summary-row" *ngIf="jobs().length > 0">
+    <div class="summary-chip chip-active">
+      <span class="chip-number">{{ countByStatus('ACTIVE') }}</span>
+      <span class="chip-label">Active</span>
+    </div>
+    <div class="summary-chip chip-paused">
+      <span class="chip-number">{{ countByStatus('PAUSED') }}</span>
+      <span class="chip-label">Paused</span>
+    </div>
+    <div class="summary-chip chip-draft">
+      <span class="chip-number">{{ countByStatus('DRAFT') }}</span>
+      <span class="chip-label">Draft</span>
+    </div>
+    <div class="summary-chip chip-closed">
+      <span class="chip-number">{{ countByStatus('CLOSED') }}</span>
+      <span class="chip-label">Closed</span>
+    </div>
+  </div>
+
+  <!-- Filter Tabs -->
+  <div class="filter-tabs-row">
+    <button
+      *ngFor="let f of statusFilters"
+      class="filter-tab"
+      [class.active-tab]="activeFilter() === f"
+      (click)="setFilter(f)">
+      {{ f === 'ALL' ? 'All Jobs' : f.charAt(0) + f.slice(1).toLowerCase() }}
+    </button>
+  </div>
+
+  <!-- Loading -->
+  <div class="loading-row" *ngIf="isLoading()">
+    <div class="spinner-loader"></div>
+    <span>Loading your jobs...</span>
+  </div>
+
+  <!-- Empty State -->
+  <div class="empty-state glass-card" *ngIf="!isLoading() && filteredJobs().length === 0">
+    <div class="empty-icon">📋</div>
+    <h3>No jobs found</h3>
+    <p *ngIf="activeFilter() !== 'ALL'">No <strong>{{ activeFilter().toLowerCase() }}</strong> jobs. Try a different filter.</p>
+    <p *ngIf="activeFilter() === 'ALL'">You haven't posted any jobs yet.</p>
+    <button class="btn btn-primary" (click)="router.navigate(['/recruiter/jobs/create'])">Post Your First Job</button>
+  </div>
+
+  <!-- Jobs Grid -->
+  <div class="jobs-grid" *ngIf="!isLoading() && filteredJobs().length > 0">
+    <div class="job-card glass-card animate-scale-up" *ngFor="let job of filteredJobs()">
+
+      <!-- Card Header -->
+      <div class="job-card-header">
+        <div>
+          <span class="job-status-badge" [ngClass]="getStatusMeta(job.status).cssClass">
+            {{ getStatusMeta(job.status).label }}
+          </span>
+          <h3 class="job-card-title">{{ job.title }}</h3>
+          <div class="job-card-meta">
+            <span>{{ job.jobType.replace('_', ' ') }}</span>
+            <span class="meta-dot">·</span>
+            <span>{{ job.workMode || 'N/A' }}</span>
+            <span class="meta-dot">·</span>
+            <span>{{ job.location || 'No location' }}</span>
+          </div>
+        </div>
+        <div class="job-card-date">{{ job.createdAt | date:'mediumDate' }}</div>
+      </div>
+
+      <!-- Skills Preview -->
+      <div class="job-skills-row" *ngIf="job.requiredSkills">
+        <span *ngFor="let skill of job.requiredSkills.split(',').slice(0, 4)" class="skill-pill">{{ skill.trim() }}</span>
+        <span class="skill-pill more-pill" *ngIf="job.requiredSkills.split(',').length > 4">
+          +{{ job.requiredSkills.split(',').length - 4 }} more
+        </span>
+      </div>
+
+      <!-- Salary -->
+      <div class="job-salary-row" *ngIf="job.salaryRange">
+        <span class="salary-label">💰 {{ job.salaryRange }}</span>
+      </div>
+
+      <!-- Action Row -->
+      <div class="job-card-actions">
+        <!-- Edit -->
+        <button class="btn btn-ghost btn-xs action-btn" (click)="openEditModal(job)">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" width="14"><path d="M2.695 14.763l-1.262 3.154a.5.5 0 0 0 .65.65l3.155-1.262a4 4 0 0 0 1.343-.885L17.5 5.5a2.121 2.121 0 0 0-3-3L3.58 13.42a4 4 0 0 0-.885 1.343Z" /></svg>
+          Edit
+        </button>
+
+        <!-- Applicants -->
+        <button class="btn btn-secondary btn-xs action-btn" (click)="router.navigate(['/recruiter/jobs/' + job.id + '/applicants'])">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" width="14"><path d="M10 9a3 3 0 1 0 0-6 3 3 0 0 0 0 6Zm-7 9a7 7 0 1 1 14 0H3Z" /></svg>
+          Applicants
+        </button>
+
+        <!-- Status actions -->
+        <button
+          *ngFor="let action of getNextActions(job.status)"
+          class="btn btn-xs action-btn"
+          [ngClass]="action.btnClass"
+          (click)="changeStatus(job, action.newStatus)"
+          [disabled]="updatingStatusId() === job.id">
+          <span *ngIf="updatingStatusId() !== job.id">{{ action.label }}</span>
+          <span *ngIf="updatingStatusId() === job.id" class="dot-typing"><span></span><span></span><span></span></span>
+        </button>
+
+        <!-- Delete -->
+        <button class="btn btn-ghost btn-xs action-btn delete-btn" (click)="confirmDelete(job.id)" *ngIf="deletingJobId() !== job.id">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" width="14"><path fill-rule="evenodd" d="M8.75 1A2.75 2.75 0 0 0 6 3.75v.443c-.795.077-1.584.176-2.365.298a.75.75 0 1 0 .23 1.482l.149-.022.841 10.518A2.75 2.75 0 0 0 7.596 19h4.807a2.75 2.75 0 0 0 2.742-2.53l.841-10.52.149.023a.75.75 0 0 0 .23-1.482A41.03 41.03 0 0 0 14 4.193V3.75A2.75 2.75 0 0 0 11.25 1h-2.5ZM10 4c.84 0 1.673.025 2.5.075V3.75c0-.69-.56-1.25-1.25-1.25h-2.5c-.69 0-1.25.56-1.25 1.25v.325C8.327 4.025 9.16 4 10 4ZM8.58 7.72a.75.75 0 0 0-1.5.06l.3 7.5a.75.75 0 1 0 1.5-.06l-.3-7.5Zm4.34.06a.75.75 0 1 0-1.5-.06l-.3 7.5a.75.75 0 1 0 1.5.06l.3-7.5Z" clip-rule="evenodd" /></svg>
+          Delete
+        </button>
+
+        <!-- Delete confirm inline -->
+        <div class="delete-confirm-row" *ngIf="deletingJobId() === job.id">
+          <span class="delete-confirm-text">Are you sure?</span>
+          <button class="btn btn-danger btn-xs" (click)="executeDelete(job.id)">Yes, delete</button>
+          <button class="btn btn-ghost btn-xs" (click)="cancelDelete()">Cancel</button>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+</main>
+
+<!-- ══════════════════════ EDIT MODAL ══════════════════════ -->
+<div class="modal-overlay animate-fade-in" *ngIf="isEditModalOpen()" (click)="closeEditModal()">
+  <div class="modal-box glass-card" (click)="$event.stopPropagation()">
+
+    <div class="modal-header">
+      <h2 class="modal-title">Edit Job</h2>
+      <button class="modal-close-btn" (click)="closeEditModal()">✕</button>
+    </div>
+
+    <div class="modal-body">
+      <div class="form-group">
+        <label class="form-label-bold">Job Title <span class="required-star">*</span></label>
+        <input type="text" [(ngModel)]="editForm.title" class="form-control onboard-input" placeholder="e.g. Senior Backend Developer">
+      </div>
+
+      <div class="form-row-2">
+        <div class="form-group">
+          <label class="form-label-bold">Employment Type</label>
+          <select [(ngModel)]="editForm.jobType" class="form-control onboard-input">
+            <option *ngFor="let t of jobTypes" [value]="t">{{ t.replace('_', ' ') }}</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label-bold">Work Mode</label>
+          <select [(ngModel)]="editForm.workMode" class="form-control onboard-input">
+            <option *ngFor="let m of workModes" [value]="m">{{ m }}</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label-bold">Description <span class="required-star">*</span></label>
+        <textarea [(ngModel)]="editForm.description" rows="4" class="form-control onboard-textarea" placeholder="Full job description..."></textarea>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label-bold">Required Skills</label>
+        <input type="text" [(ngModel)]="editForm.requiredSkills" class="form-control onboard-input" placeholder="Java, Spring Boot, PostgreSQL">
+      </div>
+
+      <div class="form-group">
+        <label class="form-label-bold">Preferred Skills</label>
+        <input type="text" [(ngModel)]="editForm.preferredSkills" class="form-control onboard-input" placeholder="Docker, AWS, Redis">
+      </div>
+
+      <div class="form-row-2">
+        <div class="form-group">
+          <label class="form-label-bold">Location</label>
+          <input type="text" [(ngModel)]="editForm.location" class="form-control onboard-input" placeholder="Pune, Maharashtra">
+        </div>
+        <div class="form-group">
+          <label class="form-label-bold">Salary Range</label>
+          <input type="text" [(ngModel)]="editForm.salaryRange" class="form-control onboard-input" placeholder="₹8–14 LPA">
+        </div>
+      </div>
+
+      <div class="form-row-2">
+        <div class="form-group">
+          <label class="form-label-bold">Experience Level</label>
+          <input type="text" [(ngModel)]="editForm.experienceLevel" class="form-control onboard-input" placeholder="2-4 years">
+        </div>
+        <div class="form-group">
+          <label class="form-label-bold">Education Level</label>
+          <input type="text" [(ngModel)]="editForm.educationLevel" class="form-control onboard-input" placeholder="B.Tech / Any Degree">
+        </div>
+      </div>
+
+      <label class="sponsorship-check-label">
+        <input type="checkbox" [(ngModel)]="editForm.sponsorshipAvailable">
+        <span>Sponsorship / Relocation Available</span>
+      </label>
+    </div>
+
+    <div class="modal-footer">
+      <button class="btn btn-secondary" (click)="closeEditModal()">Cancel</button>
+      <button class="btn btn-primary" (click)="saveEdit()" [disabled]="isSaving()">
+        <span *ngIf="!isSaving()">Save Changes</span>
+        <span *ngIf="isSaving()" class="dot-typing"><span></span><span></span><span></span></span>
+      </button>
+    </div>
+
+  </div>
+</div>
+
+<app-footer></app-footer>

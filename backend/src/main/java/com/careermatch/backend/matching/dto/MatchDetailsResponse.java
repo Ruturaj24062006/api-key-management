@@ -19,4 +19,12 @@ public class MatchDetailsResponse {
     private String explanation;
     private String skillGap; // JSON string
     private String careerInsights;
+
+    // Score breakdown
+    private Double techFit;
+    private Double projectFit;
+    private Double expFit;
+    private Double domainFit;
+    private Double behavioralFit;
+    private Double eduCertFit;
 }

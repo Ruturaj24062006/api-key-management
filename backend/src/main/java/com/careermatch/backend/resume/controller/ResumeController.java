@@ -10,6 +10,7 @@ import com.careermatch.backend.exception.ResourceNotFoundException;
 import com.careermatch.backend.resume.dto.ResumeResponse;
 import com.careermatch.backend.resume.entity.Resume;
 import com.careermatch.backend.resume.repository.ResumeRepository;
+import com.careermatch.backend.resume.service.ResumeService;
 import com.careermatch.backend.student.entity.Student;
 import com.careermatch.backend.student.repository.StudentRepository;
 import com.careermatch.backend.util.FileStorageService;
@@ -46,6 +47,7 @@ public class ResumeController {
     private final StudentRepository studentRepository;
     private final RabbitTemplate rabbitTemplate;
     private final ApplicationEventPublisher eventPublisher;
+    private final ResumeService resumeService;
 
     @PostMapping(value = "/upload", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     @PreAuthorize("hasAuthority('ROLE_STUDENT')")
@@ -114,5 +116,47 @@ public class ResumeController {
         } catch (Exception e) {
             throw new ResourceNotFoundException("Resume file not found: " + filename);
         }
+    }
+
+    @GetMapping("/latest")
+    @PreAuthorize("hasAuthority('ROLE_STUDENT')")
+    @Operation(summary = "Get the latest resume parsing status and extracted info")
+    public ResponseEntity<ApiResponse<ResumeResponse>> getLatestResume() {
+        String email = SecurityContextHolder.getContext().getAuthentication().getName();
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new BadRequestException("Logged-in user not found"));
+
+        Resume resume = resumeRepository.findByStudentIdAndIsCurrentTrue(user.getId())
+                .orElseThrow(() -> new ResourceNotFoundException("No current resume found for this student"));
+
+        ResumeResponse response = ResumeResponse.builder()
+                .id(resume.getId())
+                .fileUrl(resume.getFileUrl())
+                .isCurrent(resume.isCurrent())
+                .parsedText(resume.getParsedText())
+                .extractedJson(resume.getExtractedJson())
+                .createdAt(resume.getCreatedAt())
+                .build();
+
+        return ResponseEntity.ok(ApiResponse.success("Latest resume parsed state retrieved successfully.", response));
+    }
+
+    @PostMapping("/{resumeId}/confirm")
+    @PreAuthorize("hasAuthority('ROLE_STUDENT')")
+    @Operation(summary = "Confirm the parsed resume info to update the student profile")
+    public ResponseEntity<ApiResponse<Void>> confirmResume(@PathVariable("resumeId") UUID resumeId) {
+        String email = SecurityContextHolder.getContext().getAuthentication().getName();
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new BadRequestException("Logged-in user not found"));
+
+        Resume resume = resumeRepository.findById(resumeId)
+                .orElseThrow(() -> new ResourceNotFoundException("Resume not found: " + resumeId));
+
+        if (!resume.getStudent().getId().equals(user.getId())) {
+            throw new BadRequestException("You do not own this resume");
+        }
+
+        resumeService.confirmResumeExtractedProfile(resumeId);
+        return ResponseEntity.ok(ApiResponse.success("Profile confirmed and updated successfully", null));
     }
 }

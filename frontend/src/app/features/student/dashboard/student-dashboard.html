@@ -1,19 +1,661 @@
 <app-navbar></app-navbar>
 
-<main class="dashboard-wrapper container">
-  <div class="dashboard-header-row">
-    <h1 class="dashboard-title">Student Dashboard</h1>
-    <button (click)="onLogout()" class="btn btn-secondary btn-sm">Log out</button>
+<main class="dashboard-wrapper">
+  <div class="container">
+    
+    <!-- Header Greeting -->
+    <div class="dashboard-header animate-fade-in">
+      <div class="header-greeting-row">
+        <div>
+          <h1 class="dashboard-greeting-title">{{ greetingText() }}, {{ getStudentName() }}</h1>
+          <p class="dashboard-greeting-subtitle">Your profile is <strong>{{ profile()?.profileCompletedPct || 0 }}%</strong> complete</p>
+        </div>
+        <button (click)="onLogout()" class="btn btn-secondary btn-sm logout-btn-dash">Log out</button>
+      </div>
+    </div>
+
+    <!-- Tab Navigation -->
+    <div class="dashboard-tabs animate-fade-in">
+      <button class="tab-btn" [class.active]="activeTab() === 'recommendations'" (click)="changeTab('recommendations')">
+        Recommendations
+      </button>
+      <button class="tab-btn" [class.active]="activeTab() === 'discover'" (click)="changeTab('discover')">
+        Discover Jobs
+      </button>
+      <button class="tab-btn" [class.active]="activeTab() === 'applications'" (click)="changeTab('applications')">
+        Applications
+      </button>
+    </div>
+
+    <!-- KPI Grid -->
+    <div class="kpi-grid animate-fade-in">
+      <!-- Card 1: Recommended Jobs -->
+      <div class="kpi-card glass-card">
+        <div class="kpi-card-content">
+          <span class="kpi-label">Recommended Jobs</span>
+          <span class="kpi-value">{{ matches().length }}</span>
+        </div>
+        <div class="kpi-icon-box">
+          <svg class="kpi-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path>
+          </svg>
+        </div>
+      </div>
+
+      <!-- Card 2: Average Match Score -->
+      <div class="kpi-card glass-card">
+        <div class="kpi-card-content">
+          <span class="kpi-label">Average Match Score</span>
+          <span class="kpi-value">{{ averageMatchScore() }}%</span>
+        </div>
+        <div class="kpi-icon-box">
+          <svg class="kpi-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2z"></path>
+          </svg>
+        </div>
+      </div>
+
+      <!-- Card 3: Applications -->
+      <div class="kpi-card glass-card">
+        <div class="kpi-card-content">
+          <span class="kpi-label">Applications</span>
+          <span class="kpi-value">{{ applicationsCount() }}</span>
+        </div>
+        <div class="kpi-icon-box">
+          <svg class="kpi-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"></path>
+          </svg>
+        </div>
+      </div>
+
+      <!-- Card 4: Profile Strength -->
+      <div class="kpi-card glass-card">
+        <div class="kpi-card-content">
+          <span class="kpi-label">Profile Strength</span>
+          <span class="kpi-value">{{ profile()?.profileCompletedPct || 0 }}%</span>
+        </div>
+        <div class="kpi-icon-box">
+          <svg class="kpi-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
+          </svg>
+        </div>
+      </div>
+    </div>
+
+    <!-- Recommendations Section -->
+    <div class="recommendations-section animate-fade-in" *ngIf="activeTab() === 'recommendations'">
+      <h2 class="section-title">Job Recommendations</h2>
+      
+      <!-- Loading Skeleton / No Matches state -->
+      <div class="empty-matches-box glass-card text-center" *ngIf="matches().length === 0">
+        <p>Analyzing job markets and matching with your skills...</p>
+      </div>
+
+      <!-- Recommendations Grid -->
+      <div class="recommendations-grid" *ngIf="matches().length > 0">
+        <div *ngFor="let m of matches()" class="job-recommendation-card glass-card" (click)="viewMatchDetails(m.id)">
+          <div class="job-card-top">
+            <div class="job-title-group">
+              <h3 class="job-card-title">{{ m.jobTitle }}</h3>
+              <p class="job-card-company">{{ m.companyName }}</p>
+            </div>
+            <div class="match-score-badge" [class.high-match]="m.compositeScore >= 80" [class.mid-match]="m.compositeScore < 80 && m.compositeScore >= 60">
+              Match Score: {{ m.compositeScore }}%
+            </div>
+          </div>
+
+          <div class="job-card-details">
+            <div class="detail-item">
+              <svg class="detail-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path>
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path>
+              </svg>
+              <span>{{ m.location }} &bull; {{ m.jobType || 'Hybrid' | lowercase }}</span>
+            </div>
+            <div class="detail-item">
+              <svg class="detail-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M12 16V5"></path>
+              </svg>
+              <span class="salary-txt">{{ m.salaryRange || '₹8–12 LPA' }}</span>
+            </div>
+          </div>
+
+          <div class="job-card-actions">
+            <button type="button" class="btn btn-secondary btn-sm" (click)="viewMatchDetails(m.id)">View Details</button>
+            <button type="button" class="btn btn-primary btn-sm btn-ask-ai" (click)="askAiMatch(m.id, $event)">
+              <svg class="ai-sparkle-icon" fill="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                <path d="M9 21c0 .55-.45 1-1 1H4c-.55 0-1-.45-1-1v-4c0-.55.45-1 1-1h4c.55 0 1 .45 1 1v4zm11.5-8.5c-.83 0-1.5-.67-1.5-1.5V7c0-.83.67-1.5 1.5-1.5h1c.83 0 1.5.67 1.5 1.5v4c0 .83-.67 1.5-1.5 1.5h-1zm-6-2.5V3.5c0-.83.67-1.5 1.5-1.5h1c.83 0 1.5.67 1.5 1.5V10c0 .83-.67 1.5-1.5 1.5h-1c-.83 0-1.5-.67-1.5-1.5zm-5-3.5H4.5c-.83 0-1.5-.67-1.5-1.5V3c0-.83.67-1.5 1.5-1.5h1c.83 0 1.5.67 1.5 1.5v4c0 .83-.67 1.5-1.5 1.5z"></path>
+              </svg>
+              Ask AI
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Discover Jobs Section -->
+    <div class="discover-section animate-fade-in" *ngIf="activeTab() === 'discover'">
+      <h2 class="section-title">Job Discovery & Filtering</h2>
+
+      <!-- Filtering Panel -->
+      <div class="filter-panel glass-card">
+        <div class="filter-grid">
+          <!-- Role filter -->
+          <div class="filter-group">
+            <label class="filter-label">Job Role</label>
+            <input type="text" [(ngModel)]="searchRole" (ngModelChange)="searchJobs()" placeholder="Search title or role..." class="form-control">
+          </div>
+
+          <!-- Location filter -->
+          <div class="filter-group">
+            <label class="filter-label">Location</label>
+            <input type="text" [(ngModel)]="searchLocation" (ngModelChange)="searchJobs()" placeholder="City, Remote, Hybrid..." class="form-control">
+          </div>
+
+          <!-- Experience filter -->
+          <div class="filter-group">
+            <label class="filter-label">Experience Level</label>
+            <select [(ngModel)]="filterExperience" (change)="searchJobs()" class="form-select">
+              <option value="">All Levels</option>
+              <option value="Entry">Entry Level</option>
+              <option value="Mid">Mid Level</option>
+              <option value="Senior">Senior Level</option>
+            </select>
+          </div>
+
+          <!-- Job Type filter -->
+          <div class="filter-group">
+            <label class="filter-label">Job Type</label>
+            <select [(ngModel)]="filterJobType" (change)="searchJobs()" class="form-select">
+              <option value="">All Types</option>
+              <option value="FULL_TIME">Full-Time</option>
+              <option value="PART_TIME">Part-Time</option>
+              <option value="INTERNSHIP">Internship</option>
+              <option value="CONTRACT">Contract</option>
+              <option value="REMOTE">Remote</option>
+            </select>
+          </div>
+
+          <!-- Salary filter -->
+          <div class="filter-group">
+            <label class="filter-label">Min Salary</label>
+            <input type="text" [(ngModel)]="filterSalary" (ngModelChange)="searchJobs()" placeholder="e.g. ₹8 LPA..." class="form-control">
+          </div>
+
+          <!-- Skills filter -->
+          <div class="filter-group">
+            <label class="filter-label">Skills (comma-separated)</label>
+            <input type="text" [(ngModel)]="filterSkills" (ngModelChange)="searchJobs()" placeholder="e.g. Java, AWS..." class="form-control">
+          </div>
+        </div>
+
+        <div class="filter-actions-row">
+          <div class="checkbox-wrapper">
+            <label class="switch-checkbox-label">
+              <input type="checkbox" [(ngModel)]="filterSponsorship" (change)="searchJobs()" class="switch-checkbox">
+              <span class="custom-checkbox-btn"></span>
+              Sponsorship Available
+            </label>
+          </div>
+          <button type="button" class="btn btn-secondary btn-sm" (click)="resetFilters()">Reset Filters</button>
+        </div>
+      </div>
+
+      <!-- Sorting & Stats Bar -->
+      <div class="search-stats-bar">
+        <span class="stats-txt">{{ searchResults().length }} Jobs Found</span>
+        <div class="sort-wrapper">
+          <label class="sort-lbl">Sort by:</label>
+          <select [(ngModel)]="sortOption" (change)="searchJobs()" class="form-select sort-select">
+            <option value="BEST_MATCH">Best Match</option>
+            <option value="LATEST">Latest</option>
+            <option value="SALARY">Highest Salary</option>
+            <option value="EXPERIENCE">Experience Level</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- Search Loading spinner -->
+      <div *ngIf="isSearchLoading()" class="search-loading-box text-center">
+        <div class="spinner-loader"></div>
+        <p>Loading matching jobs...</p>
+      </div>
+
+      <!-- Empty state -->
+      <div *ngIf="!isSearchLoading() && searchResults().length === 0" class="empty-matches-box glass-card text-center">
+        <p>No jobs match your search parameters. Try widening your filters.</p>
+      </div>
+
+      <!-- Results Grid -->
+      <div class="recommendations-grid" *ngIf="!isSearchLoading() && searchResults().length > 0">
+        <div *ngFor="let m of searchResults()" class="job-recommendation-card glass-card" (click)="viewMatchDetails(m.id)">
+          <div class="job-card-top">
+            <div class="job-title-group">
+              <h3 class="job-card-title">{{ m.jobTitle }}</h3>
+              <p class="job-card-company">{{ m.companyName }}</p>
+            </div>
+            <div class="match-score-badge" [class.high-match]="m.compositeScore >= 80" [class.mid-match]="m.compositeScore < 80 && m.compositeScore >= 60">
+              Match Score: {{ m.compositeScore }}%
+            </div>
+          </div>
+
+          <div class="job-card-details">
+            <div class="detail-item">
+              <svg class="detail-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path>
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path>
+              </svg>
+              <span>{{ m.location }} &bull; {{ m.jobType || 'Hybrid' | lowercase }}</span>
+            </div>
+            <div class="detail-item">
+              <svg class="detail-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M12 16V5"></path>
+              </svg>
+              <span class="salary-txt">{{ m.salaryRange || '₹8–12 LPA' }}</span>
+            </div>
+          </div>
+
+          <div class="job-card-actions">
+            <button type="button" class="btn btn-secondary btn-sm" (click)="viewMatchDetails(m.id)">View Details</button>
+            <button type="button" class="btn btn-primary btn-sm btn-ask-ai" (click)="askAiMatch(m.id, $event)">
+              <svg class="ai-sparkle-icon" fill="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                <path d="M9 21c0 .55-.45 1-1 1H4c-.55 0-1-.45-1-1v-4c0-.55.45-1 1-1h4c.55 0 1 .45 1 1v4zm11.5-8.5c-.83 0-1.5-.67-1.5-1.5V7c0-.83.67-1.5 1.5-1.5h1c.83 0 1.5.67 1.5 1.5v4c0 .83-.67 1.5-1.5 1.5h-1zm-6-2.5V3.5c0-.83.67-1.5 1.5-1.5h1c.83 0 1.5.67 1.5 1.5V10c0 .83-.67 1.5-1.5 1.5h-1c-.83 0-1.5-.67-1.5-1.5zm-5-3.5H4.5c-.83 0-1.5-.67-1.5-1.5V3c0-.83.67-1.5 1.5-1.5h1c.83 0 1.5.67 1.5 1.5v4c0 .83-.67 1.5-1.5 1.5z"></path>
+              </svg>
+              Ask AI
+            </button>
+        </div>
+      </div>
+    </div>
   </div>
-  
-  <div class="glass-card info-card">
-    <h3>Active Session Info</h3>
-    <p class="session-detail"><strong>User Email:</strong> {{ getUserEmail() }}</p>
-    <p class="session-detail"><strong>Role Scope:</strong> ROLE_STUDENT</p>
-    <p class="session-note">
-      Welcome to your NEXUS dashboard! Your environment has been set up successfully. In the next modules, you will be able to upload your resume to start generating real-time match scores and bridge your skill gaps.
-    </p>
+
+  <!-- Applications Section -->
+  <div class="applications-section animate-fade-in" *ngIf="activeTab() === 'applications'">
+      <h2 class="section-title">Your Submitted Applications</h2>
+
+      <!-- Status Filtering Bar -->
+      <div class="app-filter-bar" *ngIf="myApplications().length > 0">
+        <button type="button" class="app-filter-pill" [class.active]="applicationsFilter() === 'ALL'" (click)="setApplicationsFilter('ALL')">All</button>
+        <button type="button" class="app-filter-pill" [class.active]="applicationsFilter() === 'APPLIED'" (click)="setApplicationsFilter('APPLIED')">Applied</button>
+        <button type="button" class="app-filter-pill" [class.active]="applicationsFilter() === 'UNDER_REVIEW'" (click)="setApplicationsFilter('UNDER_REVIEW')">Under Review</button>
+        <button type="button" class="app-filter-pill" [class.active]="applicationsFilter() === 'SHORTLISTED'" (click)="setApplicationsFilter('SHORTLISTED')">Shortlisted</button>
+        <button type="button" class="app-filter-pill" [class.active]="applicationsFilter() === 'INTERVIEW'" (click)="setApplicationsFilter('INTERVIEW')">Interview</button>
+        <button type="button" class="app-filter-pill" [class.active]="applicationsFilter() === 'SELECTED'" (click)="setApplicationsFilter('SELECTED')">Selected</button>
+        <button type="button" class="app-filter-pill" [class.active]="applicationsFilter() === 'REJECTED'" (click)="setApplicationsFilter('REJECTED')">Rejected</button>
+      </div>
+
+      <!-- Empty state if no applications at all -->
+      <div class="empty-matches-box glass-card text-center" *ngIf="myApplications().length === 0">
+        <p class="no-applications-msg">You have not submitted any applications yet. Browse recommendations to apply!</p>
+      </div>
+
+      <!-- Empty state if filtered applications is empty -->
+      <div class="empty-matches-box glass-card text-center" *ngIf="myApplications().length > 0 && filteredApplications().length === 0">
+        <p class="no-applications-msg">No applications found matching the selected status filter.</p>
+      </div>
+
+      <!-- Applications List -->
+      <div class="applications-list" *ngIf="filteredApplications().length > 0">
+        <div *ngFor="let app of filteredApplications()" class="application-card glass-card">
+          <div class="application-card-header">
+            <div>
+              <h3 class="app-job-title">{{ app.job?.title }}</h3>
+              <p class="app-job-company">{{ app.job?.company?.name }} &bull; {{ app.job?.location }}</p>
+            </div>
+            <div class="app-date-badge">
+              Applied on: {{ app.createdAt | date:'mediumDate' }}
+            </div>
+          </div>
+
+          <!-- Application cover letter -->
+          <div class="app-cover-letter-preview" *ngIf="app.coverLetter">
+            <strong>Cover Letter Summary:</strong>
+            <p>{{ app.coverLetter }}</p>
+          </div>
+
+          <!-- Timeline Stepper -->
+          <div class="stepper-wrapper">
+            <h5 class="timeline-title">Application Status</h5>
+            
+            <div class="status-stepper" [class.rejected-flow]="app.status === 'REJECTED'">
+              
+              <!-- Step 1: Applied -->
+              <div class="stepper-step" [class.active]="getStatusStep(app.status) >= 0">
+                <div class="step-circle">1</div>
+                <div class="step-label">Applied</div>
+              </div>
+              <div class="step-line" [class.active]="getStatusStep(app.status) >= 1"></div>
+
+              <!-- Step 2: Under Review -->
+              <div class="stepper-step" [class.active]="getStatusStep(app.status) >= 1">
+                <div class="step-circle">2</div>
+                <div class="step-label">Under Review</div>
+              </div>
+              <div class="step-line" [class.active]="getStatusStep(app.status) >= 2"></div>
+
+              <!-- Step 3: Shortlisted -->
+              <div class="stepper-step" [class.active]="getStatusStep(app.status) >= 2">
+                <div class="step-circle">3</div>
+                <div class="step-label">Shortlisted</div>
+              </div>
+              <div class="step-line" [class.active]="getStatusStep(app.status) >= 3"></div>
+
+              <!-- Step 4: Interview -->
+              <div class="stepper-step" [class.active]="getStatusStep(app.status) >= 3">
+                <div class="step-circle">4</div>
+                <div class="step-label">Interview</div>
+              </div>
+              <div class="step-line" [class.active]="getStatusStep(app.status) >= 4 || app.status === 'REJECTED'"></div>
+
+              <!-- Step 5: Selected / Rejected -->
+              <div class="stepper-step" 
+                   [class.active]="getStatusStep(app.status) >= 4" 
+                   [class.rejected]="app.status === 'REJECTED'">
+                <div class="step-circle">
+                  <span *ngIf="app.status !== 'REJECTED'">5</span>
+                  <span *ngIf="app.status === 'REJECTED'">&times;</span>
+                </div>
+                <div class="step-label">
+                  {{ app.status === 'REJECTED' ? 'Rejected' : (getStatusStep(app.status) >= 4 ? 'Selected' : 'Decision') }}
+                </div>
+              </div>
+
+            </div>
+          </div>
+
+          <!-- Feedback note from recruiter -->
+          <div class="recruiter-feedback-box" *ngIf="app.feedback" style="margin-top: 1rem; padding: 0.85rem 1.25rem; background: rgba(255,255,255,0.02); border-radius: 8px; border-left: 3px solid var(--primary-color); font-size: 0.88rem;">
+            <strong>Recruiter Note / Update:</strong>
+            <p style="margin: 0.25rem 0 0; color: var(--text-muted); line-height: 1.5;">{{ app.feedback }}</p>
+          </div>
+
+          <!-- Respond to Interview Invitation -->
+          <div class="interview-response-box" *ngIf="app.status === 'INTERVIEW'" style="margin-top: 1.25rem; padding: 1.1rem 1.25rem; background: rgba(var(--primary-rgb), 0.03); border: 1px dashed rgba(var(--primary-rgb), 0.25); border-radius: 10px;">
+            <h5 style="margin: 0 0 0.25rem; font-size: 0.95rem; font-weight: 800; color: var(--text-dark);">Interview Invitation Received</h5>
+            <p style="margin: 0 0 0.85rem; font-size: 0.82rem; color: var(--text-muted);">The recruiter has requested an interview. Please confirm your availability or response below:</p>
+            <div class="response-actions-row" style="display: flex; gap: 0.6rem;">
+              <button type="button" class="btn btn-success btn-xs" (click)="respondToInterview(app.id, 'ACCEPTED')" style="padding: 0.4rem 1rem; font-size: 0.8rem;">Accept Invitation</button>
+              <button type="button" class="btn btn-danger btn-xs" (click)="respondToInterview(app.id, 'DECLINED')" style="padding: 0.4rem 1rem; font-size: 0.8rem;">Decline Invitation</button>
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </div>
   </div>
 </main>
+
+<!-- Details & AI Insights Modal Overlay -->
+<div *ngIf="isDetailsModalOpen()" class="modal-overlay animate-fade-in" (click)="closeModal()">
+  <div class="modal-container glass-card animate-scale-up" [class.split-layout]="isAiChatOpen()" (click)="$event.stopPropagation()">
+    
+    <!-- Modal Close -->
+    <button type="button" class="modal-close" (click)="closeModal()">&times;</button>
+    
+    <!-- AI Loading State -->
+    <div *ngIf="isAiLoading()" class="modal-ai-loading text-center">
+      <div class="spinner-loader"></div>
+      <h4>Consulting Career Match AI...</h4>
+      <p>Analyzing resume parameters and job requisites via Groq. This takes up to 8 seconds...</p>
+    </div>
+
+    <!-- Modal Content -->
+    <div *ngIf="!isAiLoading() && selectedMatch() as match" class="modal-split-content-wrapper">
+      <!-- Left side: Job Specs & Breakdowns -->
+      <div class="modal-left-details">
+        <div class="modal-header">
+          <div class="modal-title-row">
+            <div>
+              <h3 class="modal-job-title">{{ match.jobTitle }}</h3>
+              <p class="modal-job-company">{{ match.companyName }} &bull; {{ match.location }}</p>
+            </div>
+            
+            <!-- Circular Score Display -->
+            <div class="score-circle-container">
+              <svg class="score-svg-circle" viewBox="0 0 36 36">
+                <path class="circle-bg" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"></path>
+                <path class="circle-fill" [style.strokeDasharray]="match.compositeScore + ', 100'" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"></path>
+              </svg>
+              <div class="score-circle-text">
+                <span class="score-circle-num">{{ match.compositeScore }}%</span>
+                <span class="score-circle-lbl">Match</span>
+              </div>
+            </div>
+          </div>
+          
+          <div class="modal-meta-row">
+            <span class="eligibility-status-badge" [class.eligible]="match.eligibilityStatus" [class.ineligible]="!match.eligibilityStatus">
+              {{ match.eligibilityStatus ? 'Eligible to Apply' : 'Eligibility Gap Detected' }}
+            </span>
+          </div>
+        </div>
+
+        <div class="modal-body-scroll">
+          <!-- Match Score Breakdown -->
+          <div class="score-breakdown-section">
+            <h4 class="modal-section-title-sub">Score Breakdown</h4>
+            <div class="breakdown-grid-modal">
+              
+              <!-- Tech Fit -->
+              <div class="breakdown-item">
+                <div class="breakdown-header-row">
+                  <span class="breakdown-name">Technical Fit</span>
+                  <span class="breakdown-score">{{ match.techFit || 0 }}/40</span>
+                </div>
+                <div class="progress-bar-bg">
+                  <div class="progress-bar-fill" [style.width.%]="((match.techFit || 0) / 40) * 100"></div>
+                </div>
+              </div>
+
+              <!-- Project Fit -->
+              <div class="breakdown-item">
+                <div class="breakdown-header-row">
+                  <span class="breakdown-name">Project Fit</span>
+                  <span class="breakdown-score">{{ match.projectFit || 0 }}/20</span>
+                </div>
+                <div class="progress-bar-bg">
+                  <div class="progress-bar-fill" [style.width.%]="((match.projectFit || 0) / 20) * 100"></div>
+                </div>
+              </div>
+
+              <!-- Experience Fit -->
+              <div class="breakdown-item">
+                <div class="breakdown-header-row">
+                  <span class="breakdown-name">Experience Fit</span>
+                  <span class="breakdown-score">{{ match.expFit || 0 }}/15</span>
+                </div>
+                <div class="progress-bar-bg">
+                  <div class="progress-bar-fill" [style.width.%]="((match.expFit || 0) / 15) * 100"></div>
+                </div>
+              </div>
+
+              <!-- Domain Fit -->
+              <div class="breakdown-item">
+                <div class="breakdown-header-row">
+                  <span class="breakdown-name">Domain Fit</span>
+                  <span class="breakdown-score">{{ match.domainFit || 0 }}/10</span>
+                </div>
+                <div class="progress-bar-bg">
+                  <div class="progress-bar-fill" [style.width.%]="((match.domainFit || 0) / 10) * 100"></div>
+                </div>
+              </div>
+
+              <!-- Behavior Fit -->
+              <div class="breakdown-item">
+                <div class="breakdown-header-row">
+                  <span class="breakdown-name">Behavior Fit</span>
+                  <span class="breakdown-score">{{ match.behavioralFit || 0 }}/10</span>
+                </div>
+                <div class="progress-bar-bg">
+                  <div class="progress-bar-fill" [style.width.%]="((match.behavioralFit || 0) / 10) * 100"></div>
+                </div>
+              </div>
+
+              <!-- Education Fit -->
+              <div class="breakdown-item">
+                <div class="breakdown-header-row">
+                  <span class="breakdown-name">Education & Certs</span>
+                  <span class="breakdown-score">{{ match.eduCertFit || 0 }}/5</span>
+                </div>
+                <div class="progress-bar-bg">
+                  <div class="progress-bar-fill" [style.width.%]="((match.eduCertFit || 0) / 5) * 100"></div>
+                </div>
+              </div>
+
+            </div>
+          </div>
+
+          <!-- Explain the Match Section -->
+          <div class="explain-match-card-wrapper glass-card">
+            <h4 class="explain-title-hdr">Explain the Match</h4>
+            
+            <div class="explain-subtitle-hdr">Why you matched</div>
+            <ul class="match-check-list">
+              <li *ngIf="(match.techFit || 0) >= 20"><span class="check-green">✓</span> Skills overlap with technical requirements</li>
+              <li *ngIf="(match.projectFit || 0) >= 10"><span class="check-green">✓</span> Relevant project experience matching technologies</li>
+              <li *ngIf="(match.expFit || 0) >= 7.5"><span class="check-green">✓</span> Experience tier aligns with career prerequisites</li>
+              <li *ngIf="(match.domainFit || 0) >= 5"><span class="check-green">✓</span> Industry title matches profile domain</li>
+              <li *ngIf="(match.eduCertFit || 0) >= 1.5"><span class="check-green">✓</span> Academic background matching expectations</li>
+              <li *ngIf="match.eligibilityStatus"><span class="check-green">✓</span> Meets general job parameters</li>
+            </ul>
+
+            <!-- AI Skill Gaps & Roadmap (static summary) -->
+            <div class="ai-derived-gaps-section" *ngIf="aiExplanation()">
+              <div class="explain-subtitle-hdr gap-hdr-margin">Skill gaps</div>
+              <ul class="match-gap-list" *ngIf="aiSkillGap()?.missingSkills as ms">
+                <li *ngFor="let s of ms"><span class="circle-dot">○</span> {{ s }}</li>
+                <li *ngIf="ms.length === 0" class="no-gaps-lbl">✓ No skill gaps found! Ready to apply.</li>
+              </ul>
+            </div>
+          </div>
+
+          <!-- Description -->
+          <div class="modal-info-section">
+            <h4 class="modal-section-title">Job Description</h4>
+            <p class="modal-info-text">{{ match.jobDescription }}</p>
+          </div>
+
+          <!-- Requirements -->
+          <div class="modal-info-section" *ngIf="match.jobRequirements">
+            <h4 class="modal-section-title">Requirements</h4>
+            <p class="modal-info-text">{{ match.jobRequirements }}</p>
+          </div>
+        </div>
+
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" (click)="closeModal()">Close</button>
+          <button type="button" class="btn btn-primary btn-ask-ai" (click)="isAiChatOpen() ? closeAiChat() : openAiChat()">
+            {{ isAiChatOpen() ? 'Hide AI Chat' : 'Ask AI' }}
+          </button>
+          
+          <!-- Apply Action Button -->
+          <button type="button" 
+                  *ngIf="!appliedJobIds().has(match.jobId)"
+                  class="btn btn-success btn-apply-action animate-fade-in" 
+                  (click)="initiateApply(match.jobId, match.jobTitle, match.companyName, $event)">
+            Apply Now
+          </button>
+          <button type="button" 
+                  *ngIf="appliedJobIds().has(match.jobId)"
+                  class="btn btn-success btn-apply-action animate-fade-in" 
+                  disabled>
+            Applied ✓
+          </button>
+        </div>
+      </div>
+
+      <!-- Right side: Sliding AI Advisor Chat Panel -->
+      <div class="modal-right-chat animate-slide-in" *ngIf="isAiChatOpen()">
+        <div class="chat-header-row">
+          <h4 class="chat-title-text">Ask AI about this job</h4>
+          <button type="button" class="close-chat-btn" (click)="closeAiChat()">&times;</button>
+        </div>
+
+        <!-- Quick suggestion actions -->
+        <div class="chat-quick-actions">
+          <button type="button" class="quick-action-pill" (click)="selectQuickQuestion('Why did I get this score?')">Why did I get this score?</button>
+          <button type="button" class="quick-action-pill" (click)="selectQuickQuestion('What skills am I missing?')">What skills am I missing?</button>
+          <button type="button" class="quick-action-pill" (click)="selectQuickQuestion('Should I apply?')">Should I apply?</button>
+          <button type="button" class="quick-action-pill" (click)="selectQuickQuestion('How can I improve my chances?')">How can I improve my chances?</button>
+          <button type="button" class="quick-action-pill" (click)="selectQuickQuestion('Give me interview questions for this role.')">Interview questions</button>
+        </div>
+
+        <!-- Chat history box -->
+        <div class="chat-messages-box">
+          <div *ngFor="let msg of aiChatMessages()" class="chat-message-row" [class.user-row]="msg.sender === 'user'" [class.ai-row]="msg.sender === 'ai'">
+            <div class="chat-bubble" [class.user-bubble]="msg.sender === 'user'" [class.ai-bubble]="msg.sender === 'ai'">
+              {{ msg.text }}
+            </div>
+          </div>
+
+          <!-- Loading thinking indicator -->
+          <div class="chat-message-row ai-row" *ngIf="isAiResponding()">
+            <div class="chat-bubble ai-bubble thinking-bubble">
+              <span class="dot-typing"></span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Input Area -->
+        <div class="chat-input-form-row">
+          <input type="text" [(ngModel)]="userQuestionText" (keydown.enter)="sendQuestion()" placeholder="Type your question..." class="form-control chat-input">
+          <button type="button" class="btn btn-primary send-btn" (click)="sendQuestion()">Send</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Apply Confirmation Modal Overlay -->
+<div *ngIf="isApplyModalOpen()" class="modal-overlay apply-modal-overlay animate-fade-in" (click)="closeApplyModal()">
+  <div class="modal-container apply-modal-container glass-card animate-scale-up" (click)="$event.stopPropagation()">
+    
+    <button type="button" class="modal-close" (click)="closeApplyModal()">&times;</button>
+    
+    <!-- Success state -->
+    <div *ngIf="applicationSuccess()" class="apply-success-box text-center animate-scale-up">
+      <div class="success-icon-circle">✓</div>
+      <h3>Application Submitted!</h3>
+      <p>Your resume and details have been transmitted successfully to {{ applyCompanyName() }}.</p>
+    </div>
+
+    <!-- Active form -->
+    <div *ngIf="!applicationSuccess()">
+      <div class="modal-header">
+        <h3 class="modal-job-title">Apply to {{ applyJobTitle() }}</h3>
+        <p class="modal-job-company">{{ applyCompanyName() }}</p>
+      </div>
+
+      <div class="modal-body-scroll">
+        <div class="apply-profile-summary-box">
+          <p><strong>Resume Attachment:</strong> Your active profile parsed resume will be submitted automatically with this application.</p>
+          <div class="attached-resume-badge">
+            <svg class="file-icon" fill="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+              <path d="M14 2H6c-1.1 0-1.99.9-1.99 2L4 20c0 1.1.89 2 1.99 2H18c1.1 0 2-.9 2-2V8l-6-6zm2 16H8v-2h8v2zm0-4H8v-2h8v2zm-3-5V3.5L18.5 9H13z"></path>
+            </svg>
+            Active_Resume.pdf
+          </div>
+        </div>
+
+        <div class="form-group margin-top-lg">
+          <label class="form-label-bold">Add Cover Letter (Optional)</label>
+          <textarea [(ngModel)]="coverLetterText" 
+                    placeholder="Write a brief cover letter outlining why you are a great match for this role..." 
+                    class="form-control apply-textarea" 
+                    rows="5"></textarea>
+        </div>
+      </div>
+
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" (click)="closeApplyModal()">Cancel</button>
+        <button type="button" 
+                class="btn btn-success btn-submit-action" 
+                [disabled]="isSubmittingApplication()" 
+                (click)="submitApplication()">
+          {{ isSubmittingApplication() ? 'Submitting...' : 'Submit Application' }}
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
 
 <app-footer></app-footer>

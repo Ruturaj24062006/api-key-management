@@ -61,7 +61,12 @@ public class JobService {
                 .jobType(request.getJobType())
                 .experienceLevel(request.getExperienceLevel())
                 .salaryRange(request.getSalaryRange())
-                .status(JobStatus.PUBLISHED) // Auto-publish for simplicity
+                .requiredSkills(request.getRequiredSkills())
+                .preferredSkills(request.getPreferredSkills())
+                .workMode(request.getWorkMode())
+                .educationLevel(request.getEducationLevel())
+                .sponsorshipAvailable(request.getSponsorshipAvailable())
+                .status(JobStatus.ACTIVE) // Default to active on creation
                 .embedding(vector)
                 .build();
 
@@ -93,6 +98,11 @@ public class JobService {
         job.setJobType(request.getJobType());
         job.setExperienceLevel(request.getExperienceLevel());
         job.setSalaryRange(request.getSalaryRange());
+        job.setRequiredSkills(request.getRequiredSkills());
+        job.setPreferredSkills(request.getPreferredSkills());
+        job.setWorkMode(request.getWorkMode());
+        job.setEducationLevel(request.getEducationLevel());
+        job.setSponsorshipAvailable(request.getSponsorshipAvailable());
 
         // Re-generate embedding
         String context = request.getTitle() + " " + request.getDescription() + " " + request.getRequirements();
@@ -119,6 +129,58 @@ public class JobService {
     }
 
     public List<Job> getAllPublishedJobs() {
-        return jobRepository.findByStatus(JobStatus.PUBLISHED);
+        return jobRepository.findByStatus(JobStatus.ACTIVE);
+    }
+
+    public List<Job> getJobsByRecruiter(String recruiterEmail) {
+        User user = userRepository.findByEmail(recruiterEmail)
+                .orElseThrow(() -> new ResourceNotFoundException("User not found"));
+        Recruiter recruiter = recruiterRepository.findById(user.getId())
+                .orElseThrow(() -> new ResourceNotFoundException("Recruiter not found"));
+        if (recruiter.getCompany() == null) return List.of();
+        return jobRepository.findByCompanyId(recruiter.getCompany().getId());
+    }
+
+    @Transactional
+    public Job updateJobStatus(UUID jobId, String newStatus, String recruiterEmail) {
+        Job job = jobRepository.findById(jobId)
+                .orElseThrow(() -> new ResourceNotFoundException("Job not found: " + jobId));
+
+        // Ownership check
+        User user = userRepository.findByEmail(recruiterEmail)
+                .orElseThrow(() -> new ResourceNotFoundException("User not found"));
+        Recruiter recruiter = recruiterRepository.findById(user.getId())
+                .orElseThrow(() -> new ResourceNotFoundException("Recruiter not found"));
+        if (recruiter.getCompany() == null || !job.getCompany().getId().equals(recruiter.getCompany().getId())) {
+            throw new BadRequestException("You do not have permission to update this job.");
+        }
+
+        JobStatus targetStatus;
+        try {
+            targetStatus = JobStatus.valueOf(newStatus.toUpperCase());
+        } catch (IllegalArgumentException e) {
+            throw new BadRequestException("Invalid status: " + newStatus + ". Allowed: DRAFT, ACTIVE, PAUSED, CLOSED");
+        }
+
+        job.setStatus(targetStatus);
+        return jobRepository.save(job);
+    }
+
+    @Transactional
+    public void deleteJob(UUID jobId, String recruiterEmail) {
+        Job job = jobRepository.findById(jobId)
+                .orElseThrow(() -> new ResourceNotFoundException("Job not found: " + jobId));
+
+        User user = userRepository.findByEmail(recruiterEmail)
+                .orElseThrow(() -> new ResourceNotFoundException("User not found"));
+        Recruiter recruiter = recruiterRepository.findById(user.getId())
+                .orElseThrow(() -> new ResourceNotFoundException("Recruiter not found"));
+        if (recruiter.getCompany() == null || !job.getCompany().getId().equals(recruiter.getCompany().getId())) {
+            throw new BadRequestException("You do not have permission to delete this job.");
+        }
+
+        jobRepository.delete(job);
     }
 }
+
+

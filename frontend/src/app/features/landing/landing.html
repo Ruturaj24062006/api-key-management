@@ -13,26 +13,11 @@
         NEXUS uses proprietary recruiter intelligence to show you exactly how your profile ranks against job requirements, visa needs, and skill gaps.
       </p>
       <div class="hero-actions">
-        <a href="/register" class="btn btn-primary">Get Started</a>
-        <a href="#how-it-works" class="btn btn-secondary">See How It Works</a>
+        <a routerLink="/register" class="btn btn-primary">Get Started</a>
+        <a [routerLink]="['/']" fragment="how-it-works" class="btn btn-secondary">See How It Works</a>
       </div>
     </div>
     
-    <!-- Hero Demo Job Card -->
-    <div class="hero-preview-card animate-float">
-      <app-job-card
-        title="software engineering intern"
-        companyName="Smart Job Matching Co."
-        location="San Francisco, CA &bull; Hybrid"
-        [matchScore]="84"
-        [techSkillsCount]="6"
-        [techSkillsTotal]="7"
-        [skills]="demoJobSkills"
-        [workEducationMatched]="true"
-        [visaEligible]="true"
-        aiFeedback="Your profile matches 84% of components, indicating highly relevant experience in enterprise backend services and database optimization."
-      ></app-job-card>
-    </div>
   </section>
 
   <!-- Trusted By Universities -->
@@ -95,7 +80,7 @@
   </section>
 
   <!-- Feature 1: Explainable Match Score -->
-  <section class="feature-section container">
+  <section id="product" class="feature-section container">
     <div class="feature-grid">
       <div class="feature-visual">
         <div class="preview-mini-card">
@@ -112,7 +97,7 @@
         <p class="feature-desc">
           NEXUS doesn't just give you a random number. We parse the specific requirements of the job description and compare them against your resume to explain exactly why you qualify, using custom recruiter heuristics.
         </p>
-        <a href="/register" class="feature-link">Learn about the algorithm &rarr;</a>
+        <a routerLink="/register" class="feature-link">Learn about the algorithm &rarr;</a>
       </div>
     </div>
   </section>
@@ -261,7 +246,7 @@
   </section>
 
   <!-- Comparison Table -->
-  <section class="table-section container">
+  <section id="pricing" class="table-section container">
     <h2 class="section-title text-center">The Intelligence Gap</h2>
     
     <div class="table-container">
@@ -289,7 +274,7 @@
     <div class="cta-box">
       <h2 class="cta-title">Find roles that actually fit — starting today</h2>
       <p class="cta-desc">Join thousands of students and developers using NEXUS to navigate their careers with real-time intelligence.</p>
-      <a href="/register" class="btn btn-primary">Get Started For Free</a>
+      <a routerLink="/register" class="btn btn-primary">Get Started For Free</a>
     </div>
   </section>
 </main>

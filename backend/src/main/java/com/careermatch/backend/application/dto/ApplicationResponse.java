@@ -10,6 +10,7 @@ import java.util.UUID;
 public class ApplicationResponse {
     private UUID id;
     private UUID jobId;
+    private UUID studentId;
     private String jobTitle;
     private String companyName;
     private String studentName;
@@ -18,4 +19,14 @@ public class ApplicationResponse {
     private String coverLetter;
     private String feedback;
     private LocalDateTime createdAt;
+
+    // Match metrics for recruiter-side ranking
+    private Double matchScore;
+    private Double technicalFit;
+    private Double projectFit;
+    private Double experienceFit;
+    private Double domainFit;
+    private Double behavioralFit;
+    private Double educationFit;
 }
+

@@ -34,6 +34,10 @@ public class User {
     @Builder.Default
     private boolean isVerified = false;
 
+    @Column(name = "suspended", nullable = false)
+    @Builder.Default
+    private boolean suspended = false;
+
     @Column(name = "verification_token")
     private String verificationToken;
 

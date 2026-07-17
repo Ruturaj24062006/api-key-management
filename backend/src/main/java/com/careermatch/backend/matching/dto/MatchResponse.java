@@ -14,4 +14,6 @@ public class MatchResponse {
     private String location;
     private Double compositeScore;
     private boolean eligibilityStatus;
+    private String salaryRange;
+    private String jobType;
 }

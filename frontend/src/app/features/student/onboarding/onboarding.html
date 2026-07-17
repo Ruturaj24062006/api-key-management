@@ -274,21 +274,131 @@
       <!-- STEP 7: Resume Upload & Finalize -->
       <div *ngIf="currentStep() === 7" class="step-view animate-fade-in text-center">
         <h3 class="step-title">Upload Resume & Verify</h3>
-        <p class="step-subtitle">Uploading your PDF resume automatically syncs and optimizes your vector search matches.</p>
+        <p class="step-subtitle">Uploading your PDF resume extracts structure, sets details, and calculates candidate matching.</p>
 
-        <!-- Drag Drop/Upload Box -->
-        <div class="upload-zone" [class.uploading]="isUploading()">
+        <!-- Idle State: Upload Zone -->
+        <div *ngIf="resumeUploadState() === 'idle'" class="upload-zone" [class.uploading]="isUploading()">
           <svg class="upload-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"></path>
           </svg>
           <label for="resume-input" class="upload-label">
-            <span *ngIf="!isUploading()">Choose PDF file to upload</span>
-            <span *ngIf="isUploading()">Uploading and parsing...</span>
+            <span>Choose PDF file to upload</span>
           </label>
           <input type="file" id="resume-input" (change)="onFileSelected($event)" accept="application/pdf" class="file-hidden">
         </div>
 
-        <div class="ready-banner-box" *ngIf="profile.profileCompletedPct >= 85">
+        <!-- Loader / Processing States -->
+        <div *ngIf="resumeUploadState() === 'uploading' || resumeUploadState() === 'processing' || resumeUploadState() === 'extracting'" class="upload-loader animate-fade-in">
+          <div class="spinner-loader"></div>
+          <h4 *ngIf="resumeUploadState() === 'uploading'" class="loading-state-title">Uploading PDF Resume...</h4>
+          <h4 *ngIf="resumeUploadState() === 'processing'" class="loading-state-title">Processing PDF Contents...</h4>
+          <h4 *ngIf="resumeUploadState() === 'extracting'" class="loading-state-title">Extracting Profile via Groq AI...</h4>
+          <p class="loading-state-desc">Please wait. This will take up to 10-15 seconds for semantic parsing and mapping.</p>
+        </div>
+
+        <!-- Review Extracted Details Card -->
+        <div *ngIf="resumeUploadState() === 'review' && extractedResumeProfile() as ext" class="extracted-review-card text-left animate-fade-in">
+          <div class="review-header">
+            <h4>Review Extracted Resume Data</h4>
+            <p>Inspect the data extracted from your resume. Choose to confirm it directly to your profile, or pre-populate the step wizard to edit details.</p>
+          </div>
+
+          <div class="review-body">
+            <!-- Basic Info -->
+            <div class="review-section">
+              <h5>Name & Contact</h5>
+              <div class="review-section-content">
+                <p><strong>Name:</strong> {{ ext.firstName }} {{ ext.lastName }}</p>
+                <p *ngIf="ext.bio"><strong>Bio:</strong> {{ ext.bio }}</p>
+                <p *ngIf="ext.languages"><strong>Languages:</strong> {{ ext.languages }}</p>
+                <div class="social-links-review" *ngIf="ext.githubUrl || ext.linkedinUrl || ext.portfolioUrl">
+                  <span *ngIf="ext.githubUrl" class="social-tag">GitHub</span>
+                  <span *ngIf="ext.linkedinUrl" class="social-tag">LinkedIn</span>
+                  <span *ngIf="ext.portfolioUrl" class="social-tag">Portfolio</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Skills -->
+            <div class="review-section" *ngIf="ext.skills && ext.skills.length > 0">
+              <h5>Skills Found</h5>
+              <div class="skills-review-grid">
+                <div *ngFor="let sk of ext.skills" class="skill-review-item">
+                  <span class="checkmark-green">✓</span> <span class="skill-name-txt">{{ sk.name }}</span> <span class="prof-tag">({{ sk.proficiencyLevel | lowercase }})</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Education -->
+            <div class="review-section" *ngIf="ext.education && ext.education.length > 0">
+              <h5>Education</h5>
+              <div *ngFor="let ed of ext.education" class="sub-item-review">
+                <h6>{{ ed.degree }} &mdash; {{ ed.institution }}</h6>
+                <p class="sub-item-meta">{{ ed.fieldOfStudy }} &bull; {{ ed.startDate }} - {{ ed.endDate || 'Present' }}</p>
+                <p class="gpa-meta" *ngIf="ed.gpa">GPA: {{ ed.gpa }}</p>
+              </div>
+            </div>
+
+            <!-- Experience -->
+            <div class="review-section" *ngIf="ext.experience && ext.experience.length > 0">
+              <h5>Experience</h5>
+              <div *ngFor="let exp of ext.experience" class="sub-item-review">
+                <h6>{{ exp.jobTitle }} &mdash; {{ exp.companyName }}</h6>
+                <p class="sub-item-meta">{{ exp.startDate }} - {{ exp.endDate || 'Present' }}</p>
+                <p class="desc-review" *ngIf="exp.description">{{ exp.description }}</p>
+              </div>
+            </div>
+
+            <!-- Projects -->
+            <div class="review-section" *ngIf="ext.projects && ext.projects.length > 0">
+              <h5>Projects</h5>
+              <div *ngFor="let pr of ext.projects" class="sub-item-review">
+                <h6>{{ pr.name }}</h6>
+                <p class="desc-review" *ngIf="pr.description">{{ pr.description }}</p>
+                <p class="tech-meta" *ngIf="pr.technologies"><strong>Tech:</strong> {{ pr.technologies }}</p>
+              </div>
+            </div>
+          </div>
+
+          <div class="review-footer-actions">
+            <button type="button" class="btn btn-secondary btn-sm" (click)="editExtractedData()">
+              Edit / Pre-populate Form
+            </button>
+            <button type="button" class="btn btn-primary btn-sm" (click)="confirmExtractedData()">
+              Confirm Details
+            </button>
+          </div>
+        </div>
+
+        <!-- Success State -->
+        <div *ngIf="resumeUploadState() === 'success'" class="upload-success-state animate-fade-in">
+          <div class="icon-circle icon-circle-success center-icon">
+            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"></path>
+            </svg>
+          </div>
+          <h4>Resume Parsed and Confirmed!</h4>
+          <p>Your profile is fully synchronized with your resume. Click Finish below to explore job matches.</p>
+          <button type="button" class="btn btn-secondary btn-sm mt-3" (click)="resetUploadState()">
+            Upload Another Resume
+          </button>
+        </div>
+
+        <!-- Error State -->
+        <div *ngIf="resumeUploadState() === 'error'" class="upload-error-state animate-fade-in">
+          <div class="icon-circle icon-circle-error center-icon">
+            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+            </svg>
+          </div>
+          <h4>Something Went Wrong</h4>
+          <p class="error-msg-detail">{{ errorMessage() || 'Failed to complete resume extraction.' }}</p>
+          <button type="button" class="btn btn-primary btn-sm mt-3" (click)="resetUploadState()">
+            Try Again
+          </button>
+        </div>
+
+        <div class="ready-banner-box" *ngIf="profile.profileCompletedPct >= 85 && resumeUploadState() === 'idle'">
           <div class="icon-circle icon-circle-success center-icon">
             <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"></path>

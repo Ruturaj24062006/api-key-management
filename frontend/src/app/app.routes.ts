@@ -9,6 +9,10 @@ import { Unauthorized } from './features/auth/unauthorized/unauthorized';
 import { StudentDashboard } from './features/student/dashboard/student-dashboard';
 import { Onboarding } from './features/student/onboarding/onboarding';
 import { RecruiterDashboard } from './features/recruiter/dashboard/recruiter-dashboard';
+import { RecruiterOnboarding } from './features/recruiter/onboarding/onboarding';
+import { CreateJob } from './features/recruiter/create-job/create-job';
+import { RecruiterJobs } from './features/recruiter/jobs/recruiter-jobs';
+import { ApplicantRanking } from './features/recruiter/applicant-ranking/applicant-ranking';
 import { AdminDashboard } from './features/admin/dashboard/admin-dashboard';
 import { authGuard, roleGuard } from './core/guards/auth.guard';
 
@@ -41,6 +45,30 @@ export const routes: Routes = [
     data: { roles: ['ROLE_RECRUITER'] } 
   },
   { 
+    path: 'recruiter/onboarding', 
+    component: RecruiterOnboarding, 
+    canActivate: [authGuard, roleGuard], 
+    data: { roles: ['ROLE_RECRUITER'] }
+  },
+  {
+    path: 'recruiter/jobs/create',
+    component: CreateJob,
+    canActivate: [authGuard, roleGuard],
+    data: { roles: ['ROLE_RECRUITER'] }
+  },
+  {
+    path: 'recruiter/jobs',
+    component: RecruiterJobs,
+    canActivate: [authGuard, roleGuard],
+    data: { roles: ['ROLE_RECRUITER'] }
+  },
+  {
+    path: 'recruiter/jobs/:jobId/applicants',
+    component: ApplicantRanking,
+    canActivate: [authGuard, roleGuard],
+    data: { roles: ['ROLE_RECRUITER'] }
+  },
+  {
     path: 'admin/dashboard', 
     component: AdminDashboard, 
     canActivate: [authGuard, roleGuard], 

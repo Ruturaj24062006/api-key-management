@@ -34,6 +34,10 @@ public class Company {
     @Column(name = "logo_url")
     private String logoUrl;
 
+    private String industry;
+
+    private String location;
+
     @Builder.Default
     @Column(name = "is_verified", nullable = false)
     private boolean isVerified = false;

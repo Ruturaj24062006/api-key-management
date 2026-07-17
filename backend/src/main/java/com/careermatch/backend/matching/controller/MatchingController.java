@@ -59,6 +59,8 @@ public class MatchingController {
                         .location(m.getJob().getLocation())
                         .compositeScore(m.getCompositeScore())
                         .eligibilityStatus(m.isEligibilityStatus())
+                        .salaryRange(m.getJob().getSalaryRange())
+                        .jobType(m.getJob().getJobType() != null ? m.getJob().getJobType().name() : null)
                         .build())
                 .collect(Collectors.toList());
 
@@ -71,6 +73,14 @@ public class MatchingController {
     public ResponseEntity<ApiResponse<MatchDetailsResponse>> getMatchDetails(@PathVariable("matchId") UUID matchId) {
         Match enriched = matchingService.enrichMatchWithAi(matchId);
         
+        // Calculate sub-scores dynamically on the fly
+        double techFit = matchingService.calculateTechnicalFit(enriched.getStudent(), enriched.getJob());
+        double projectFit = matchingService.calculateProjectFit(enriched.getStudent(), enriched.getJob());
+        double expFit = matchingService.calculateExperienceFit(enriched.getStudent(), enriched.getJob());
+        double domainFit = matchingService.calculateDomainFit(enriched.getStudent(), enriched.getJob());
+        double behavioralFit = matchingService.calculateBehavioralFit(enriched.getStudent(), enriched.getJob());
+        double eduCertFit = matchingService.calculateEduCertFit(enriched.getStudent());
+
         MatchDetailsResponse response = MatchDetailsResponse.builder()
                 .id(enriched.getId())
                 .jobId(enriched.getJob().getId())
@@ -84,8 +94,63 @@ public class MatchingController {
                 .explanation(enriched.getExplanation())
                 .skillGap(enriched.getSkillGap())
                 .careerInsights(enriched.getCareerInsights())
+                .techFit(Math.round(techFit * 10.0) / 10.0)
+                .projectFit(Math.round(projectFit * 10.0) / 10.0)
+                .expFit(Math.round(expFit * 10.0) / 10.0)
+                .domainFit(Math.round(domainFit * 10.0) / 10.0)
+                .behavioralFit(Math.round(behavioralFit * 10.0) / 10.0)
+                .eduCertFit(Math.round(eduCertFit * 10.0) / 10.0)
                 .build();
 
         return ResponseEntity.ok(ApiResponse.success(response));
+    }
+
+    @GetMapping("/search")
+    @PreAuthorize("hasAuthority('ROLE_STUDENT')")
+    @Operation(summary = "Search, filter, and sort jobs dynamically with matching scores")
+    public ResponseEntity<ApiResponse<List<MatchResponse>>> searchMatches(
+            @RequestParam(value = "location", required = false) String location,
+            @RequestParam(value = "role", required = false) String role,
+            @RequestParam(value = "experienceLevel", required = false) String experienceLevel,
+            @RequestParam(value = "jobType", required = false) String jobType,
+            @RequestParam(value = "skills", required = false) String skills,
+            @RequestParam(value = "salary", required = false) String salary,
+            @RequestParam(value = "sponsorship", required = false) Boolean sponsorship,
+            @RequestParam(value = "sortBy", required = false, defaultValue = "BEST_MATCH") String sortBy
+    ) {
+        String email = SecurityContextHolder.getContext().getAuthentication().getName();
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new BadRequestException("User not found"));
+
+        List<Match> matches = matchingService.searchJobsWithScores(
+                user.getId(), location, role, experienceLevel, jobType, skills, salary, sponsorship, sortBy
+        );
+
+        List<MatchResponse> response = matches.stream()
+                .map(m -> MatchResponse.builder()
+                        .id(m.getId() != null ? m.getId() : UUID.randomUUID())
+                        .jobId(m.getJob().getId())
+                        .jobTitle(m.getJob().getTitle())
+                        .companyName(m.getJob().getCompany().getName())
+                        .location(m.getJob().getLocation())
+                        .compositeScore(m.getCompositeScore())
+                        .eligibilityStatus(m.isEligibilityStatus())
+                        .salaryRange(m.getJob().getSalaryRange())
+                        .jobType(m.getJob().getJobType() != null ? m.getJob().getJobType().name() : null)
+                        .build())
+                .collect(Collectors.toList());
+
+        return ResponseEntity.ok(ApiResponse.success(response));
+    }
+
+    @PostMapping("/{matchId}/ask-ai")
+    @PreAuthorize("hasAuthority('ROLE_STUDENT')")
+    @Operation(summary = "Ask a custom question to the AI matching assistant")
+    public ResponseEntity<ApiResponse<String>> askAi(
+            @PathVariable("matchId") UUID matchId,
+            @RequestBody com.careermatch.backend.matching.dto.AskAiRequest request
+    ) {
+        String response = matchingService.askAiAboutMatch(matchId, request.getQuestion());
+        return ResponseEntity.ok(ApiResponse.success("AI Answer generated", response));
     }
 }

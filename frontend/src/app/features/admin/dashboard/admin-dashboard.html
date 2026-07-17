@@ -1,18 +1,297 @@
 <app-navbar></app-navbar>
 
 <main class="dashboard-wrapper container">
-  <div class="dashboard-header-row">
-    <h1 class="dashboard-title">Admin Dashboard</h1>
+  <!-- Header Row -->
+  <div class="dashboard-header-row animate-fade-in">
+    <div>
+      <h1 class="dashboard-title">Admin command deck</h1>
+      <p class="admin-session-email">Logged in as: <strong>{{ getUserEmail() }}</strong></p>
+    </div>
     <button (click)="onLogout()" class="btn btn-secondary btn-sm">Log out</button>
   </div>
-  
-  <div class="glass-card info-card">
-    <h3>Active Session Info</h3>
-    <p class="session-detail"><strong>User Email:</strong> {{ getUserEmail() }}</p>
-    <p class="session-detail"><strong>Role Scope:</strong> ROLE_ADMIN</p>
-    <p class="session-note">
-      Welcome to the Admin Command Center! You have systemic authorization to manage company approvals, verify recruiters, and monitor backend database search logs.
-    </p>
+
+  <!-- Admin Nav Tabs -->
+  <div class="admin-tabs animate-fade-in">
+    <button 
+      class="tab-btn" 
+      [class.active]="activeTab() === 'OVERVIEW'" 
+      (click)="setTab('OVERVIEW')">
+      Overview & Stats
+    </button>
+    <button 
+      class="tab-btn" 
+      [class.active]="activeTab() === 'COMPANIES'" 
+      (click)="setTab('COMPANIES')">
+      Verify Companies
+    </button>
+    <button 
+      class="tab-btn" 
+      [class.active]="activeTab() === 'STUDENTS'" 
+      (click)="setTab('STUDENTS')">
+      Manage Students
+    </button>
+    <button 
+      class="tab-btn" 
+      [class.active]="activeTab() === 'RECRUITERS'" 
+      (click)="setTab('RECRUITERS')">
+      Manage Recruiters
+    </button>
+    <button 
+      class="tab-btn" 
+      [class.active]="activeTab() === 'JOBS'" 
+      (click)="setTab('JOBS')">
+      Manage Jobs
+    </button>
+  </div>
+
+  <!-- Loading State -->
+  <div *ngIf="isLoading()" class="loading-overlay text-center">
+    <div class="spinner"></div>
+    <p>Loading administration data...</p>
+  </div>
+
+  <div class="tab-content-area animate-scale-up" *ngIf="!isLoading()">
+    
+    <!-- ════════════ OVERVIEW TAB ════════════ -->
+    <div *ngIf="activeTab() === 'OVERVIEW'">
+      <div class="kpi-grid">
+        <div class="kpi-card glass-card">
+          <div class="kpi-icon">🎓</div>
+          <div class="kpi-details">
+            <span class="kpi-value">{{ stats()?.studentCount || 0 }}</span>
+            <span class="kpi-label">Registered Students</span>
+          </div>
+        </div>
+        
+        <div class="kpi-card glass-card">
+          <div class="kpi-icon">💼</div>
+          <div class="kpi-details">
+            <span class="kpi-value">{{ stats()?.recruiterCount || 0 }}</span>
+            <span class="kpi-label">Registered Recruiters</span>
+          </div>
+        </div>
+
+        <div class="kpi-card glass-card">
+          <div class="kpi-icon">🏢</div>
+          <div class="kpi-details">
+            <span class="kpi-value">{{ stats()?.companyCount || 0 }}</span>
+            <span class="kpi-label">Companies Onboarded</span>
+          </div>
+        </div>
+
+        <div class="kpi-card glass-card">
+          <div class="kpi-icon">📝</div>
+          <div class="kpi-details">
+            <span class="kpi-value">{{ stats()?.jobCount || 0 }}</span>
+            <span class="kpi-label">Active Job Posts</span>
+          </div>
+        </div>
+
+        <div class="kpi-card glass-card">
+          <div class="kpi-icon">📨</div>
+          <div class="kpi-details">
+            <span class="kpi-value">{{ stats()?.applicationCount || 0 }}</span>
+            <span class="kpi-label">Total Applications</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="glass-card instructions-card">
+        <h3>Platform Administrator Scope</h3>
+        <p>You have systemic access to authorize company profiles, verify recruiters, suspend accounts, and remove job posts reported as fraudulent or abusive.</p>
+        <ul>
+          <li><strong>Verify Companies:</strong> Unlocks job posting capabilities for linked recruiters.</li>
+          <li><strong>Suspend Accounts:</strong> Revokes login privileges instantly for compromised or abusive users.</li>
+          <li><strong>Manage Jobs:</strong> Systemic deletion of jobs violating platform policies.</li>
+        </ul>
+      </div>
+    </div>
+
+    <!-- ════════════ COMPANIES TAB ════════════ -->
+    <div *ngIf="activeTab() === 'COMPANIES'">
+      <div class="table-container glass-card">
+        <h3>Company Verification Desk</h3>
+        <table class="admin-table">
+          <thead>
+            <tr>
+              <th>Company Name</th>
+              <th>Industry</th>
+              <th>Location</th>
+              <th>Website</th>
+              <th>Status</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let comp of companies()">
+              <td><strong>{{ comp.name }}</strong></td>
+              <td>{{ comp.industry }}</td>
+              <td>{{ comp.location }}</td>
+              <td>
+                <a [href]="comp.websiteUrl" target="_blank" class="table-link" *ngIf="comp.websiteUrl">{{ comp.websiteUrl }}</a>
+                <span class="text-muted" *ngIf="!comp.websiteUrl">N/A</span>
+              </td>
+              <td>
+                <span class="badge" [class.badge-success]="comp.verified" [class.badge-warning]="!comp.verified">
+                  {{ comp.verified ? 'Verified' : 'Pending' }}
+                </span>
+              </td>
+              <td>
+                <button 
+                  class="btn btn-primary btn-xs" 
+                  *ngIf="!comp.verified" 
+                  (click)="verifyCompany(comp.id)">
+                  Approve Company
+                </button>
+                <span class="verified-text" *ngIf="comp.verified">Approved ✓</span>
+              </td>
+            </tr>
+            <tr *ngIf="companies().length === 0">
+              <td colspan="6" class="text-center text-muted">No companies registered on the platform.</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- ════════════ STUDENTS TAB ════════════ -->
+    <div *ngIf="activeTab() === 'STUDENTS'">
+      <div class="table-container glass-card">
+        <h3>Registered Students Registry</h3>
+        <table class="admin-table">
+          <thead>
+            <tr>
+              <th>Name</th>
+              <th>Email</th>
+              <th>Status</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let s of students()">
+              <td><strong>{{ s.firstName }} {{ s.lastName }}</strong></td>
+              <td>{{ s.email }}</td>
+              <td>
+                <span class="badge" [class.badge-danger]="s.suspended" [class.badge-success]="!s.suspended">
+                  {{ s.suspended ? 'Suspended' : 'Active' }}
+                </span>
+              </td>
+              <td>
+                <button 
+                  class="btn" 
+                  [class.btn-danger]="!s.suspended" 
+                  [class.btn-primary]="s.suspended" 
+                  (click)="toggleSuspension(s.id)">
+                  {{ s.suspended ? 'Reinstate Access' : 'Suspend Account' }}
+                </button>
+              </td>
+            </tr>
+            <tr *ngIf="students().length === 0">
+              <td colspan="4" class="text-center text-muted">No student accounts registered yet.</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- ════════════ RECRUITERS TAB ════════════ -->
+    <div *ngIf="activeTab() === 'RECRUITERS'">
+      <div class="table-container glass-card">
+        <h3>Recruiter Accounts Registry</h3>
+        <table class="admin-table">
+          <thead>
+            <tr>
+              <th>Email</th>
+              <th>Job Title</th>
+              <th>Company</th>
+              <th>Verification</th>
+              <th>Suspension</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let r of recruiters()">
+              <td><strong>{{ r.email }}</strong></td>
+              <td>{{ r.jobTitle }}</td>
+              <td>{{ r.companyName }}</td>
+              <td>
+                <span class="badge" [class.badge-success]="r.verified" [class.badge-warning]="!r.verified">
+                  {{ r.verified ? 'Verified' : 'Unverified' }}
+                </span>
+              </td>
+              <td>
+                <span class="badge" [class.badge-danger]="r.suspended" [class.badge-success]="!r.suspended">
+                  {{ r.suspended ? 'Suspended' : 'Active' }}
+                </span>
+              </td>
+              <td>
+                <button 
+                  class="btn btn-danger" 
+                  *ngIf="!r.suspended" 
+                  (click)="toggleSuspension(r.id)">
+                  Suspend Account
+                </button>
+                <button 
+                  class="btn btn-primary" 
+                  *ngIf="r.suspended" 
+                  (click)="toggleSuspension(r.id)">
+                  Reinstate Access
+                </button>
+              </td>
+            </tr>
+            <tr *ngIf="recruiters().length === 0">
+              <td colspan="6" class="text-center text-muted">No recruiter accounts registered yet.</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- ════════════ JOBS TAB ════════════ -->
+    <div *ngIf="activeTab() === 'JOBS'">
+      <div class="table-container glass-card">
+        <h3>Job Listings Index</h3>
+        <table class="admin-table">
+          <thead>
+            <tr>
+              <th>Job Title</th>
+              <th>Company Name</th>
+              <th>Work Mode</th>
+              <th>Location</th>
+              <th>Status</th>
+              <th>Date Posted</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let j of jobs()">
+              <td><strong>{{ j.title }}</strong></td>
+              <td>{{ j.companyName }}</td>
+              <td>{{ j.workMode }}</td>
+              <td>{{ j.location }}</td>
+              <td>
+                <span class="badge" 
+                  [class.badge-success]="j.status === 'ACTIVE'"
+                  [class.badge-warning]="j.status === 'PAUSED'"
+                  [class.badge-secondary]="j.status === 'DRAFT' || j.status === 'CLOSED'">
+                  {{ j.status }}
+                </span>
+              </td>
+              <td>{{ j.createdAt | date:'mediumDate' }}</td>
+              <td>
+                <button class="btn btn-danger btn-xs" (click)="deleteJob(j.id)">
+                  Remove Job
+                </button>
+              </td>
+            </tr>
+            <tr *ngIf="jobs().length === 0">
+              <td colspan="7" class="text-center text-muted">No job posts indexed yet.</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
   </div>
 </main>
 

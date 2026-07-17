@@ -68,9 +68,15 @@ public class ApplicationService {
         Application saved = applicationRepository.save(application);
         log.info("Student {} applied to Job: {}", student.getId(), jobId);
 
-        // Send a notification to the recruiter or log it
+        // Notify Recruiter (New application / New candidate)
         createNotification(job.getRecruiter().getUser(), "New Application", 
-                "Student " + student.getFirstName() + " has applied for your job post: " + job.getTitle());
+                "A new candidate " + student.getFirstName() + " " + student.getLastName() + 
+                " has applied for your job post: " + job.getTitle());
+
+        // Notify Student (Application submitted)
+        createNotification(student.getUser(), "Application Submitted", 
+                "You have successfully submitted your application for " + job.getTitle() + 
+                " at " + job.getCompany().getName());
 
         return saved;
     }
@@ -86,13 +92,69 @@ public class ApplicationService {
 
         log.info("Application {} status updated to {}", applicationId, request.getStatus());
 
-        // Send a notification to the student
+        // Notify Student based on new status
+        String title = "Application Status Changed";
         String msg = "Your application for the position of " + application.getJob().getTitle() + 
                 " has been updated to: " + request.getStatus();
-        if (request.getFeedback() != null && !request.getFeedback().isBlank()) {
-            msg += ". Feedback: " + request.getFeedback();
+
+        switch (request.getStatus()) {
+            case SHORTLISTED:
+                title = "Shortlisted for " + application.getJob().getTitle();
+                msg = "Congratulations! You have been Shortlisted for " + application.getJob().getTitle() + 
+                        " at " + application.getJob().getCompany().getName() + ".";
+                break;
+            case INTERVIEW:
+                title = "Interview Scheduled";
+                msg = "Interview scheduled! The recruiter has invited you for an interview for " + 
+                        application.getJob().getTitle() + ". Please review feedback for details.";
+                break;
+            case ACCEPTED:
+            case OFFER:
+                title = "Selected Candidate Alert";
+                msg = "Congratulations! You have been Selected for the position of " + 
+                        application.getJob().getTitle() + " at " + application.getJob().getCompany().getName() + "!";
+                break;
+            case REJECTED:
+                title = "Application Update";
+                msg = "Thank you for your interest in " + application.getJob().getTitle() + 
+                        ". Unfortunately, we will not be moving forward with your application at this time.";
+                break;
+            default:
+                break;
         }
-        createNotification(application.getStudent().getUser(), "Application Status Updated", msg);
+
+        if (request.getFeedback() != null && !request.getFeedback().isBlank()) {
+            msg += " Feedback: " + request.getFeedback();
+        }
+
+        createNotification(application.getStudent().getUser(), title, msg);
+
+        return saved;
+    }
+
+    @Transactional
+    public Application respondToInterview(UUID applicationId, String response, String note, String studentEmail) {
+        Application app = applicationRepository.findById(applicationId)
+                .orElseThrow(() -> new ResourceNotFoundException("Application not found: " + applicationId));
+
+        if (!app.getStudent().getUser().getEmail().equals(studentEmail)) {
+            throw new BadRequestException("You do not own this application.");
+        }
+
+        String statusNote = "Student responded: " + response;
+        if (note != null && !note.isBlank()) {
+            statusNote += " - " + note;
+        }
+        app.setFeedback(statusNote);
+        Application saved = applicationRepository.save(app);
+
+        // Notify Recruiter (Interview response)
+        String msg = "Student " + app.getStudent().getFirstName() + " " + app.getStudent().getLastName() +
+                " has " + response.toLowerCase() + " your interview request for: " + app.getJob().getTitle();
+        if (note != null && !note.isBlank()) {
+            msg += ". Message: " + note;
+        }
+        createNotification(app.getJob().getRecruiter().getUser(), "Interview Response Received", msg);
 
         return saved;
     }

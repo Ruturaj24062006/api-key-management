@@ -13,4 +13,5 @@ public interface ApplicationRepository extends JpaRepository<Application, UUID> 
     List<Application> findByStudentId(UUID studentId);
     List<Application> findByJobId(UUID jobId);
     Optional<Application> findByStudentIdAndJobId(UUID studentId, UUID jobId);
+    List<Application> findByJobIdIn(List<UUID> jobIds);
 }
