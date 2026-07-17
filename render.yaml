@@ -30,9 +30,8 @@ services:
         generateValue: true
 
   # 2. Angular Frontend Static Site
-  - type: web
+  - type: static
     name: nexus-frontend
-    env: static
     rootDir: frontend
     buildCommand: npm run build
     publishDir: dist/frontend/browser
