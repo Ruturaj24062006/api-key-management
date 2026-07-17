@@ -9,17 +9,8 @@ RUN tr -d '\r' < mvnw > mvnw.tmp && mv mvnw.tmp mvnw && chmod +x mvnw && ./mvnw 
 
 FROM eclipse-temurin:21-jre-jammy
 WORKDIR /app
-# Enable Ubuntu universe repository, then install libstdc++6, python3, and python3-pip
-RUN echo "deb http://archive.ubuntu.com/ubuntu/ jammy universe" >> /etc/apt/sources.list && \
-    apt-get update && apt-get install -y --no-install-recommends \
-    libstdc++6 \
-    python3 \
-    python3-pip \
-    && rm -rf /var/lib/apt/lists/*
-
-# Install PyMuPDF using pip3 (downloads pre-compiled manylinux wheel)
-RUN pip3 install --no-cache-dir pymupdf --break-system-packages
-
+# JRE base image already includes glibc and libstdc++6 by default on Ubuntu Jammy.
+# We do not install Python, pip, or PyMuPDF, keeping the image minimal and build-stable.
 COPY --from=build /app/target/career-match-backend-0.0.1-SNAPSHOT.jar app.jar
 
 EXPOSE 8080

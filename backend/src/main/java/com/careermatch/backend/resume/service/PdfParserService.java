@@ -16,27 +16,40 @@ public class PdfParserService {
     private final Tika tika = new Tika();
 
     public String parsePdf(InputStream inputStream) throws IOException {
-        // Copy stream to a temp file for PyMuPDF script
+        // Copy stream to a temp file
         Path tempFile = Files.createTempFile("resume-", ".pdf");
         try (OutputStream out = Files.newOutputStream(tempFile)) {
             inputStream.transferTo(out);
         }
 
+        // 1. Try Apache Tika first (pure Java, in-process, no OS dependencies)
         try {
-            log.info("Attempting PDF text extraction via PyMuPDF (fitz) script...");
-            String text = runPythonParser(tempFile.toAbsolutePath().toString());
+            log.info("Attempting PDF text extraction via Apache Tika...");
+            String text = tika.parseToString(Files.newInputStream(tempFile));
             if (text != null && !text.isBlank()) {
-                log.info("PyMuPDF PDF extraction succeeded.");
+                log.info("Apache Tika PDF extraction succeeded.");
                 Files.deleteIfExists(tempFile);
                 return text;
             }
         } catch (Exception e) {
-            log.warn("PyMuPDF extraction failed: {}. Falling back to Apache Tika.", e.getMessage());
+            log.warn("Apache Tika extraction failed: {}. Falling back to PyMuPDF.", e.getMessage());
         }
 
-        // Fallback to Apache Tika using the same temp file, then clean up
-        log.info("Attempting PDF text extraction via Apache Tika fallback...");
-        return parseWithTika(tempFile);
+        // 2. Fallback to PyMuPDF (fitz Python script)
+        try {
+            log.info("Attempting PDF text extraction via PyMuPDF (fitz) script fallback...");
+            String text = runPythonParser(tempFile.toAbsolutePath().toString());
+            if (text != null && !text.isBlank()) {
+                log.info("PyMuPDF PDF extraction succeeded.");
+                return text;
+            }
+        } catch (Exception e) {
+            log.error("PyMuPDF fallback extraction failed: {}", e.getMessage());
+        } finally {
+            Files.deleteIfExists(tempFile);
+        }
+
+        throw new RuntimeException("All PDF parsers failed to extract text from resume");
     }
 
     private String runPythonParser(String absolutePath) throws Exception {
