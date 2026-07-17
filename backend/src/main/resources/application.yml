@@ -38,21 +38,10 @@ spring:
       max-file-size: 10MB
       max-request-size: 10MB
 
-  security:
-    oauth2:
-      client:
-        registration:
-          google:
-            client-id: ${GOOGLE_CLIENT_ID:mock-google-client-id}
-            client-secret: ${GOOGLE_CLIENT_SECRET:mock-google-client-secret}
-            scope:
-              - email
-              - profile
-
-# JWT, Local Storage, and Resend Configuration
+# JWT, Local Storage, Resend, and Supabase Configuration
 app:
   jwt:
-    secret: ${JWT_SECRET:404E635266556A586E3272357538782F413F4428472B4B6250645367566B5970} # 256-bit key
+    secret: ${JWT_SECRET:404E635266556A586E3272357538782F413F4428472B4B6250645367566B5970} # Matches Supabase JWT Secret in Cloud
     accessTokenExpirationMs: 86400000 # 24 Hours
     refreshTokenExpirationMs: 604800000 # 7 Days
   upload:
@@ -60,6 +49,10 @@ app:
   resend:
     apiKey: ${RESEND_API_KEY:mock-resend-key}
     from: ${RESEND_FROM_EMAIL:onboarding@resend.dev}
+
+supabase:
+  url: ${SUPABASE_URL:https://your-project.supabase.co}
+  anonKey: ${SUPABASE_ANON_KEY:mock-anon-key}
 
 # Groq API Configuration
 groq:

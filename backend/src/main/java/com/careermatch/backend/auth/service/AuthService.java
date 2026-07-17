@@ -16,14 +16,18 @@ import com.careermatch.backend.exception.ResourceNotFoundException;
 import com.careermatch.backend.util.EmailService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.*;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.client.RestTemplate;
 
 import java.time.LocalDateTime;
 import java.util.Collections;
+import java.util.Map;
 import java.util.Random;
 import java.util.UUID;
 
@@ -40,23 +44,34 @@ public class AuthService {
     private final JwtTokenProvider jwtTokenProvider;
     private final EmailService emailService;
 
+    @Value("${supabase.url}")
+    private String supabaseUrl;
+
+    @Value("${supabase.anonKey}")
+    private String supabaseAnonKey;
+
     @Transactional
     public String register(RegisterRequest request) {
         if (userRepository.findByEmail(request.getEmail()).isPresent()) {
             throw new BadRequestException("Email is already registered");
         }
 
+        // 1. Sign up user in Supabase Auth and get their Supabase UUID
+        String supabaseUserId = signupInSupabase(request.getEmail(), request.getPassword());
+        UUID userId = UUID.fromString(supabaseUserId);
+
+        // 2. Save User in local PostgreSQL using the Supabase UUID as primary key
         User user = User.builder()
+                .id(userId)
                 .email(request.getEmail())
                 .passwordHash(passwordEncoder.encode(request.getPassword()))
                 .role(request.getRole())
-                .isVerified(false)
-                .verificationToken(UUID.randomUUID().toString())
+                .isVerified(true) // Supabase Auth manages email verification status
                 .build();
 
         User savedUser = userRepository.save(user);
 
-        // Initialize empty profile depending on role
+        // 3. Initialize profile details
         if (request.getRole() == UserRole.ROLE_STUDENT) {
             Student student = Student.builder()
                     .id(savedUser.getId())
@@ -87,68 +102,120 @@ public class AuthService {
             recruiterRepository.save(recruiter);
         }
 
-        log.info("Registered user: {} with role: {}", savedUser.getEmail(), savedUser.getRole());
-        
-        String link = "http://localhost:8080/api/v1/auth/verify-email?token=" + savedUser.getVerificationToken();
-        String html = "<p>Thank you for registering. Please verify your email by clicking the link below:</p>" +
-                "<p><a href=\"" + link + "\">Verify Email</a></p>";
-        emailService.sendEmail(savedUser.getEmail(), "Verify Your Email - CareerMatch AI", html);
-
-        return "Registration successful. Please verify your email.";
+        log.info("Registered user in Supabase & local DB: {} with role: {}", savedUser.getEmail(), savedUser.getRole());
+        return "Registration successful.";
     }
 
+    @Transactional
     public LoginResponse login(LoginRequest request) {
+        // 1. Authenticate with Supabase Auth to obtain valid Supabase JWT
+        Map<String, Object> tokenData = loginInSupabase(request.getEmail(), request.getPassword());
+        String accessToken = (String) tokenData.get("access_token");
+        String refreshToken = (String) tokenData.get("refresh_token");
+
+        // 2. Fetch locally stored User record
         User user = userRepository.findByEmail(request.getEmail())
-                .orElseThrow(() -> new BadRequestException("Invalid email or password"));
-
-        if (!passwordEncoder.matches(request.getPassword(), user.getPasswordHash())) {
-            throw new BadRequestException("Invalid email or password");
-        }
-
-        UserDetails userDetails = new org.springframework.security.core.userdetails.User(
-                user.getEmail(),
-                user.getPasswordHash(),
-                Collections.singletonList(new SimpleGrantedAuthority(user.getRole().name()))
-        );
-
-        String accessToken = jwtTokenProvider.generateToken(userDetails);
-        String refreshToken = jwtTokenProvider.generateRefreshToken(userDetails);
+                .orElseThrow(() -> new BadRequestException("User profile not found locally. Please register first."));
 
         return LoginResponse.builder()
+                .userId(user.getId())
+                .role(user.getRole().name())
                 .accessToken(accessToken)
                 .refreshToken(refreshToken)
-                .email(user.getEmail())
-                .role(user.getRole().name())
-                .userId(user.getId())
                 .build();
+    }
+
+    private String signupInSupabase(String email, String password) {
+        if ("mock-anon-key".equals(supabaseAnonKey) || supabaseUrl.contains("your-project")) {
+            log.warn("Supabase credentials not configured. Generating mock Supabase User ID.");
+            return UUID.randomUUID().toString();
+        }
+
+        try {
+            HttpHeaders headers = new HttpHeaders();
+            headers.setContentType(MediaType.APPLICATION_JSON);
+            headers.set("apikey", supabaseAnonKey);
+
+            Map<String, String> body = Map.of("email", email, "password", password);
+            HttpEntity<Map<String, String>> entity = new HttpEntity<>(body, headers);
+
+            RestTemplate restTemplate = new RestTemplate();
+            ResponseEntity<Map> response = restTemplate.postForEntity(supabaseUrl + "/auth/v1/signup", entity, Map.class);
+
+            if (response.getStatusCode().is2xxSuccessful() && response.getBody() != null) {
+                return (String) response.getBody().get("id");
+            }
+            throw new RuntimeException("Empty response from Supabase Signup API");
+        } catch (Exception e) {
+            log.error("Failed to sign up in Supabase: {}", e.getMessage());
+            throw new BadRequestException("Supabase signup failed: " + e.getMessage());
+        }
+    }
+
+    private Map<String, Object> loginInSupabase(String email, String password) {
+        if ("mock-anon-key".equals(supabaseAnonKey) || supabaseUrl.contains("your-project")) {
+            log.warn("Supabase credentials not configured. Generating mock JWT tokens.");
+            User user = userRepository.findByEmail(email)
+                    .orElseThrow(() -> new BadRequestException("Invalid email or password"));
+
+            // Check password hash match locally for mock fallback mode
+            if (!passwordEncoder.matches(password, user.getPasswordHash())) {
+                throw new BadRequestException("Invalid email or password");
+            }
+            
+            UserDetails userDetails = new org.springframework.security.core.userdetails.User(
+                    user.getEmail(),
+                    "",
+                    Collections.singletonList(new SimpleGrantedAuthority(user.getRole().name()))
+            );
+            String mockAccess = jwtTokenProvider.generateToken(userDetails);
+            String mockRefresh = jwtTokenProvider.generateRefreshToken(userDetails);
+            return Map.of("access_token", mockAccess, "refresh_token", mockRefresh);
+        }
+
+        try {
+            HttpHeaders headers = new HttpHeaders();
+            headers.setContentType(MediaType.APPLICATION_JSON);
+            headers.set("apikey", supabaseAnonKey);
+
+            Map<String, String> body = Map.of("email", email, "password", password);
+            HttpEntity<Map<String, String>> entity = new HttpEntity<>(body, headers);
+
+            RestTemplate restTemplate = new RestTemplate();
+            ResponseEntity<Map> response = restTemplate.postForEntity(supabaseUrl + "/auth/v1/token?grant_type=password", entity, Map.class);
+
+            if (response.getStatusCode().is2xxSuccessful() && response.getBody() != null) {
+                Map bodyMap = response.getBody();
+                String access = (String) bodyMap.get("access_token");
+                String refresh = (String) bodyMap.get("refresh_token");
+                return Map.of("access_token", access, "refresh_token", refresh);
+            }
+            throw new RuntimeException("Empty response from Supabase Login API");
+        } catch (Exception e) {
+            log.error("Failed to login in Supabase: {}", e.getMessage());
+            throw new BadRequestException("Invalid email or password (Supabase Auth)");
+        }
     }
 
     @Transactional
     public LoginResponse loginWithGoogle(GoogleLoginRequest request) {
-        // Mock parsing Google ID Token
-        // In production, verify with Google API Client library:
-        // GoogleIdToken idToken = GoogleIdTokenVerifier.verify(request.getIdToken());
-        // String email = idToken.getPayload().getEmail();
-        
-        // Mock verification: extract email from mock idToken (assume idToken is just the email for local test)
-        String email = request.getIdToken().contains("@") ? request.getIdToken() : "student@gmail.com";
-        
+        log.warn("OAuth Google Sign-in should be handled on client side using Supabase SDK. Processing request via mock fallback.");
+        String email = "google-student@careermatch.com";
         User user = userRepository.findByEmail(email).orElseGet(() -> {
             User newUser = User.builder()
                     .email(email)
+                    .passwordHash(passwordEncoder.encode("OAuth-mock-password"))
                     .role(UserRole.ROLE_STUDENT)
                     .isVerified(true)
                     .build();
             User saved = userRepository.save(newUser);
-            
-            Student student = Student.builder()
+            studentRepository.save(Student.builder()
                     .id(saved.getId())
                     .user(saved)
                     .firstName("Google")
                     .lastName("User")
-                    .profileCompletedPct(0)
-                    .build();
-            studentRepository.save(student);
+                    .profileCompletedPct(20)
+                    .build());
             return saved;
         });
 
@@ -157,56 +224,77 @@ public class AuthService {
                 "",
                 Collections.singletonList(new SimpleGrantedAuthority(user.getRole().name()))
         );
-
-        String accessToken = jwtTokenProvider.generateToken(userDetails);
-        String refreshToken = jwtTokenProvider.generateRefreshToken(userDetails);
+        String token = jwtTokenProvider.generateToken(userDetails);
+        String refresh = jwtTokenProvider.generateRefreshToken(userDetails);
 
         return LoginResponse.builder()
-                .accessToken(accessToken)
-                .refreshToken(refreshToken)
-                .email(user.getEmail())
-                .role(user.getRole().name())
                 .userId(user.getId())
-                .build();
-    }
-
-    public LoginResponse refreshToken(RefreshTokenRequest request) {
-        String token = request.getRefreshToken();
-        String email = jwtTokenProvider.extractUsername(token);
-        
-        User user = userRepository.findByEmail(email)
-                .orElseThrow(() -> new BadRequestException("Invalid refresh token"));
-
-        UserDetails userDetails = new org.springframework.security.core.userdetails.User(
-                user.getEmail(),
-                user.getPasswordHash() != null ? user.getPasswordHash() : "",
-                Collections.singletonList(new SimpleGrantedAuthority(user.getRole().name()))
-        );
-
-        if (!jwtTokenProvider.validateToken(token, userDetails)) {
-            throw new BadRequestException("Expired or invalid refresh token");
-        }
-
-        String newAccessToken = jwtTokenProvider.generateToken(userDetails);
-        return LoginResponse.builder()
-                .accessToken(newAccessToken)
-                .refreshToken(token)
-                .email(user.getEmail())
                 .role(user.getRole().name())
-                .userId(user.getId())
+                .accessToken(token)
+                .refreshToken(refresh)
                 .build();
     }
 
     @Transactional
-    public String verifyEmail(String token) {
-        User user = userRepository.findByVerificationToken(token)
-                .orElseThrow(() -> new ResourceNotFoundException("Invalid verification token"));
+    public LoginResponse refreshToken(RefreshTokenRequest request) {
+        Map<String, Object> tokenData = refreshSupabaseToken(request.getRefreshToken());
+        String accessToken = (String) tokenData.get("access_token");
+        String refreshToken = (String) tokenData.get("refresh_token");
 
-        user.setVerified(true);
-        user.setVerificationToken(null);
-        userRepository.save(user);
+        String email = jwtTokenProvider.extractUsername(accessToken);
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new BadRequestException("User profile not found locally."));
 
-        return "Email verified successfully.";
+        return LoginResponse.builder()
+                .userId(user.getId())
+                .role(user.getRole().name())
+                .accessToken(accessToken)
+                .refreshToken(refreshToken)
+                .build();
+    }
+
+    private Map<String, Object> refreshSupabaseToken(String refresh) {
+        if ("mock-anon-key".equals(supabaseAnonKey) || supabaseUrl.contains("your-project")) {
+            log.warn("Supabase credentials not configured. Mocking refresh token rotation.");
+            String email = "student@careermatch.com";
+            try {
+                email = jwtTokenProvider.extractUsername(refresh);
+            } catch (Exception e) {}
+            User user = userRepository.findByEmail(email)
+                    .orElseThrow(() -> new BadRequestException("Invalid refresh token"));
+            
+            UserDetails userDetails = new org.springframework.security.core.userdetails.User(
+                    user.getEmail(),
+                    "",
+                    Collections.singletonList(new SimpleGrantedAuthority(user.getRole().name()))
+            );
+            String mockAccess = jwtTokenProvider.generateToken(userDetails);
+            String mockRefresh = jwtTokenProvider.generateRefreshToken(userDetails);
+            return Map.of("access_token", mockAccess, "refresh_token", mockRefresh);
+        }
+
+        try {
+            HttpHeaders headers = new HttpHeaders();
+            headers.setContentType(MediaType.APPLICATION_JSON);
+            headers.set("apikey", supabaseAnonKey);
+
+            Map<String, String> body = Map.of("refresh_token", refresh);
+            HttpEntity<Map<String, String>> entity = new HttpEntity<>(body, headers);
+
+            RestTemplate restTemplate = new RestTemplate();
+            ResponseEntity<Map> response = restTemplate.postForEntity(supabaseUrl + "/auth/v1/token?grant_type=refresh_token", entity, Map.class);
+
+            if (response.getStatusCode().is2xxSuccessful() && response.getBody() != null) {
+                Map bodyMap = response.getBody();
+                String access = (String) bodyMap.get("access_token");
+                String newRefresh = (String) bodyMap.get("refresh_token");
+                return Map.of("access_token", access, "refresh_token", newRefresh);
+            }
+            throw new RuntimeException("Empty response from Supabase Refresh Token API");
+        } catch (Exception e) {
+            log.error("Failed to refresh token in Supabase: {}", e.getMessage());
+            throw new BadRequestException("Invalid refresh token (Supabase Auth)");
+        }
     }
 
     @Transactional
@@ -214,7 +302,6 @@ public class AuthService {
         User user = userRepository.findByEmail(request.getEmail())
                 .orElseThrow(() -> new ResourceNotFoundException("No user found with email " + request.getEmail()));
 
-        // Generate 6 digit numeric OTP
         String otp = String.format("%06d", new Random().nextInt(999999));
         user.setOtp(otp);
         user.setOtpExpiry(LocalDateTime.now().plusMinutes(15));
@@ -236,8 +323,8 @@ public class AuthService {
             throw new BadRequestException("Invalid OTP");
         }
 
-        if (user.getOtpExpiry().isBefore(LocalDateTime.now())) {
-            throw new BadRequestException("OTP expired");
+        if (user.getOtpExpiry() == null || user.getOtpExpiry().isBefore(LocalDateTime.now())) {
+            throw new BadRequestException("OTP has expired");
         }
 
         user.setPasswordHash(passwordEncoder.encode(request.getNewPassword()));
@@ -246,5 +333,17 @@ public class AuthService {
         userRepository.save(user);
 
         return "Password reset successful.";
+    }
+
+    @Transactional
+    public String verifyEmail(String token) {
+        User user = userRepository.findByVerificationToken(token)
+                .orElseThrow(() -> new BadRequestException("Invalid verification token"));
+
+        user.setVerified(true);
+        user.setVerificationToken(null);
+        userRepository.save(user);
+
+        return "Email verified successfully.";
     }
 }

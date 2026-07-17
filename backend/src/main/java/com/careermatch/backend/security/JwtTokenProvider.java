@@ -7,6 +7,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
 
 import java.security.Key;
+import java.security.MessageDigest;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
@@ -25,17 +26,22 @@ public class JwtTokenProvider {
     private long jwtRefreshExpirationMs;
 
     private Key getSigningKey() {
-        // Safe conversion of the configured secret or a fallback
         byte[] keyBytes = jwtSecret.getBytes();
         if (keyBytes.length < 32) {
-            // pad or hash to make it at least 256 bits (32 bytes)
-            return Keys.secretKeyFor(SignatureAlgorithm.HS256);
+            try {
+                MessageDigest digest = MessageDigest.getInstance("SHA-256");
+                keyBytes = digest.digest(keyBytes);
+            } catch (Exception e) {
+                // Ignore fallback
+            }
         }
         return Keys.hmacShaKeyFor(keyBytes);
     }
 
     public String extractUsername(String token) {
-        return extractClaim(token, Claims::getSubject);
+        Claims claims = extractAllClaims(token);
+        String email = claims.get("email", String.class);
+        return email != null ? email : claims.getSubject();
     }
 
     public Date extractExpiration(String token) {
