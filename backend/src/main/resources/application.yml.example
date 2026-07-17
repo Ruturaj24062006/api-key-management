@@ -1,0 +1,80 @@
+server:
+  port: 8080
+  servlet:
+    context-path: /api/v1
+
+spring:
+  application:
+    name: career-match-backend
+
+  datasource:
+    url: jdbc:postgresql://${DB_HOST:your-supabase-pooling-host}:${DB_PORT:5432}/${DB_NAME:postgres}
+    username: ${DB_USER:your-supabase-username}
+    password: ${DB_PASSWORD:your-supabase-password}
+    driver-class-name: org.postgresql.Driver
+  
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: true
+    properties:
+      hibernate:
+        format_sql: true
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+
+  data:
+    redis:
+      host: ${REDIS_HOST:localhost}
+      port: ${REDIS_PORT:6379}
+    
+  rabbitmq:
+    host: ${RABBITMQ_HOST:localhost}
+    port: ${RABBITMQ_PORT:5672}
+    username: ${RABBITMQ_USER:guest}
+    password: ${RABBITMQ_PASSWORD:guest}
+    listener:
+      simple:
+        retry:
+          enabled: true
+          max-attempts: 3
+          initial-interval: 2000ms
+          multiplier: 2.0
+          max-interval: 10000ms
+          default-requeue-rejected: false
+
+  servlet:
+    multipart:
+      max-file-size: 10MB
+      max-request-size: 10MB
+
+# JWT, Local Storage, Resend, and Supabase Configuration
+app:
+  jwt:
+    secret: ${JWT_SECRET:your-supabase-jwt-secret}
+    accessTokenExpirationMs: 86400000 # 24 Hours
+    refreshTokenExpirationMs: 604800000 # 7 Days
+  upload:
+    dir: ${UPLOAD_DIR:uploads}
+  resend:
+    apiKey: ${RESEND_API_KEY:your-resend-api-key}
+    from: ${RESEND_FROM_EMAIL:onboarding@resend.dev}
+
+supabase:
+  url: ${SUPABASE_URL:your-supabase-project-url}
+  anonKey: ${SUPABASE_ANON_KEY:your-supabase-anon-key}
+
+# Groq API Configuration
+groq:
+  api:
+    key: ${GROQ_API_KEY:your-groq-api-key}
+    url: https://api.groq.com/openai/v1/chat/completions
+  model: ${GROQ_MODEL:llama-3.3-70b-versatile}
+
+# Springdoc OpenAPI Config
+springdoc:
+  api-docs:
+    path: /api-docs
+  swagger-ui:
+    path: /swagger-ui.html
+    operationsSorter: alpha
+    tagsSorter: alpha
