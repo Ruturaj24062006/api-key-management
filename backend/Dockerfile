@@ -4,7 +4,8 @@ COPY .mvn .mvn
 COPY mvnw mvnw
 COPY pom.xml pom.xml
 COPY src src
-RUN chmod +x mvnw && ./mvnw clean package -DskipTests
+# Fix CRLF carriage return line endings in mvnw script for Linux compatibility
+RUN tr -d '\r' < mvnw > mvnw.tmp && mv mvnw.tmp mvnw && chmod +x mvnw && ./mvnw clean package -DskipTests
 
 FROM eclipse-temurin:21-jre-jammy
 WORKDIR /app
