@@ -1,23 +1,22 @@
-# Stage 1: Build the Maven application
-FROM maven:3.9.6-eclipse-temurin-17 AS build
+FROM maven:3.9.6-eclipse-temurin-21 AS build
 WORKDIR /app
-COPY . .
-RUN mvn clean package -Dmaven.test.skip=true
+COPY pom.xml .
+COPY src ./src
+RUN mvn clean package -DskipTests
 
-# Stage 2: Lightweight Ubuntu-based runtime image
-# NOTE: Must use 'jammy' (Ubuntu 22.04), NOT 'alpine'
-# Alpine uses musl libc which is missing libstdc++.so.6
-# ONNX Runtime (used by LangChain4j embeddings) requires glibc (libstdc++)
-FROM eclipse-temurin:17-jre-jammy
+FROM eclipse-temurin:21-jre-jammy
 WORKDIR /app
+# Install libstdc++6 (required by ONNX runtime), python3, and pip
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    libstdc++6 \
+    python3 \
+    python3-pip \
+    && rm -rf /var/lib/apt/lists/*
+
+# Install PyMuPDF for resume processing
+RUN pip3 install --no-cache-dir pymupdf --break-system-packages
+
 COPY --from=build /app/target/career-match-backend-0.0.1-SNAPSHOT.jar app.jar
 
-# Render sets PORT automatically; activate prod profile
-ENV SPRING_PROFILES_ACTIVE=prod
-ENV PORT=8080
 EXPOSE 8080
-
-ENTRYPOINT ["java", \
-  "-Dspring.profiles.active=prod", \
-  "-Dserver.port=${PORT}", \
-  "-jar", "app.jar"]
+ENTRYPOINT ["java", "-jar", "app.jar"]

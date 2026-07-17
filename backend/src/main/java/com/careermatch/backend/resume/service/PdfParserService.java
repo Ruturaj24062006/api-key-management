@@ -40,38 +40,54 @@ public class PdfParserService {
     }
 
     private String runPythonParser(String absolutePath) throws Exception {
-        String scriptPath = "d:/job matching/backend/src/main/resources/scripts/pdf_parser.py";
-        ProcessBuilder pb = new ProcessBuilder("python", scriptPath, absolutePath);
-        Process process = pb.start();
-
-        StringBuilder output = new StringBuilder();
-        try (BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()))) {
-            String line;
-            while ((line = reader.readLine()) != null) {
-                output.append(line).append("\n");
+        Path tempScript = Files.createTempFile("pdf_parser-", ".py");
+        try (InputStream is = getClass().getClassLoader().getResourceAsStream("scripts/pdf_parser.py");
+             OutputStream os = Files.newOutputStream(tempScript)) {
+            if (is == null) {
+                throw new FileNotFoundException("Classpath resource scripts/pdf_parser.py not found");
             }
+            is.transferTo(os);
         }
 
-        // Apply a 30-second execution timeout to prevent worker thread starvation
-        boolean finished = process.waitFor(30, TimeUnit.SECONDS);
-        if (!finished) {
-            process.destroyForcibly();
-            log.error("PyMuPDF Python parsing process timed out after 30 seconds for file: {}", absolutePath);
-            throw new RuntimeException("Python PDF parser script timed out after 30 seconds");
-        }
+        try {
+            ProcessBuilder pb = new ProcessBuilder("python", tempScript.toAbsolutePath().toString(), absolutePath);
+            Process process = pb.start();
 
-        int exitCode = process.exitValue();
-        if (exitCode != 0) {
-            StringBuilder error = new StringBuilder();
-            try (BufferedReader reader = new BufferedReader(new InputStreamReader(process.getErrorStream()))) {
+            StringBuilder output = new StringBuilder();
+            try (BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()))) {
                 String line;
                 while ((line = reader.readLine()) != null) {
-                    error.append(line).append("\n");
+                    output.append(line).append("\n");
                 }
             }
-            throw new RuntimeException("Python script exited with code " + exitCode + ". Error: " + error);
+
+            // Apply a 30-second execution timeout to prevent worker thread starvation
+            boolean finished = process.waitFor(30, TimeUnit.SECONDS);
+            if (!finished) {
+                process.destroyForcibly();
+                log.error("PyMuPDF Python parsing process timed out after 30 seconds for file: {}", absolutePath);
+                throw new RuntimeException("Python PDF parser script timed out after 30 seconds");
+            }
+
+            int exitCode = process.exitValue();
+            if (exitCode != 0) {
+                StringBuilder error = new StringBuilder();
+                try (BufferedReader reader = new BufferedReader(new InputStreamReader(process.getErrorStream()))) {
+                    String line;
+                    while ((line = reader.readLine()) != null) {
+                        error.append(line).append("\n");
+                    }
+                }
+                throw new RuntimeException("Python script exited with code " + exitCode + ". Error: " + error);
+            }
+            return output.toString();
+        } finally {
+            try {
+                Files.deleteIfExists(tempScript);
+            } catch (Exception ex) {
+                log.warn("Failed to delete temp script file: {}", ex.getMessage());
+            }
         }
-        return output.toString();
     }
 
     private String parseWithTika(Path filePath) {
