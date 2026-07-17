@@ -1,0 +1,24 @@
+# Production profile - disables Redis and RabbitMQ (not available on Render free tier)
+# All queue operations fall back to in-process Spring ApplicationEvent listeners
+spring:
+  autoconfigure:
+    exclude:
+      - org.springframework.boot.autoconfigure.data.redis.RedisAutoConfiguration
+      - org.springframework.boot.autoconfigure.data.redis.RedisRepositoriesAutoConfiguration
+      - org.springframework.boot.autoconfigure.amqp.RabbitAutoConfiguration
+
+  # Use Render's PORT environment variable
+  # Database config is inherited from application.yml with env var overrides
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: false
+
+server:
+  port: ${PORT:8080}
+
+logging:
+  level:
+    root: INFO
+    com.careermatch: INFO
+    org.hibernate.SQL: WARN

@@ -7,6 +7,8 @@ services:
     dockerfilePath: Dockerfile
     plan: free
     envVars:
+      - key: SPRING_PROFILES_ACTIVE
+        value: prod
       - key: DB_HOST
         sync: false
       - key: DB_PORT
