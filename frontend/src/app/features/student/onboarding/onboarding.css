@@ -1,0 +1,342 @@
+.onboarding-layout {
+  padding: 4rem 1.25rem;
+  background-color: var(--bg-cream);
+  min-height: 100vh;
+}
+
+.onboarding-container {
+  width: 100%;
+  max-width: 720px;
+}
+
+.onboarding-header {
+  text-align: center;
+  margin-bottom: 2.5rem;
+}
+
+/* Progress Completion Styling */
+.progress-block-container {
+  background: var(--bg-white);
+  border: 1px solid var(--border-color);
+  border-radius: 12px;
+  padding: 1.25rem 2rem;
+  margin-top: 1.5rem;
+  display: inline-flex;
+  flex-direction: column;
+  align-items: center;
+  box-shadow: var(--shadow-sm);
+}
+
+.progress-text-row {
+  display: flex;
+  justify-content: space-between;
+  width: 100%;
+  margin-bottom: 0.5rem;
+  font-size: 0.9rem;
+  color: var(--text-dark);
+  align-items: center;
+  gap: 2rem;
+}
+
+.badge-ready {
+  background-color: #E6F4EA;
+  color: #137333;
+  font-size: 0.75rem;
+  font-weight: 700;
+  padding: 0.2rem 0.6rem;
+  border-radius: 4px;
+  text-transform: uppercase;
+}
+
+.progress-bar-blocks {
+  font-family: monospace;
+  font-size: 1.6rem;
+  letter-spacing: 0.05em;
+  color: var(--accent-burgundy);
+  line-height: 1;
+}
+
+/* Stepper Line */
+.stepper-bar {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 2rem;
+  position: relative;
+}
+
+.stepper-bar::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background-color: var(--border-light);
+  z-index: 1;
+  transform: translateY(-50%);
+}
+
+.step-indicator {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background-color: var(--bg-white);
+  border: 2px solid var(--border-color);
+  color: var(--text-muted);
+  font-weight: 700;
+  font-size: 0.9rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 2;
+  cursor: pointer;
+  transition: var(--transition-fast);
+}
+
+.step-indicator.active {
+  border-color: var(--accent-burgundy);
+  color: var(--accent-burgundy);
+  box-shadow: 0 0 0 3px rgba(144, 48, 27, 0.1);
+}
+
+.step-indicator.completed {
+  background-color: var(--accent-burgundy);
+  border-color: var(--accent-burgundy);
+  color: var(--bg-white);
+}
+
+/* Card view */
+.onboarding-card {
+  background-color: var(--bg-white);
+  border: 1px solid var(--border-color);
+  border-radius: 16px;
+  padding: 3rem;
+  box-shadow: var(--shadow-md);
+}
+
+.step-title {
+  font-family: var(--font-serif);
+  font-size: 1.8rem;
+  color: var(--text-dark);
+  margin-bottom: 0.5rem;
+}
+
+.step-subtitle {
+  font-size: 0.95rem;
+  color: var(--text-muted);
+  margin-bottom: 2.5rem;
+}
+
+.textarea-input {
+  resize: vertical;
+  min-height: 100px;
+}
+
+/* Dynamic Add Forms */
+.add-item-form-box {
+  background-color: var(--bg-cream);
+  border: 1px dashed var(--border-color);
+  border-radius: 12px;
+  padding: 1.75rem;
+  margin-top: 2rem;
+}
+
+.add-item-form-box h4 {
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: var(--text-dark);
+  margin-bottom: 1.25rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.btn-add {
+  margin-top: 1.25rem;
+  width: 100%;
+}
+
+.select-input {
+  height: 44px;
+}
+
+/* Added items listing */
+.added-items-list {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  margin-bottom: 2rem;
+}
+
+.added-item-card {
+  border: 1px solid var(--border-light);
+  border-radius: 8px;
+  padding: 1.25rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  background-color: var(--bg-white);
+  transition: var(--transition-fast);
+}
+
+.added-item-card:hover {
+  border-color: var(--border-color);
+}
+
+.item-meta h4 {
+  font-size: 1.05rem;
+  color: var(--text-dark);
+  margin-bottom: 0.4rem;
+}
+
+.item-meta p {
+  font-size: 0.85rem;
+  color: var(--text-light);
+}
+
+.item-desc {
+  margin-top: 0.75rem;
+  font-size: 0.9rem !important;
+  color: var(--text-muted) !important;
+  line-height: 1.5;
+}
+
+.btn-remove {
+  background: none;
+  border: none;
+  font-size: 1.8rem;
+  color: var(--text-light);
+  cursor: pointer;
+  line-height: 1;
+  padding: 0 0.5rem;
+}
+
+.btn-remove:hover {
+  color: #D93025;
+}
+
+/* Skills Wrapper */
+.skills-wrap {
+  display: flex;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+  margin-bottom: 2rem;
+  padding: 1.25rem;
+  border: 1px solid var(--border-light);
+  border-radius: 8px;
+}
+
+.skill-pills {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.8rem;
+  font-weight: 600;
+  padding: 0.3rem 0.8rem;
+  border-radius: 20px;
+  background-color: var(--bg-cream);
+  color: var(--text-dark);
+  border: 1px solid var(--border-color);
+}
+
+.remove-pill {
+  cursor: pointer;
+  color: var(--text-light);
+  font-size: 1.1rem;
+}
+
+.remove-pill:hover {
+  color: #D93025;
+}
+
+.repo-link {
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--accent-burgundy);
+  margin-top: 0.5rem;
+  display: inline-block;
+}
+
+/* Upload zone */
+.upload-zone {
+  border: 2px dashed var(--border-color);
+  border-radius: 12px;
+  padding: 3rem 2rem;
+  background-color: var(--bg-cream);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: var(--transition-smooth);
+  margin-bottom: 2rem;
+}
+
+.upload-zone:hover, .upload-zone.uploading {
+  border-color: var(--accent-burgundy);
+  background-color: rgba(144, 48, 27, 0.02);
+}
+
+.upload-icon {
+  width: 48px;
+  height: 48px;
+  color: var(--text-light);
+  margin-bottom: 1.25rem;
+}
+
+.upload-label {
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: var(--accent-burgundy);
+}
+
+.file-hidden {
+  display: none;
+}
+
+/* Ready banner */
+.ready-banner-box {
+  background-color: #E6F4EA;
+  border: 1px solid #CEEAD6;
+  border-radius: 12px;
+  padding: 2rem;
+  margin-top: 2rem;
+  animation: fadeIn 0.5s ease-out;
+}
+
+.center-icon {
+  margin: 0 auto 1rem auto;
+}
+
+.ready-title {
+  font-size: 1.25rem;
+  color: #137333;
+  margin-bottom: 0.5rem;
+  font-weight: 700;
+}
+
+.ready-desc {
+  font-size: 0.9rem;
+  color: #137333;
+  line-height: 1.5;
+}
+
+/* Bottom Nav Row */
+.onboarding-nav-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-top: 1px solid var(--border-light);
+  padding-top: 2rem;
+  margin-top: 3rem;
+}
+
+.nav-right-actions {
+  display: flex;
+  gap: 1rem;
+}
+
+@media (max-width: 768px) {
+  .onboarding-card {
+    padding: 2rem;
+  }
+}

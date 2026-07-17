@@ -7,6 +7,7 @@ import { ForgotPassword } from './features/auth/forgot-password/forgot-password'
 import { ResetPassword } from './features/auth/reset-password/reset-password';
 import { Unauthorized } from './features/auth/unauthorized/unauthorized';
 import { StudentDashboard } from './features/student/dashboard/student-dashboard';
+import { Onboarding } from './features/student/onboarding/onboarding';
 import { RecruiterDashboard } from './features/recruiter/dashboard/recruiter-dashboard';
 import { AdminDashboard } from './features/admin/dashboard/admin-dashboard';
 import { authGuard, roleGuard } from './core/guards/auth.guard';
@@ -24,6 +25,12 @@ export const routes: Routes = [
   { 
     path: 'student/dashboard', 
     component: StudentDashboard, 
+    canActivate: [authGuard, roleGuard], 
+    data: { roles: ['ROLE_STUDENT'] } 
+  },
+  { 
+    path: 'student/onboarding', 
+    component: Onboarding, 
     canActivate: [authGuard, roleGuard], 
     data: { roles: ['ROLE_STUDENT'] } 
   },

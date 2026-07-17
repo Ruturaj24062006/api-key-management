@@ -1,0 +1,328 @@
+<div class="auth-wrapper onboarding-layout">
+  <div class="onboarding-container">
+    <!-- Header with Progress -->
+    <div class="onboarding-header">
+      <div class="brand-logo"><a href="/">NEXUS</a></div>
+      <h2 class="auth-title">Student Onboarding</h2>
+      
+      <!-- Progress Bar Indicator -->
+      <div class="progress-block-container">
+        <div class="progress-text-row">
+          <span>Profile Completion: <strong>{{ profile.profileCompletedPct }}%</strong></span>
+          <span *ngIf="profile.profileCompletedPct >= 85" class="badge-ready">Profile Ready</span>
+        </div>
+        <div class="progress-bar-blocks">
+          {{ getProgressBlocks() }}
+        </div>
+      </div>
+    </div>
+
+    <!-- Stepper Navigation -->
+    <div class="stepper-bar">
+      <button *ngFor="let step of [1,2,3,4,5,6,7]; let idx = index"
+              type="button" 
+              class="step-indicator"
+              [class.active]="currentStep() === step"
+              [class.completed]="currentStep() > step"
+              (click)="goToStep(step)">
+        {{ step }}
+      </button>
+    </div>
+
+    <!-- Success & Error Banners -->
+    <div *ngIf="successMessage()" class="alert alert-success">
+      {{ successMessage() }}
+    </div>
+    <div *ngIf="errorMessage()" class="alert alert-error">
+      {{ errorMessage() }}
+    </div>
+
+    <!-- Step Content Wrapper -->
+    <div class="onboarding-card">
+      
+      <!-- STEP 1: Basic Information -->
+      <div *ngIf="currentStep() === 1" class="step-view animate-fade-in">
+        <h3 class="step-title">Basic Information</h3>
+        <p class="step-subtitle">Introduce yourself to recruiters and start tailoring matching parameters.</p>
+        
+        <div class="auth-form">
+          <div class="form-row-grid">
+            <div class="form-group">
+              <label for="firstName" class="form-label">First Name *</label>
+              <input type="text" id="firstName" [(ngModel)]="profile.firstName" class="form-input" placeholder="Alex">
+            </div>
+            <div class="form-group">
+              <label for="lastName" class="form-label">Last Name *</label>
+              <input type="text" id="lastName" [(ngModel)]="profile.lastName" class="form-input" placeholder="Chen">
+            </div>
+          </div>
+          
+          <div class="form-group">
+            <label for="bio" class="form-label">Short Bio</label>
+            <textarea id="bio" [(ngModel)]="profile.bio" class="form-input textarea-input" placeholder="Aspiring Software Engineer interested in backend services and cloud architecture..."></textarea>
+          </div>
+
+          <div class="form-group">
+            <label for="linkedin" class="form-label">LinkedIn URL</label>
+            <input type="url" id="linkedin" [(ngModel)]="profile.linkedinUrl" class="form-input" placeholder="https://linkedin.com/in/alexchen">
+          </div>
+
+          <div class="form-group">
+            <label for="github" class="form-label">GitHub URL</label>
+            <input type="url" id="github" [(ngModel)]="profile.githubUrl" class="form-input" placeholder="https://github.com/alexchen">
+          </div>
+
+          <div class="form-group">
+            <label for="portfolio" class="form-label">Portfolio URL</label>
+            <input type="url" id="portfolio" [(ngModel)]="profile.portfolioUrl" class="form-input" placeholder="https://alexchen.dev">
+          </div>
+        </div>
+      </div>
+
+      <!-- STEP 2: Education -->
+      <div *ngIf="currentStep() === 2" class="step-view animate-fade-in">
+        <h3 class="step-title">Education</h3>
+        <p class="step-subtitle">Where did you study? Recruiter metrics heavily check field alignment.</p>
+        
+        <!-- List of Added Education -->
+        <div class="added-items-list" *ngIf="profile.education.length > 0">
+          <div *ngFor="let ed of profile.education; let i = index" class="added-item-card">
+            <div class="item-meta">
+              <h4>{{ ed.degree }} in {{ ed.fieldOfStudy }}</h4>
+              <p>{{ ed.institution }} &bull; {{ ed.startDate }} - {{ ed.endDate || 'Present' }}</p>
+              <p *ngIf="ed.gpa">GPA: {{ ed.gpa }}</p>
+            </div>
+            <button type="button" class="btn-remove" (click)="removeEducation(i)">&times;</button>
+          </div>
+        </div>
+
+        <!-- Add Education Form -->
+        <div class="add-item-form-box">
+          <h4>Add Education Details</h4>
+          <div class="form-group">
+            <label class="form-label">Institution Name</label>
+            <input type="text" [(ngModel)]="newEducation.institution" placeholder="University of San Francisco" class="form-input">
+          </div>
+          <div class="form-row-grid">
+            <div class="form-group">
+              <label class="form-label">Degree</label>
+              <input type="text" [(ngModel)]="newEducation.degree" placeholder="B.S. / M.S." class="form-input">
+            </div>
+            <div class="form-group">
+              <label class="form-label">Field of Study</label>
+              <input type="text" [(ngModel)]="newEducation.fieldOfStudy" placeholder="Computer Science" class="form-input">
+            </div>
+          </div>
+          <div class="form-row-grid">
+            <div class="form-group">
+              <label class="form-label">Start Date</label>
+              <input type="date" [(ngModel)]="newEducation.startDate" class="form-input">
+            </div>
+            <div class="form-group">
+              <label class="form-label">End Date (Optional)</label>
+              <input type="date" [(ngModel)]="newEducation.endDate" class="form-input">
+            </div>
+            <div class="form-group">
+              <label class="form-label">GPA (Optional)</label>
+              <input type="number" step="0.01" min="0" max="4" [(ngModel)]="newEducation.gpa" placeholder="3.85" class="form-input">
+            </div>
+          </div>
+          <button type="button" (click)="addEducation()" class="btn btn-secondary btn-sm btn-add">Add Education Entry</button>
+        </div>
+      </div>
+
+      <!-- STEP 3: Skills -->
+      <div *ngIf="currentStep() === 3" class="step-view animate-fade-in">
+        <h3 class="step-title">Technical Skills</h3>
+        <p class="step-subtitle">Add technical skills that recruiters filters search for.</p>
+
+        <!-- Current Skills Pills -->
+        <div class="skills-wrap" *ngIf="profile.skills.length > 0">
+          <span *ngFor="let sk of profile.skills; let i = index" class="skill-pills matched">
+            {{ sk.name }} ({{ sk.proficiencyLevel | lowercase }})
+            <span class="remove-pill" (click)="removeSkill(i)">&times;</span>
+          </span>
+        </div>
+
+        <!-- Add Skill Form -->
+        <div class="add-item-form-box">
+          <h4>Add Skill</h4>
+          <div class="form-row-grid">
+            <div class="form-group">
+              <label class="form-label">Skill Name</label>
+              <input type="text" [(ngModel)]="newSkill.name" placeholder="Java / Spring Boot / SQL" class="form-input">
+            </div>
+            <div class="form-group">
+              <label class="form-label">Proficiency Level</label>
+              <select [(ngModel)]="newSkill.proficiencyLevel" class="form-input select-input">
+                <option value="BEGINNER">Beginner</option>
+                <option value="INTERMEDIATE">Intermediate</option>
+                <option value="ADVANCED">Advanced</option>
+              </select>
+            </div>
+          </div>
+          <button type="button" (click)="addSkill()" class="btn btn-secondary btn-sm btn-add">Add Skill</button>
+        </div>
+      </div>
+
+      <!-- STEP 4: Experience -->
+      <div *ngIf="currentStep() === 4" class="step-view animate-fade-in">
+        <h3 class="step-title">Work Experience</h3>
+        <p class="step-subtitle">List any internships or full-time roles. Relevant tasks count heavily.</p>
+
+        <!-- List of Experience -->
+        <div class="added-items-list" *ngIf="profile.experience.length > 0">
+          <div *ngFor="let ex of profile.experience; let i = index" class="added-item-card">
+            <div class="item-meta">
+              <h4>{{ ex.jobTitle }} at {{ ex.companyName }}</h4>
+              <p>{{ ex.startDate }} - {{ ex.endDate || 'Present' }}</p>
+              <p class="item-desc" *ngIf="ex.description">{{ ex.description }}</p>
+            </div>
+            <button type="button" class="btn-remove" (click)="removeExperience(i)">&times;</button>
+          </div>
+        </div>
+
+        <!-- Add Experience Form -->
+        <div class="add-item-form-box">
+          <h4>Add Experience Details</h4>
+          <div class="form-row-grid">
+            <div class="form-group">
+              <label class="form-label">Company Name</label>
+              <input type="text" [(ngModel)]="newExperience.companyName" placeholder="NEXUS Tech" class="form-input">
+            </div>
+            <div class="form-group">
+              <label class="form-label">Job Title</label>
+              <input type="text" [(ngModel)]="newExperience.jobTitle" placeholder="Backend Engineering Intern" class="form-input">
+            </div>
+          </div>
+          <div class="form-row-grid">
+            <div class="form-group">
+              <label class="form-label">Start Date</label>
+              <input type="date" [(ngModel)]="newExperience.startDate" class="form-input">
+            </div>
+            <div class="form-group">
+              <label class="form-label">End Date (Optional)</label>
+              <input type="date" [(ngModel)]="newExperience.endDate" class="form-input">
+            </div>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Description</label>
+            <textarea [(ngModel)]="newExperience.description" placeholder="Optimized database indexing, reducing REST query latencies by 35%..." class="form-input textarea-input"></textarea>
+          </div>
+          <button type="button" (click)="addExperience()" class="btn btn-secondary btn-sm btn-add">Add Experience Entry</button>
+        </div>
+      </div>
+
+      <!-- STEP 5: Projects -->
+      <div *ngIf="currentStep() === 5" class="step-view animate-fade-in">
+        <h3 class="step-title">Projects</h3>
+        <p class="step-subtitle">Showcase your side projects, technologies, and GitHub repositories.</p>
+
+        <!-- List of Projects -->
+        <div class="added-items-list" *ngIf="profile.projects.length > 0">
+          <div *ngFor="let pr of profile.projects; let i = index" class="added-item-card">
+            <div class="item-meta">
+              <h4>{{ pr.name }}</h4>
+              <p *ngIf="pr.technologies"><strong>Tech:</strong> {{ pr.technologies }}</p>
+              <p class="item-desc" *ngIf="pr.description">{{ pr.description }}</p>
+              <a *ngIf="pr.repoUrl" [href]="pr.repoUrl" target="_blank" class="repo-link">Repository &rarr;</a>
+            </div>
+            <button type="button" class="btn-remove" (click)="removeProject(i)">&times;</button>
+          </div>
+        </div>
+
+        <!-- Add Project Form -->
+        <div class="add-item-form-box">
+          <h4>Add Project Details</h4>
+          <div class="form-group">
+            <label class="form-label">Project Name</label>
+            <input type="text" [(ngModel)]="newProject.name" placeholder="Smart Matching Engine" class="form-input">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Technologies (comma-separated)</label>
+            <input type="text" [(ngModel)]="newProject.technologies" placeholder="Java, Spring Boot, Postgres, pgvector" class="form-input">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Repository URL (Optional)</label>
+            <input type="url" [(ngModel)]="newProject.repoUrl" placeholder="https://github.com/username/project" class="form-input">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Description</label>
+            <textarea [(ngModel)]="newProject.description" placeholder="A hybrid search scoring engine implementing Reciprocal Rank Fusion on Vector Embeddings..." class="form-input textarea-input"></textarea>
+          </div>
+          <button type="button" (click)="addProject()" class="btn btn-secondary btn-sm btn-add">Add Project Entry</button>
+        </div>
+      </div>
+
+      <!-- STEP 6: Career Preferences & Languages -->
+      <div *ngIf="currentStep() === 6" class="step-view animate-fade-in">
+        <h3 class="step-title">Career Preferences</h3>
+        <p class="step-subtitle">What are your ideal job roles, location preferences, or visa requirements?</p>
+
+        <div class="auth-form">
+          <div class="form-group">
+            <label for="preferences" class="form-label">Career Preferences Details</label>
+            <textarea id="preferences" [(ngModel)]="profile.careerPreferences" class="form-input textarea-input" placeholder="Full Time, hybrid in SF, Software Engineer (Backend), require visa sponsorship..."></textarea>
+          </div>
+          <div class="form-group">
+            <label for="languages" class="form-label">Languages Spoken (comma-separated)</label>
+            <input type="text" id="languages" [(ngModel)]="profile.languages" class="form-input" placeholder="English, Spanish, Hindi">
+          </div>
+        </div>
+      </div>
+
+      <!-- STEP 7: Resume Upload & Finalize -->
+      <div *ngIf="currentStep() === 7" class="step-view animate-fade-in text-center">
+        <h3 class="step-title">Upload Resume & Verify</h3>
+        <p class="step-subtitle">Uploading your PDF resume automatically syncs and optimizes your vector search matches.</p>
+
+        <!-- Drag Drop/Upload Box -->
+        <div class="upload-zone" [class.uploading]="isUploading()">
+          <svg class="upload-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"></path>
+          </svg>
+          <label for="resume-input" class="upload-label">
+            <span *ngIf="!isUploading()">Choose PDF file to upload</span>
+            <span *ngIf="isUploading()">Uploading and parsing...</span>
+          </label>
+          <input type="file" id="resume-input" (change)="onFileSelected($event)" accept="application/pdf" class="file-hidden">
+        </div>
+
+        <div class="ready-banner-box" *ngIf="profile.profileCompletedPct >= 85">
+          <div class="icon-circle icon-circle-success center-icon">
+            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"></path>
+            </svg>
+          </div>
+          <h4 class="ready-title">Profile Ready</h4>
+          <p class="ready-desc">All onboarding fields have met alignment thresholds. You are ready to view your scoring matrix!</p>
+        </div>
+      </div>
+
+      <!-- Wizard Navigation Bottom Row -->
+      <div class="onboarding-nav-row">
+        <button type="button" 
+                class="btn btn-secondary btn-sm" 
+                [disabled]="currentStep() === 1" 
+                (click)="prevStep()">
+          Back
+        </button>
+        
+        <div class="nav-right-actions">
+          <button type="button" 
+                  class="btn btn-secondary btn-sm" 
+                  (click)="saveProgress()">
+            Save Draft
+          </button>
+          
+          <button type="button" 
+                  class="btn btn-primary btn-sm" 
+                  (click)="nextStep()">
+            {{ currentStep() === totalSteps ? 'Finish' : 'Save & Next' }}
+          </button>
+        </div>
+      </div>
+      
+    </div>
+  </div>
+</div>
