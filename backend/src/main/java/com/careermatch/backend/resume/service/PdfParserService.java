@@ -2,6 +2,9 @@ package com.careermatch.backend.resume.service;
 
 import lombok.extern.slf4j.Slf4j;
 import org.apache.tika.Tika;
+import org.apache.pdfbox.Loader;
+import org.apache.pdfbox.pdmodel.PDDocument;
+import org.apache.pdfbox.text.PDFTextStripper;
 import org.springframework.stereotype.Service;
 
 import java.io.*;
@@ -22,7 +25,23 @@ public class PdfParserService {
             inputStream.transferTo(out);
         }
 
-        // 1. Try Apache Tika first (pure Java, in-process, no OS dependencies)
+        // 1. Try Apache PDFBox directly (highly reliable in standard JRE environments)
+        try {
+            log.info("Attempting PDF text extraction via Apache PDFBox directly...");
+            try (PDDocument document = Loader.loadPDF(tempFile.toFile())) {
+                PDFTextStripper pdfStripper = new PDFTextStripper();
+                String text = pdfStripper.getText(document);
+                if (text != null && !text.isBlank()) {
+                    log.info("Apache PDFBox PDF extraction succeeded.");
+                    Files.deleteIfExists(tempFile);
+                    return text;
+                }
+            }
+        } catch (Exception e) {
+            log.warn("Apache PDFBox extraction failed: {}. Falling back to Apache Tika.", e.getMessage());
+        }
+
+        // 2. Try Apache Tika (pure Java, in-process, no OS dependencies)
         try {
             log.info("Attempting PDF text extraction via Apache Tika...");
             String text = tika.parseToString(Files.newInputStream(tempFile));
@@ -35,7 +54,7 @@ public class PdfParserService {
             log.warn("Apache Tika extraction failed: {}. Falling back to PyMuPDF.", e.getMessage());
         }
 
-        // 2. Fallback to PyMuPDF (fitz Python script)
+        // 3. Fallback to PyMuPDF (fitz Python script)
         try {
             log.info("Attempting PDF text extraction via PyMuPDF (fitz) script fallback...");
             String text = runPythonParser(tempFile.toAbsolutePath().toString());

@@ -69,7 +69,7 @@ export class Register {
     const payload: any = {
       email: formVal.email,
       password: formVal.password,
-      role: this.selectedRole()
+      role: this.selectedRole()   // Always ROLE_STUDENT or ROLE_RECRUITER
     };
 
     if (this.selectedRole() === 'ROLE_STUDENT') {
@@ -85,29 +85,24 @@ export class Register {
         if (res.success) {
           this.successMessage.set('Registration successful! A verification link has been sent to your email.');
           this.registerForm.reset();
+          this.selectedRole.set('ROLE_STUDENT');
         } else {
           this.errorMessage.set(res.message || 'Registration failed. Please try again.');
         }
       },
       error: (err) => {
-        console.warn('Backend server down. Activating developer mock registration fallback...', err);
-        const mockData = {
-          accessToken: 'mock_access_token_123',
-          refreshToken: 'mock_refresh_token_123',
-          email: payload.email,
-          role: payload.role,
-          userId: '00000000-0000-0000-0000-000000000000'
-        };
-        (this.authService as any).saveSession(mockData);
         this.isLoading.set(false);
-        this.successMessage.set('Registration successful! Redirecting to dashboard...');
-        setTimeout(() => {
-          if (payload.role === 'ROLE_RECRUITER') {
-            this.router.navigate(['/recruiter/dashboard']);
-          } else {
-            this.router.navigate(['/student/dashboard']);
-          }
-        }, 1500);
+
+        if (err.status === 0) {
+          // Backend unreachable — do NOT create a fake session.
+          this.errorMessage.set(
+            'Cannot reach the server. Please check your connection or try again later.'
+          );
+          console.warn('Backend server is unreachable during registration.', err);
+        } else {
+          const backendMsg = err.error?.message || err.error?.error || 'Registration failed. Please try again.';
+          this.errorMessage.set(backendMsg);
+        }
       }
     });
   }

@@ -1,4 +1,4 @@
-import { Component, OnInit, signal, computed } from '@angular/core';
+import { Component, OnInit, OnDestroy, signal, computed } from '@angular/core';
 import { Router } from '@angular/router';
 import { NgIf, NgFor, LowerCasePipe, DatePipe } from '@angular/common';
 import { FormsModule } from '@angular/forms';
@@ -15,7 +15,7 @@ import { Footer } from '../../../shared/components/footer/footer';
   templateUrl: './student-dashboard.html',
   styleUrl: './student-dashboard.css'
 })
-export class StudentDashboard implements OnInit {
+export class StudentDashboard implements OnInit, OnDestroy {
   // Signals for state management
   profile = signal<StudentProfileDto | null>(null);
   matches = signal<MatchResponse[]>([]);
@@ -55,6 +55,7 @@ export class StudentDashboard implements OnInit {
   uploadError = signal<string | null>(null);
   extractedData = signal<any>(null);
   currentResumeId = signal<string | null>(null);
+  private modalPollIntervalId: any = null;
 
   // Review editable fields
   reviewRole: string = '';
@@ -120,6 +121,10 @@ export class StudentDashboard implements OnInit {
   ngOnInit(): void {
     this.updateGreeting();
     this.checkProfileCompletenessAndLoad();
+  }
+
+  ngOnDestroy(): void {
+    this.stopModalPolling();
   }
 
   updateGreeting(): void {
@@ -569,28 +574,25 @@ export class StudentDashboard implements OnInit {
   private startModalUpload(file: File): void {
     this.uploadError.set(null);
     this.uploadStep.set('uploading');
-    this.uploadProgress.set(25);
+    this.uploadProgress.set(10);
 
     const progressTimer = setInterval(() => {
       if (this.uploadProgress() < 85) {
-        this.uploadProgress.update(p => p + 15);
+        this.uploadProgress.update(p => Math.min(p + 5, 85));
       } else {
         clearInterval(progressTimer);
       }
-    }, 250);
+    }, 500);
 
     this.profileService.uploadResume(file).subscribe({
       next: (res) => {
         clearInterval(progressTimer);
-        this.uploadProgress.set(100);
+        this.uploadProgress.set(90);
         if (res.data && res.data.id) {
           this.currentResumeId.set(res.data.id);
         }
-
-        // Fetch latest extracted details
-        setTimeout(() => {
-          this.fetchExtractedResumeData();
-        }, 1000);
+        // Start polling for AI extraction completion (backend takes 10-30s)
+        this.startModalPolling();
       },
       error: (err) => {
         clearInterval(progressTimer);
@@ -600,36 +602,58 @@ export class StudentDashboard implements OnInit {
     });
   }
 
-  private fetchExtractedResumeData(): void {
-    this.profileService.getLatestResume().subscribe({
-      next: (res) => {
-        if (res.success && res.data) {
-          const rawJson = res.data.extractedJson;
-          let parsed = null;
-          if (rawJson) {
+  private startModalPolling(): void {
+    this.stopModalPolling();
+    let attempts = 0;
+    const maxAttempts = 60; // 3 minutes max (60 * 3s)
+
+    this.modalPollIntervalId = setInterval(() => {
+      attempts++;
+
+      if (attempts > maxAttempts) {
+        this.stopModalPolling();
+        // Timed out — move to review anyway so user is not stuck
+        this.uploadProgress.set(100);
+        this.extractedData.set({});
+        this.uploadStep.set('review');
+        this.uploadError.set('AI processing timed out. You can still confirm and search jobs.');
+        return;
+      }
+
+      this.profileService.getLatestResume().subscribe({
+        next: (res) => {
+          if (res.success && res.data && res.data.extractedJson) {
+            this.stopModalPolling();
+            const rawJson = res.data.extractedJson;
+            let parsed: any = null;
             try {
               parsed = typeof rawJson === 'string' ? JSON.parse(rawJson) : rawJson;
             } catch (e) {
               console.error('JSON parse error', e);
             }
+            this.extractedData.set(parsed || {});
+            this.reviewRole = parsed?.preferredRole || parsed?.name || 'Software Engineer';
+            this.reviewCity = parsed?.location || 'Bengaluru';
+            this.reviewExperience = parsed?.experienceLevel || 'Entry-Mid';
+            this.reviewWorkMode = parsed?.workMode || 'HYBRID';
+            this.uploadProgress.set(100);
+            this.uploadStep.set('review');
           }
-          this.extractedData.set(parsed || {});
-          
-          // Pre-fill editable review fields
-          this.reviewRole = parsed?.preferredRole || parsed?.name || 'Software Engineer';
-          this.reviewCity = parsed?.location || 'Bengaluru';
-          this.reviewExperience = parsed?.experienceLevel || 'Entry-Mid';
-          this.reviewWorkMode = parsed?.workMode || 'HYBRID';
-
-          this.uploadStep.set('review');
-        } else {
-          this.uploadStep.set('review');
+          // else: still PROCESSING — keep polling
+        },
+        error: () => {
+          // Network error during poll — just keep trying
+          console.warn('Resume status poll failed, retrying...');
         }
-      },
-      error: () => {
-        this.uploadStep.set('review');
-      }
-    });
+      });
+    }, 3000);
+  }
+
+  private stopModalPolling(): void {
+    if (this.modalPollIntervalId) {
+      clearInterval(this.modalPollIntervalId);
+      this.modalPollIntervalId = null;
+    }
   }
 
   confirmModalAndSearchJobs(): void {

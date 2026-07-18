@@ -22,6 +22,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
@@ -59,6 +60,7 @@ public class JobDataSeeder {
         // 2. Find or create default demo recruiter user
         User recruiterUser = userRepository.findByEmail("demo.recruiter@careermatch.com")
                 .orElseGet(() -> userRepository.save(User.builder()
+                        .id(UUID.randomUUID())
                         .email("demo.recruiter@careermatch.com")
                         .passwordHash(passwordEncoder.encode("RecruiterPass123!"))
                         .role(UserRole.ROLE_RECRUITER)

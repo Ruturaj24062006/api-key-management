@@ -29,9 +29,10 @@ export class Login implements OnInit {
   }
 
   ngOnInit(): void {
-    // Check if there is an active session
+    // If a valid session already exists, redirect to the user's correct dashboard —
+    // NOT hardcoded to student.
     if (this.authService.isAuthenticated()) {
-      this.router.navigate(['/student/dashboard']);
+      this.authService.redirectToDashboard(this.router);
       return;
     }
     this.initGoogleSignIn();
@@ -41,22 +42,15 @@ export class Login implements OnInit {
     const checkGoogle = setInterval(() => {
       if (typeof window !== 'undefined' && (window as any).google) {
         clearInterval(checkGoogle);
-        
-        // This Client ID matches the configuration they are performing in Supabase Auth settings.
+
         const clientId = '562305543169-qgghq9tr4v4o0npsqg27sc6ndv7b0688.apps.googleusercontent.com';
-        
+
         if ((window as any).googleInitialized) {
           const btnContainer = document.getElementById('googleBtn');
           if (btnContainer) {
             (window as any).google.accounts.id.renderButton(
               btnContainer,
-              { 
-                theme: 'outline', 
-                size: 'large',
-                width: 320,
-                text: 'continue_with',
-                shape: 'rectangular'
-              }
+              { theme: 'outline', size: 'large', width: 320, text: 'continue_with', shape: 'rectangular' }
             );
           }
           return;
@@ -72,13 +66,7 @@ export class Login implements OnInit {
         if (btnContainer) {
           (window as any).google.accounts.id.renderButton(
             btnContainer,
-            { 
-              theme: 'outline', 
-              size: 'large',
-              width: 320,
-              text: 'continue_with',
-              shape: 'rectangular'
-            }
+            { theme: 'outline', size: 'large', width: 320, text: 'continue_with', shape: 'rectangular' }
           );
         }
       }
@@ -119,42 +107,41 @@ export class Login implements OnInit {
       next: (res: any) => {
         this.isLoading.set(false);
         if (res.success && res.data) {
-          const role = res.data.role;
-          this.redirectBasedOnRole(role);
+          // Role comes from the backend — the authoritative source of truth
+          this.redirectBasedOnRole(res.data.role);
         } else {
           this.errorMessage.set(res.message || 'Login failed. Please check your credentials.');
         }
       },
       error: (err: any) => {
-        console.warn('Backend server down. Activating developer mock session fallback...', err);
-        const email = this.loginForm.value.email.toLowerCase();
-        let role = 'ROLE_STUDENT';
-        if (email.includes('admin')) {
-          role = 'ROLE_ADMIN';
-        } else if (email.includes('recruiter')) {
-          role = 'ROLE_RECRUITER';
-        }
-
-        const mockData = {
-          accessToken: 'mock_access_token_123',
-          refreshToken: 'mock_refresh_token_123',
-          email: this.loginForm.value.email,
-          role: role,
-          userId: '00000000-0000-0000-0000-000000000000'
-        };
-
-        // Access saveSession via typed or type-cast call
-        (this.authService as any).saveSession(mockData);
         this.isLoading.set(false);
-        this.redirectBasedOnRole(role);
+
+        if (err.status === 0) {
+          // Backend is unreachable — show a clear offline error.
+          // Do NOT silently create a mock session that bypasses real authentication.
+          this.errorMessage.set(
+            'Cannot reach the server. Please check your connection or try again later.'
+          );
+          console.warn('Backend server is unreachable.', err);
+        } else {
+          const backendMsg = err.error?.message || err.error?.error || 'Login failed. Please check your credentials.';
+          this.errorMessage.set(backendMsg);
+        }
       }
     });
   }
 
-
+  /**
+   * Single centralized redirect method — uses AuthService.redirectToDashboard for
+   * RECRUITER and ADMIN, but adds profile-completion check for STUDENT.
+   */
   private redirectBasedOnRole(role: string): void {
-    switch (role) {
+    const normalized = (role ?? '').trim().toUpperCase();
+    const fullRole = normalized.startsWith('ROLE_') ? normalized : `ROLE_${normalized}`;
+
+    switch (fullRole) {
       case 'ROLE_STUDENT':
+        // Check profile completion to decide between dashboard and onboarding
         this.profileService.getProfile().subscribe({
           next: (res: any) => {
             if (res.data && res.data.profileCompletedPct >= 85) {
@@ -164,18 +151,24 @@ export class Login implements OnInit {
             }
           },
           error: () => {
+            // Profile check failed — default to resume upload / onboarding
             this.router.navigate(['/student/resume-upload']);
           }
         });
         break;
+
       case 'ROLE_RECRUITER':
         this.router.navigate(['/recruiter/dashboard']);
         break;
+
       case 'ROLE_ADMIN':
         this.router.navigate(['/admin/dashboard']);
         break;
+
       default:
-        this.router.navigate(['/unauthorized']);
+        // Unknown role — never silently pick a dashboard; show an error
+        this.errorMessage.set(`Login succeeded but an unknown role was returned: "${role}". Please contact support.`);
+        console.error('Unknown role returned from backend:', role);
         break;
     }
   }

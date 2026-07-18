@@ -81,8 +81,14 @@ public class JobService {
                 .embedding(vector)
                 .build();
 
-        Job saved = jobRepository.save(job);
-        log.info("Posted job ID: {} by Recruiter: {}", saved.getId(), recruiter.getId());
+        Job saved;
+        try {
+            saved = jobRepository.save(job);
+            log.info("Posted job ID: {} by Recruiter: {} saved successfully.", saved.getId(), recruiter.getId());
+        } catch (Exception e) {
+            log.error("CRITICAL: Failed to save the job posting to PostgreSQL: {}", e.getMessage(), e);
+            throw e;
+        }
 
         // Dispatch JobPostedEvent to trigger match updates for all students (fail-safe)
         JobPostedEvent event = new JobPostedEvent(saved.getId(), recruiter.getCompany().getId());

@@ -124,6 +124,7 @@ public class AuthService {
 
         return LoginResponse.builder()
                 .userId(user.getId())
+                .email(user.getEmail())
                 .role(user.getRole().name())
                 .accessToken(accessToken)
                 .refreshToken(refreshToken)
@@ -252,6 +253,7 @@ public class AuthService {
 
         return LoginResponse.builder()
                 .userId(user.getId())
+                .email(user.getEmail())
                 .role(user.getRole().name())
                 .accessToken(accessToken)
                 .refreshToken(refreshToken)
@@ -311,6 +313,7 @@ public class AuthService {
 
         return LoginResponse.builder()
                 .userId(user.getId())
+                .email(user.getEmail())
                 .role(user.getRole().name())
                 .accessToken(accessToken)
                 .refreshToken(refreshToken)
