@@ -8,11 +8,15 @@
 .review-card {
   padding: 2.25rem;
   border-radius: 16px;
-  background: rgba(255, 255, 255, 0.02);
-  border: 1px solid rgba(255, 255, 255, 0.06);
-  box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.2);
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
+  background: var(--bg-white, #FFFFFF);
+  border: 1px solid var(--border-light, #EFEBE0);
+  box-shadow: var(--shadow-md, 0 10px 30px rgba(144, 48, 27, 0.04));
+  transition: var(--transition-smooth, all 0.3s cubic-bezier(0.4, 0, 0.2, 1));
+}
+
+.review-card:hover {
+  box-shadow: var(--shadow-lg, 0 20px 40px rgba(144, 48, 27, 0.06));
+  border-color: var(--border-color, #E7E1D3);
 }
 
 .card-header-row {
@@ -20,35 +24,36 @@
   justify-content: space-between;
   align-items: center;
   margin-bottom: 2rem;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+  border-bottom: 1px solid var(--border-light, #EFEBE0);
   padding-bottom: 1rem;
 }
 
 .card-title {
+  font-family: var(--font-serif, 'Playfair Display', Georgia, serif);
   font-size: 1.35rem;
   font-weight: 700;
-  color: #f3f4f6;
+  color: var(--text-dark, #1F1F24);
   letter-spacing: -0.02em;
 }
 
 .badge-verified {
   font-size: 0.75rem;
   font-weight: 600;
-  color: #10b981;
-  background: rgba(16, 185, 129, 0.1);
+  color: #137333;
+  background: #E6F4EA;
   padding: 0.25rem 0.75rem;
   border-radius: 9999px;
-  border: 1px solid rgba(16, 185, 129, 0.2);
+  border: 1px solid rgba(19, 115, 51, 0.2);
 }
 
 .badge-incomplete {
   font-size: 0.75rem;
   font-weight: 600;
-  color: #f59e0b;
-  background: rgba(245, 158, 11, 0.1);
+  color: #b45309;
+  background: #fef3c7;
   padding: 0.25rem 0.75rem;
   border-radius: 9999px;
-  border: 1px solid rgba(245, 158, 11, 0.2);
+  border: 1px solid rgba(180, 83, 9, 0.2);
 }
 
 /* Form structure */
@@ -66,9 +71,17 @@
   }
 }
 
+.form-label {
+  display: block;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--text-dark, #1F1F24);
+  margin-bottom: 0.35rem;
+}
+
 .list-item-block {
-  background: rgba(255, 255, 255, 0.015);
-  border: 1px solid rgba(255, 255, 255, 0.04);
+  background: var(--bg-cream, #FAF6EE);
+  border: 1px solid var(--border-color, #E7E1D3);
   border-radius: 12px;
   padding: 1.5rem;
   margin-bottom: 1.5rem;
@@ -83,39 +96,51 @@
 }
 
 .item-sub-title {
-  font-size: 1rem;
-  font-weight: 600;
-  color: var(--primary-color, #4f46e5);
+  font-family: var(--font-serif, 'Playfair Display', Georgia, serif);
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: var(--accent-burgundy, #90301B);
 }
 
 .btn-delete-item {
   background: transparent;
-  border: none;
-  color: #ef4444;
-  font-size: 0.875rem;
+  border: 1px solid rgba(217, 48, 37, 0.25);
+  color: #D93025;
+  font-size: 0.82rem;
+  font-weight: 600;
   cursor: pointer;
-  padding: 0.25rem 0.5rem;
-  border-radius: 4px;
-  transition: background 0.2s ease;
+  padding: 0.35rem 0.75rem;
+  border-radius: 8px;
+  transition: var(--transition-fast, all 0.15s ease);
 }
 
 .btn-delete-item:hover {
-  background: rgba(239, 68, 68, 0.1);
+  background: rgba(217, 48, 37, 0.06);
+  border-color: rgba(217, 48, 37, 0.5);
 }
 
 .add-item-btn {
-  background: rgba(255, 255, 255, 0.03);
-  border: 1px dashed rgba(255, 255, 255, 0.1);
-  color: #e5e7eb;
-  padding: 0.5rem 1.25rem;
+  background-color: var(--bg-coral-light, #FDF1EE);
+  border: 1.5px dashed var(--accent-burgundy, #90301B);
+  color: var(--accent-burgundy, #90301B);
+  font-weight: 650;
+  font-size: 0.875rem;
+  padding: 0.65rem 1.35rem;
   border-radius: 8px;
   cursor: pointer;
-  transition: all 0.2s ease;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition: var(--transition-smooth, all 0.3s cubic-bezier(0.4, 0, 0.2, 1));
 }
 
 .add-item-btn:hover {
-  background: rgba(255, 255, 255, 0.06);
-  border-color: rgba(255, 255, 255, 0.2);
+  background-color: var(--accent-burgundy, #90301B);
+  color: var(--bg-white, #FFFFFF);
+  border-style: solid;
+  border-color: var(--accent-burgundy, #90301B);
+  box-shadow: 0 4px 14px rgba(144, 48, 27, 0.18);
+  transform: translateY(-1px);
 }
 
 /* Skills list view */
@@ -128,19 +153,31 @@
 .skill-pill-input {
   display: flex;
   align-items: center;
-  background: rgba(255, 255, 255, 0.02);
-  border: 1px solid rgba(255, 255, 255, 0.05);
+  background: var(--bg-cream, #FAF6EE);
+  border: 1.5px solid var(--border-color, #E7E1D3);
   border-radius: 8px;
-  padding: 0.25rem 0.5rem 0.25rem 0.75rem;
+  padding: 0.35rem 0.5rem 0.35rem 0.75rem;
+  transition: var(--transition-fast, all 0.15s ease);
+}
+
+.skill-pill-input:focus-within {
+  border-color: var(--accent-burgundy, #90301B);
+  box-shadow: 0 0 0 3px rgba(144, 48, 27, 0.08);
+  background: var(--bg-white, #FFFFFF);
 }
 
 .skill-name-field {
   background: transparent;
   border: none;
-  color: #fff;
-  font-size: 0.875rem;
+  color: var(--text-dark, #1F1F24);
+  font-size: 0.9rem;
+  font-weight: 500;
   flex: 1;
   width: 100px;
+}
+
+.skill-name-field::placeholder {
+  color: var(--text-light, #8E8F9A);
 }
 
 .skill-name-field:focus {
@@ -148,26 +185,40 @@
 }
 
 .skill-level-select {
-  background: rgba(0, 0, 0, 0.3);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  color: #d1d5db;
-  font-size: 0.75rem;
-  border-radius: 4px;
-  padding: 0.15rem 0.4rem;
+  background: var(--bg-white, #FFFFFF);
+  border: 1px solid var(--border-color, #E7E1D3);
+  color: var(--text-dark, #1F1F24);
+  font-size: 0.8rem;
+  font-weight: 500;
+  border-radius: 6px;
+  padding: 0.25rem 0.5rem;
   margin-left: 0.5rem;
   cursor: pointer;
+  outline: none;
+}
+
+.skill-level-select:focus {
+  border-color: var(--accent-burgundy, #90301B);
 }
 
 .skill-delete-x {
   background: transparent;
   border: none;
-  color: #9ca3af;
-  font-size: 1.15rem;
+  color: var(--text-muted, #5F606A);
+  font-size: 1.25rem;
+  font-weight: 600;
   cursor: pointer;
   margin-left: 0.5rem;
-  padding: 0 0.25rem;
+  padding: 0 0.35rem;
+  border-radius: 4px;
+  transition: color 0.15s ease, background 0.15s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  line-height: 1;
 }
 
 .skill-delete-x:hover {
-  color: #ef4444;
+  color: #D93025;
+  background: rgba(217, 48, 37, 0.08);
 }
