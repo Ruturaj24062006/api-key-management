@@ -138,7 +138,7 @@ public class ResumeController {
         log.info("[TIMING] Initial DB Resume save took {} ms.", dbDuration);
         log.info("[TIMING] Total upload controller request took {} ms.", System.currentTimeMillis() - startUploadTime);
 
-        // ── Step 5: Publish async task via RabbitMQ (fallback to local event) ────
+        // ── Step 5: Publish async task via RabbitMQ and local event listener ────
         ResumeUploadedEvent event = new ResumeUploadedEvent(saved.getId(), student.getId());
         try {
             rabbitTemplate.convertAndSend(QueueConfig.EXCHANGE, QueueConfig.RESUME_UPLOADED_ROUTING_KEY, event);
@@ -146,8 +146,9 @@ public class ResumeController {
         } catch (Exception e) {
             log.warn("RabbitMQ unavailable — falling back to local ApplicationEvent for resume {}: {}",
                     saved.getId(), e.getMessage());
-            eventPublisher.publishEvent(event);
         }
+        // Always dispatch ApplicationEvent to guarantee background execution in standalone environments
+        eventPublisher.publishEvent(event);
 
         ResumeResponse response = ResumeResponse.builder()
                 .id(saved.getId())

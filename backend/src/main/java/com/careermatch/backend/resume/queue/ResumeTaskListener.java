@@ -9,10 +9,13 @@ import org.springframework.amqp.rabbit.annotation.RabbitListener;
 import org.springframework.stereotype.Component;
 
 /**
- * Consumes ResumeUploadedEvent from RabbitMQ and triggers the AI processing pipeline.
+ * Consumes ResumeUploadedEvent from RabbitMQ and triggers the AI processing
+ * pipeline.
  *
- * NOTE: @EventListener has been intentionally removed. The local Spring ApplicationEvent
- * fallback is handled by {@link LocalEventFallbackListener} to avoid double-processing
+ * NOTE: @EventListener has been intentionally removed. The local Spring
+ * ApplicationEvent
+ * fallback is handled by {@link LocalEventFallbackListener} to avoid
+ * double-processing
  * when both RabbitMQ and the local event fire.
  */
 @Component
