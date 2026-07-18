@@ -45,8 +45,8 @@ spring:
 app:
   jwt:
     secret: ${JWT_SECRET:404E635266556A586E3272357538782F413F4428472B4B6250645367566B5970}
-    accessTokenExpirationMs: 86400000 # 24 Hours
-    refreshTokenExpirationMs: 604800000 # 7 Days
+    accessTokenExpirationMs: 604800000 # 7 Days
+    refreshTokenExpirationMs: 2592000000 # 30 Days
   upload:
     dir: ${UPLOAD_DIR:uploads}
   resend:

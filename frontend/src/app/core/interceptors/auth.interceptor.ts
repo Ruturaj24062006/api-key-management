@@ -33,8 +33,10 @@ export const authInterceptor: HttpInterceptorFn = (req, next) => {
 
   return next(authReq).pipe(
     catchError((error: any) => {
-      if (error instanceof HttpErrorResponse && error.status === 401) {
-        // Clear local credentials on expired/invalid token and route back to login
+      if (error instanceof HttpErrorResponse && (error.status === 401 || error.status === 403)) {
+        // Clear local credentials on expired/invalid/rejected token and route back to login.
+        // 403 happens when the JWT is structurally valid but rejected by the server (e.g. wrong
+        // secret after redeploy, stale session, or missing role). Treat it the same as 401.
         authService.logout();
         router.navigate(['/login']);
       }

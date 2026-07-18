@@ -149,6 +149,14 @@ export class AuthService {
       const token = localStorage.getItem('access_token');
 
       if (sessionStr && token) {
+        // Validate token expiry BEFORE restoring the session.
+        // If the token is expired, clear everything so the user is prompted to log in fresh
+        // instead of being stuck with 403 errors on every API call.
+        if (this.isTokenExpired(token)) {
+          console.warn('Stored access token is expired. Clearing session.');
+          this.logout();
+          return;
+        }
         const raw: UserSession = JSON.parse(sessionStr);
         // Always normalize the stored role in case localStorage has stale casing
         const session: UserSession = { ...raw, role: normalizeRole(raw.role) };
@@ -159,6 +167,19 @@ export class AuthService {
       this.logout();
     } finally {
       this.isAuthLoading.set(false);
+    }
+  }
+
+  /** Decodes a JWT and returns true if it has expired (client-side only, no signature check). */
+  private isTokenExpired(token: string): boolean {
+    try {
+      const parts = token.split('.');
+      if (parts.length !== 3) return true;
+      const payload = JSON.parse(atob(parts[1].replace(/-/g, '+').replace(/_/g, '/')));
+      const expMs = payload.exp * 1000;
+      return Date.now() > expMs;
+    } catch {
+      return true; // Malformed token — treat as expired
     }
   }
 }
