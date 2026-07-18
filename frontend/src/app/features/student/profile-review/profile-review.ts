@@ -300,7 +300,7 @@ export class ProfileReview implements OnInit {
     });
   }
 
-  private computeCompletionPct(): number {
+  computeCompletionPct(): number {
     let score = 0;
     if (this.firstName)           score += 10;
     if (this.lastName)            score += 5;
