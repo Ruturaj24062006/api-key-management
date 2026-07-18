@@ -102,8 +102,24 @@ public class JwtTokenProvider {
         return createToken(claims, userDetails.getUsername(), jwtExpirationMs);
     }
 
+    public String generateToken(String email, String role, java.util.UUID userId) {
+        Map<String, Object> claims = new HashMap<>();
+        claims.put("email", email);
+        claims.put("role", role.startsWith("ROLE_") ? role : "ROLE_" + role.toUpperCase());
+        claims.put("userId", userId != null ? userId.toString() : null);
+        return createToken(claims, email, jwtExpirationMs);
+    }
+
     public String generateRefreshToken(UserDetails userDetails) {
         return createToken(new HashMap<>(), userDetails.getUsername(), jwtRefreshExpirationMs);
+    }
+
+    public String generateRefreshToken(String email, String role, java.util.UUID userId) {
+        Map<String, Object> claims = new HashMap<>();
+        claims.put("email", email);
+        claims.put("role", role.startsWith("ROLE_") ? role : "ROLE_" + role.toUpperCase());
+        claims.put("userId", userId != null ? userId.toString() : null);
+        return createToken(claims, email, jwtRefreshExpirationMs);
     }
 
     private String createToken(Map<String, Object> claims, String subject, long expirationMs) {

@@ -54,30 +54,30 @@ public class AuthService {
     public String register(RegisterRequest request) {
         String email = request.getEmail() != null ? request.getEmail().trim().toLowerCase() : "";
         if (userRepository.findByEmail(email).isPresent()) {
-            throw new BadRequestException("This email is already registered. Please log in instead.");
+            throw new com.careermatch.backend.exception.EmailAlreadyExistsException("Email already exists.");
         }
 
-        // 1. Sign up user in Supabase Auth and get their Supabase UUID
+        // 1. Sign up user in Supabase Auth if configured, or generate UUID
         String supabaseUserId = signupInSupabase(email, request.getPassword());
         UUID userId = UUID.fromString(supabaseUserId);
 
-        // 2. Save User in local PostgreSQL using the Supabase UUID as primary key
+        // 2. Hash password & Save User in local PostgreSQL
         User user = User.builder()
                 .id(userId)
                 .email(email)
                 .passwordHash(passwordEncoder.encode(request.getPassword()))
                 .role(request.getRole())
-                .isVerified(true) // Supabase Auth manages email verification status
+                .isVerified(true)
                 .build();
 
         User savedUser = userRepository.save(user);
 
-        // 3. Initialize profile details
+        // 3. Initialize student or recruiter profile
         if (request.getRole() == UserRole.ROLE_STUDENT) {
             Student student = Student.builder()
                     .user(savedUser)
-                    .firstName(request.getFirstName())
-                    .lastName(request.getLastName())
+                    .firstName(request.getFirstName() != null ? request.getFirstName() : "Student")
+                    .lastName(request.getLastName() != null ? request.getLastName() : "")
                     .profileCompletedPct(0)
                     .build();
             studentRepository.save(student);
@@ -95,27 +95,32 @@ public class AuthService {
             Recruiter recruiter = Recruiter.builder()
                     .user(savedUser)
                     .company(company)
-                    .jobTitle(request.getJobTitle())
+                    .jobTitle(request.getJobTitle() != null ? request.getJobTitle() : "Recruiter")
                     .isVerified(false)
                     .build();
             recruiterRepository.save(recruiter);
         }
 
-        log.info("Registered user in Supabase & local DB: {} with role: {}", savedUser.getEmail(), savedUser.getRole());
+        log.info("Successfully registered user: {} with role: {}", savedUser.getEmail(), savedUser.getRole());
         return "Registration successful.";
     }
 
     @Transactional
     public LoginResponse login(LoginRequest request) {
         String email = request.getEmail() != null ? request.getEmail().trim().toLowerCase() : "";
-        // 1. Authenticate with Supabase Auth to obtain valid Supabase JWT
-        Map<String, Object> tokenData = loginInSupabase(email, request.getPassword());
-        String accessToken = (String) tokenData.get("access_token");
-        String refreshToken = (String) tokenData.get("refresh_token");
 
-        // 2. Fetch locally stored User record
+        // 1. Verify user exists
         User user = userRepository.findByEmail(email)
-                .orElseThrow(() -> new BadRequestException("User profile not found. Please register first."));
+                .orElseThrow(() -> new com.careermatch.backend.exception.AccountNotFoundException("Account not found."));
+
+        // 2. Verify password hash
+        if (!passwordEncoder.matches(request.getPassword(), user.getPasswordHash())) {
+            throw new com.careermatch.backend.exception.InvalidCredentialsException("Incorrect email or password.");
+        }
+
+        // 3. Generate JWT Access & Refresh Token
+        String accessToken = jwtTokenProvider.generateToken(user.getEmail(), user.getRole().name(), user.getId());
+        String refreshToken = jwtTokenProvider.generateRefreshToken(user.getEmail(), user.getRole().name(), user.getId());
 
         return LoginResponse.builder()
                 .userId(user.getId())
@@ -156,15 +161,9 @@ public class AuthService {
             throw new RuntimeException("Could not find user ID in Supabase response");
         } catch (org.springframework.web.client.HttpClientErrorException e) {
             log.error("Failed to sign up in Supabase: {}", e.getResponseBodyAsString());
-            String responseBody = e.getResponseBodyAsString();
-            if (responseBody.contains("already registered") || responseBody.contains("already_exists") || responseBody.contains("User already registered")) {
-                throw new BadRequestException("This email is already registered. Please log in instead.");
-            }
+            throw new com.careermatch.backend.exception.EmailAlreadyExistsException("Email already exists.");
         } catch (Exception e) {
             log.error("Failed to sign up in Supabase: {}", e.getMessage());
-            if (e.getMessage() != null && (e.getMessage().contains("already registered") || e.getMessage().contains("already_exists"))) {
-                throw new BadRequestException("This email is already registered. Please log in instead.");
-            }
             throw new BadRequestException("Registration failed: " + e.getMessage());
         }
     }

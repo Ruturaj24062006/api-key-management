@@ -32,12 +32,6 @@ public class AuthController {
         return ResponseEntity.ok(ApiResponse.success("Login successful", response));
     }
 
-    @PostMapping("/google")
-    @Operation(summary = "Authenticate with Google social token")
-    public ResponseEntity<ApiResponse<LoginResponse>> loginWithGoogle(@Valid @RequestBody GoogleLoginRequest request) {
-        LoginResponse response = authService.loginWithGoogle(request);
-        return ResponseEntity.ok(ApiResponse.success("Google login successful", response));
-    }
 
     @PostMapping("/refresh")
     @Operation(summary = "Refresh an access token using a refresh token")
