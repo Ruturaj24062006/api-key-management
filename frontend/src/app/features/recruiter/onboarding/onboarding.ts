@@ -13,7 +13,7 @@ import { AuthService } from '../../../core/services/auth.service';
 })
 export class RecruiterOnboarding implements OnInit {
   currentStep = signal<number>(1);
-  totalSteps = 3;
+  totalSteps = 2;
   isLoading = signal<boolean>(false);
   errorMessage = signal<string | null>(null);
 
@@ -78,10 +78,11 @@ export class RecruiterOnboarding implements OnInit {
       }
     }
     this.errorMessage.set(null);
-    this.currentStep.update(s => s + 1);
 
-    if (this.currentStep() === 3) {
+    if (this.currentStep() === 2) {
       this.submitOnboarding();
+    } else {
+      this.currentStep.update(s => s + 1);
     }
   }
 
@@ -94,12 +95,10 @@ export class RecruiterOnboarding implements OnInit {
     this.isLoading.set(true);
     this.profileService.onboard(this.profile).subscribe({
       next: (res) => {
+        this.isLoading.set(false);
         if (res.success) {
-          setTimeout(() => {
-            this.verifyCompany();
-          }, 3500);
+          this.router.navigate(['/recruiter/dashboard']);
         } else {
-          this.isLoading.set(false);
           this.errorMessage.set('Onboarding failed. Please try again.');
         }
       },
@@ -107,23 +106,6 @@ export class RecruiterOnboarding implements OnInit {
         console.error('Failed to submit onboarding', err);
         this.isLoading.set(false);
         this.errorMessage.set('Error submitting profile. Please check parameters.');
-        this.currentStep.set(2);
-      }
-    });
-  }
-
-  verifyCompany(): void {
-    this.profileService.verify().subscribe({
-      next: (res) => {
-        this.isLoading.set(false);
-        if (res.success) {
-          this.router.navigate(['/recruiter/dashboard']);
-        }
-      },
-      error: (err) => {
-        console.error('Verification simulation failed', err);
-        this.isLoading.set(false);
-        this.router.navigate(['/recruiter/dashboard']);
       }
     });
   }

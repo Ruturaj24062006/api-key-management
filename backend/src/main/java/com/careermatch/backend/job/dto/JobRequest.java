@@ -26,5 +26,8 @@ public class JobRequest {
     private String workMode;
     private String educationLevel;
     private Boolean sponsorshipAvailable;
+    private String department;
+    private Double gpaCutoff;
+    private java.time.LocalDateTime deadline;
 }
 

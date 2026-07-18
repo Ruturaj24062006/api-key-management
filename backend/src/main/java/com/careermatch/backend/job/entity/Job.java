@@ -66,6 +66,11 @@ public class Job {
     @Column(name = "sponsorship_available")
     private Boolean sponsorshipAvailable;
 
+    private String department;
+
+    @Column(name = "gpa_cutoff")
+    private Double gpaCutoff;
+
     private LocalDateTime deadline;
 
     @Builder.Default

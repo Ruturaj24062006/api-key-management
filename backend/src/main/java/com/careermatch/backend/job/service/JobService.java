@@ -74,6 +74,9 @@ public class JobService {
                 .workMode(request.getWorkMode())
                 .educationLevel(request.getEducationLevel())
                 .sponsorshipAvailable(request.getSponsorshipAvailable())
+                .department(request.getDepartment())
+                .gpaCutoff(request.getGpaCutoff())
+                .deadline(request.getDeadline())
                 .status(JobStatus.ACTIVE) // Default to active on creation
                 .embedding(vector)
                 .build();
@@ -115,6 +118,9 @@ public class JobService {
         job.setWorkMode(request.getWorkMode());
         job.setEducationLevel(request.getEducationLevel());
         job.setSponsorshipAvailable(request.getSponsorshipAvailable());
+        job.setDepartment(request.getDepartment());
+        job.setGpaCutoff(request.getGpaCutoff());
+        job.setDeadline(request.getDeadline());
 
         // Re-generate embedding
         String context = request.getTitle() + " " + request.getDescription() + " " + request.getRequirements();

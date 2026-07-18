@@ -122,6 +122,9 @@ public class JobController {
                 .educationLevel(job.getEducationLevel())
                 .sponsorshipAvailable(job.getSponsorshipAvailable())
                 .status(job.getStatus().name())
+                .department(job.getDepartment())
+                .gpaCutoff(job.getGpaCutoff())
+                .deadline(job.getDeadline())
                 .createdAt(job.getCreatedAt())
                 .build();
     }

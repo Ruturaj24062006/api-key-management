@@ -15,6 +15,9 @@ export interface JobCreateDto {
   workMode?: string;
   educationLevel?: string;
   sponsorshipAvailable?: boolean;
+  department?: string;
+  gpaCutoff?: number;
+  deadline?: string;
 }
 
 @Injectable({

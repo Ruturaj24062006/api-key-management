@@ -416,52 +416,41 @@
       </div>
 
       <div class="glass-card job-form-card">
-        <!-- 5-Step Stepper Header -->
-        <div class="step-indicator-row-5">
+        <!-- 4-Step Stepper Header -->
+        <div class="step-indicator-row-5" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem; border-bottom: 1px solid var(--border-light); padding-bottom: 1rem;">
           <!-- Step 1 -->
-          <div class="step-bubble-5" [class.active]="jobStep() === 1" [class.completed]="jobStep() > 1">
-            <div class="step-num-icon">
+          <div class="step-bubble-5" [class.active]="jobStep() === 1" [class.completed]="jobStep() > 1" style="display: flex; align-items: center; gap: 0.5rem; opacity: 0.5;" [style.opacity]="jobStep() === 1 ? '1' : '0.5'">
+            <div class="step-num-icon" style="width: 28px; height: 28px; border-radius: 50%; background: var(--primary-color); color: #fff; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 0.85rem;">
               <span *ngIf="jobStep() <= 1">1</span>
-              <svg *ngIf="jobStep() > 1" fill="none" stroke="currentColor" stroke-width="3" viewBox="0 0 24 24" width="14" height="14"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5" /></svg>
+              <svg *ngIf="jobStep() > 1" fill="none" stroke="currentColor" stroke-width="3" viewBox="0 0 24 24" width="14" height="14" style="color: #fff;"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5" /></svg>
             </div>
-            <span class="step-lbl">Details</span>
+            <span class="step-lbl" style="font-weight: 700; font-size: 0.9rem; color: var(--text-primary);">Role Details</span>
           </div>
-          <div class="step-connector-5" [class.filled]="jobStep() > 1"></div>
           
           <!-- Step 2 -->
-          <div class="step-bubble-5" [class.active]="jobStep() === 2" [class.completed]="jobStep() > 2">
-            <div class="step-num-icon">
+          <div class="step-bubble-5" [class.active]="jobStep() === 2" [class.completed]="jobStep() > 2" style="display: flex; align-items: center; gap: 0.5rem; opacity: 0.5;" [style.opacity]="jobStep() === 2 ? '1' : '0.5'">
+            <div class="step-num-icon" style="width: 28px; height: 28px; border-radius: 50%; background: var(--primary-color); color: #fff; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 0.85rem;">
               <span *ngIf="jobStep() <= 2">2</span>
-              <svg *ngIf="jobStep() > 2" fill="none" stroke="currentColor" stroke-width="3" viewBox="0 0 24 24" width="14" height="14"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5" /></svg>
+              <svg *ngIf="jobStep() > 2" fill="none" stroke="currentColor" stroke-width="3" viewBox="0 0 24 24" width="14" height="14" style="color: #fff;"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5" /></svg>
             </div>
-            <span class="step-lbl">Requirements</span>
+            <span class="step-lbl" style="font-weight: 700; font-size: 0.9rem; color: var(--text-primary);">Location & Mode</span>
           </div>
-          <div class="step-connector-5" [class.filled]="jobStep() > 2"></div>
 
           <!-- Step 3 -->
-          <div class="step-bubble-5" [class.active]="jobStep() === 3" [class.completed]="jobStep() > 3">
-            <div class="step-num-icon">
+          <div class="step-bubble-5" [class.active]="jobStep() === 3" [class.completed]="jobStep() > 3" style="display: flex; align-items: center; gap: 0.5rem; opacity: 0.5;" [style.opacity]="jobStep() === 3 ? '1' : '0.5'">
+            <div class="step-num-icon" style="width: 28px; height: 28px; border-radius: 50%; background: var(--primary-color); color: #fff; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 0.85rem;">
               <span *ngIf="jobStep() <= 3">3</span>
-              <svg *ngIf="jobStep() > 3" fill="none" stroke="currentColor" stroke-width="3" viewBox="0 0 24 24" width="14" height="14"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5" /></svg>
+              <svg *ngIf="jobStep() > 3" fill="none" stroke="currentColor" stroke-width="3" viewBox="0 0 24 24" width="14" height="14" style="color: #fff;"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5" /></svg>
             </div>
-            <span class="step-lbl">Work Style</span>
+            <span class="step-lbl" style="font-weight: 700; font-size: 0.9rem; color: var(--text-primary);">Requirements</span>
           </div>
-          <div class="step-connector-5" [class.filled]="jobStep() > 3"></div>
 
           <!-- Step 4 -->
-          <div class="step-bubble-5" [class.active]="jobStep() === 4" [class.completed]="jobStep() > 4">
-            <div class="step-num-icon">
-              <span *ngIf="jobStep() <= 4">4</span>
-              <svg *ngIf="jobStep() > 4" fill="none" stroke="currentColor" stroke-width="3" viewBox="0 0 24 24" width="14" height="14"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5" /></svg>
+          <div class="step-bubble-5" [class.active]="jobStep() === 4" style="display: flex; align-items: center; gap: 0.5rem; opacity: 0.5;" [style.opacity]="jobStep() === 4 ? '1' : '0.5'">
+            <div class="step-num-icon" style="width: 28px; height: 28px; border-radius: 50%; background: var(--primary-color); color: #fff; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 0.85rem;">
+              <span>4</span>
             </div>
-            <span class="step-lbl">Settings</span>
-          </div>
-          <div class="step-connector-5" [class.filled]="jobStep() > 4"></div>
-
-          <!-- Step 5 -->
-          <div class="step-bubble-5" [class.active]="jobStep() === 5">
-            <div class="step-num-icon">5</div>
-            <span class="step-lbl">Review</span>
+            <span class="step-lbl" style="font-weight: 700; font-size: 0.9rem; color: var(--text-primary);">Compensation</span>
           </div>
         </div>
 
@@ -478,200 +467,144 @@
         <!-- STEP 1: ROLE DETAILS -->
         <div class="step-content animate-fade-in" *ngIf="jobStep() === 1">
           <!-- AI Assist Card -->
-          <div class="ai-assist-premium-card" *ngIf="!jobForm.id">
-            <div class="ai-sparkle-bg"></div>
+          <div class="ai-assist-premium-card" *ngIf="!jobForm.id" style="margin-bottom: 1.5rem; padding: 1.5rem; border: 1px dashed var(--primary-color); border-radius: 12px; background: rgba(var(--primary-rgb), 0.02);">
             <div class="ai-card-content">
-              <div class="ai-title-row">
+              <div class="ai-title-row" style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.5rem;">
                 <span class="ai-sparkle-icon">✨</span>
-                <h4 class="ai-card-title">NEXUS AI Job Planner</h4>
+                <h4 class="ai-card-title" style="margin: 0; font-size: 1.1rem; font-weight: 800; color: var(--text-primary);">NEXUS AI Job Planner</h4>
               </div>
-              <p class="ai-card-desc">Provide a short role outline and our neural network will generate descriptions, criteria, and skill recommendations instantly.</p>
-              <textarea class="form-input ai-textarea" [(ngModel)]="aiPrompt" placeholder="e.g. 'Looking for a Senior Frontend Architect to lead UI migrations in Angular 18 with 5+ years experience...'"></textarea>
-              <button type="button" class="btn btn-primary btn-sparkle-action" (click)="useAiAssist()" [disabled]="isAiLoading()">
+              <p class="ai-card-desc" style="font-size: 0.85rem; color: var(--text-secondary); margin-bottom: 1rem;">Provide a short role outline and our neural network will generate descriptions and skill recommendations instantly.</p>
+              <textarea class="form-input ai-textarea" [(ngModel)]="aiPrompt" placeholder="e.g. 'Looking for a Backend Developer with Java and Spring Boot...'" style="width: 100%; padding: 0.75rem; border-radius: 8px; border: 1px solid var(--border-light); margin-bottom: 1rem;" rows="3"></textarea>
+              <button type="button" class="btn btn-primary" (click)="useAiAssist()" [disabled]="isAiLoading()">
                 <span *ngIf="!isAiLoading()">Generate Job Specifications</span>
                 <span *ngIf="isAiLoading()" class="spinner-inline"></span>
               </button>
             </div>
           </div>
 
-          <div class="form-grid-two">
-            <div class="form-group full-width">
-              <label class="form-label">Job Title *</label>
-              <input type="text" [(ngModel)]="jobForm.title" placeholder="e.g. Lead UI Architect" class="form-input">
-            </div>
-
-            <div class="form-group full-width">
-              <label class="form-label">Job Description *</label>
-              <textarea [(ngModel)]="jobForm.description" rows="7" placeholder="Provide a detailed outline of responsibilities, project scope, and team dynamic..." class="form-input"></textarea>
-            </div>
-          </div>
-        </div>
-
-        <!-- STEP 2: REQUIREMENTS -->
-        <div class="step-content animate-fade-in" *ngIf="jobStep() === 2">
-          <div class="form-grid-two">
-            <div class="form-group full-width">
-              <label class="form-label">Required Skills (Comma separated list) *</label>
-              <input type="text" [(ngModel)]="jobForm.requiredSkills" placeholder="e.g. Angular, TypeScript, CSS Grid, RxJS" class="form-input">
-              <small class="form-help-text">Candidates matching these skills will receive significant score prioritization.</small>
-            </div>
-
-            <div class="form-group full-width">
-              <label class="form-label">Preferred Skills (Comma separated list)</label>
-              <input type="text" [(ngModel)]="jobForm.preferredSkills" placeholder="e.g. Next.js, Webpack, Figma, Storybook" class="form-input">
-            </div>
-
-            <div class="form-group full-width">
-              <label class="form-label">Key Requirements & Experience</label>
-              <textarea [(ngModel)]="jobForm.requirements" rows="6" placeholder="List certifications, background requirements, or specific tools..." class="form-input"></textarea>
-            </div>
-          </div>
-        </div>
-
-        <!-- STEP 3: WORK STYLE & COMPENSATION -->
-        <div class="step-content animate-fade-in" *ngIf="jobStep() === 3">
-          <div class="form-grid-two">
+          <div class="form-grid-two" style="display: flex; flex-direction: column; gap: 1.25rem;">
             <div class="form-group">
-              <label class="form-label">Employment Type *</label>
-              <select [(ngModel)]="jobForm.jobType" class="form-input">
-                <option value="FULL_TIME">Full Time</option>
-                <option value="PART_TIME">Part Time</option>
+              <label class="form-label" style="font-weight: 700; margin-bottom: 0.35rem; display: block;">Job Title *</label>
+              <input type="text" [(ngModel)]="jobForm.title" placeholder="e.g. Lead UI Architect" class="form-input" style="width: 100%; padding: 0.75rem; border-radius: 8px; border: 1px solid var(--border-light);">
+            </div>
+
+            <div class="form-group">
+              <label class="form-label" style="font-weight: 700; margin-bottom: 0.35rem; display: block;">Department (Optional)</label>
+              <input type="text" [(ngModel)]="jobForm.department" placeholder="e.g. Engineering / Marketing" class="form-input" style="width: 100%; padding: 0.75rem; border-radius: 8px; border: 1px solid var(--border-light);">
+            </div>
+
+            <div class="form-group">
+              <label class="form-label" style="font-weight: 700; margin-bottom: 0.35rem; display: block;">Employment Type *</label>
+              <select [(ngModel)]="jobForm.jobType" class="form-input" style="width: 100%; padding: 0.75rem; border-radius: 8px; border: 1px solid var(--border-light);">
+                <option value="FULL_TIME">Full-time</option>
                 <option value="INTERNSHIP">Internship</option>
                 <option value="CONTRACT">Contract</option>
+                <option value="PART_TIME">Part-time</option>
               </select>
             </div>
 
             <div class="form-group">
-              <label class="form-label">Work Mode *</label>
-              <select [(ngModel)]="jobForm.workMode" class="form-input">
-                <option value="ONSITE">Onsite</option>
-                <option value="HYBRID">Hybrid</option>
+              <label class="form-label" style="font-weight: 700; margin-bottom: 0.35rem; display: block;">Job Description *</label>
+              <textarea [(ngModel)]="jobForm.description" rows="7" placeholder="Provide a detailed outline of responsibilities, project scope, and team dynamic..." class="form-input" style="width: 100%; padding: 0.75rem; border-radius: 8px; border: 1px solid var(--border-light); font-family: inherit;"></textarea>
+            </div>
+          </div>
+        </div>
+
+        <!-- STEP 2: LOCATION & WORK MODE -->
+        <div class="step-content animate-fade-in" *ngIf="jobStep() === 2">
+          <div class="form-grid-two" style="display: flex; flex-direction: column; gap: 1.25rem;">
+            <div class="form-group">
+              <label class="form-label" style="font-weight: 700; margin-bottom: 0.35rem; display: block;">Location / City *</label>
+              <input type="text" [(ngModel)]="jobForm.location" placeholder="e.g. Pune, India" class="form-input" style="width: 100%; padding: 0.75rem; border-radius: 8px; border: 1px solid var(--border-light);">
+            </div>
+
+            <div class="form-group">
+              <label class="form-label" style="font-weight: 700; margin-bottom: 0.35rem; display: block;">Work Mode *</label>
+              <select [(ngModel)]="jobForm.workMode" class="form-input" style="width: 100%; padding: 0.75rem; border-radius: 8px; border: 1px solid var(--border-light);">
                 <option value="REMOTE">Remote</option>
+                <option value="HYBRID">Hybrid</option>
+                <option value="ONSITE">Onsite</option>
               </select>
             </div>
-
-            <div class="form-group">
-              <label class="form-label">Location *</label>
-              <input type="text" [(ngModel)]="jobForm.location" placeholder="e.g. Pune, India (or Remote)" class="form-input">
-            </div>
-
-            <div class="form-group">
-              <label class="form-label">Salary Range / Budget</label>
-              <input type="text" [(ngModel)]="jobForm.salaryRange" placeholder="e.g. ₹12-18 LPA or $120,000" class="form-input">
-            </div>
-
-            <div class="form-group">
-              <label class="form-label">Experience Level Target</label>
-              <input type="text" [(ngModel)]="jobForm.experienceLevel" placeholder="e.g. Entry Level, 3-5 Years, Senior" class="form-input">
-            </div>
-
-            <div class="form-group">
-              <label class="form-label">Minimum Education</label>
-              <input type="text" [(ngModel)]="jobForm.educationLevel" placeholder="e.g. Bachelor's in CS / IT" class="form-input">
-            </div>
-          </div>
-
-          <div class="checkbox-group" style="margin-top: 1.5rem;">
-            <label class="checkbox-label">
-              <input type="checkbox" [(ngModel)]="jobForm.sponsorshipAvailable">
-              <span>Visa Sponsorship is available for this position (H1B / Work Permit eligible)</span>
-            </label>
           </div>
         </div>
 
-        <!-- STEP 4: APPLICATION SETTINGS -->
+        <!-- STEP 3: REQUIREMENTS -->
+        <div class="step-content animate-fade-in" *ngIf="jobStep() === 3">
+          <div class="form-grid-two" style="display: flex; flex-direction: column; gap: 1.25rem;">
+            <div class="form-group">
+              <label class="form-label" style="font-weight: 700; margin-bottom: 0.35rem; display: block;">Required Skills *</label>
+              <div class="skills-wrap" *ngIf="requiredSkillsArray.length > 0" style="display: flex; flex-wrap: wrap; gap: 0.5rem; margin-bottom: 0.5rem;">
+                <span *ngFor="let sk of requiredSkillsArray; let i = index" class="skill-pills matched" style="display: inline-flex; align-items: center; background: rgba(var(--primary-rgb), 0.1); color: var(--primary-color); padding: 0.25rem 0.65rem; border-radius: 20px; font-weight: 700; font-size: 0.8rem;">
+                  {{ sk }}
+                  <span class="remove-pill" (click)="removeRequiredSkill(i)" style="margin-left: 0.4rem; cursor: pointer; opacity: 0.7;">&times;</span>
+                </span>
+              </div>
+              <div class="add-skill-row" style="display: flex; gap: 0.5rem;">
+                <input type="text" [(ngModel)]="newRequiredSkill" placeholder="e.g. Java (press Enter or click Add)" class="form-input" (keyup.enter)="addRequiredSkill()" style="flex: 1; padding: 0.75rem; border-radius: 8px; border: 1px solid var(--border-light);">
+                <button type="button" class="btn btn-secondary" (click)="addRequiredSkill()">Add</button>
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label" style="font-weight: 700; margin-bottom: 0.35rem; display: block;">GPA Cutoff (0.0 to 4.0 / 10.0 scale)</label>
+              <input type="number" step="0.01" min="0" max="10" [(ngModel)]="jobForm.gpaCutoff" placeholder="e.g. 3.0 or 7.5" class="form-input" style="width: 100%; padding: 0.75rem; border-radius: 8px; border: 1px solid var(--border-light);">
+            </div>
+
+            <div class="form-group">
+              <label class="form-label" style="font-weight: 700; margin-bottom: 0.35rem; display: block;">Work Authorization / Visa Sponsorship</label>
+              <select [(ngModel)]="jobForm.sponsorshipAvailable" class="form-input" style="width: 100%; padding: 0.75rem; border-radius: 8px; border: 1px solid var(--border-light);">
+                <option [ngValue]="true">Yes (Sponsorship available)</option>
+                <option [ngValue]="false">No (Existing auth required)</option>
+              </select>
+            </div>
+          </div>
+        </div>
+
+        <!-- STEP 4: COMPENSATION & TIMELINE -->
         <div class="step-content animate-fade-in" *ngIf="jobStep() === 4">
-          <div class="form-grid-two">
+          <div class="form-grid-two" style="display: flex; flex-direction: column; gap: 1.25rem;">
             <div class="form-group">
-              <label class="form-label">Application Deadline</label>
-              <input type="date" class="form-input">
+              <label class="form-label" style="font-weight: 700; margin-bottom: 0.35rem; display: block;">Minimum Salary (LPA)</label>
+              <input type="number" [(ngModel)]="salaryMin" placeholder="e.g. 6" class="form-input" style="width: 100%; padding: 0.75rem; border-radius: 8px; border: 1px solid var(--border-light);">
             </div>
 
             <div class="form-group">
-              <label class="form-label">Application Cap Limit</label>
-              <input type="number" placeholder="50" class="form-input">
+              <label class="form-label" style="font-weight: 700; margin-bottom: 0.35rem; display: block;">Maximum Salary (LPA)</label>
+              <input type="number" [(ngModel)]="salaryMax" placeholder="e.g. 12" class="form-input" style="width: 100%; padding: 0.75rem; border-radius: 8px; border: 1px solid var(--border-light);">
             </div>
 
-            <div class="form-group full-width">
-              <label class="form-label">Candidate Screening Questions</label>
-              <textarea rows="4" placeholder="List questions (one per line) candidates must respond to upon applying..." class="form-input"></textarea>
-            </div>
-          </div>
-
-          <div class="checkbox-group" style="margin-top: 1.5rem; display: flex; flex-direction: column; gap: 0.75rem;">
-            <label class="checkbox-label">
-              <input type="checkbox" checked>
-              <span>Activate NEXUS Easy Apply (One-click student application processing)</span>
-            </label>
-            <label class="checkbox-label">
-              <input type="checkbox" checked>
-              <span>Notify recruiter email instantly on new applicant matches</span>
-            </label>
-          </div>
-        </div>
-
-        <!-- STEP 5: REVIEW & PUBLISH -->
-        <div class="step-content animate-fade-in" *ngIf="jobStep() === 5">
-          <div class="review-preflight-header">
-            <h4 class="preflight-title">Pre-Flight Review Summary</h4>
-            <p class="preflight-desc">Carefully review all details below. Once verified, click "Publish Job" to make the listing public.</p>
-          </div>
-
-          <div class="review-grid">
-            <!-- Details & Description -->
-            <div class="review-section-card glass-card">
-              <h5 class="review-card-heading">Role & Style Details</h5>
-              <div class="review-field-row">
-                <span class="field-label">Job Title</span>
-                <span class="field-value font-bold">{{ jobForm.title }}</span>
-              </div>
-              <div class="review-field-row">
-                <span class="field-label">Employment Type</span>
-                <span class="field-value text-capitalize">{{ jobForm.jobType?.toLowerCase() }}</span>
-              </div>
-              <div class="review-field-row">
-                <span class="field-label">Work Mode & Location</span>
-                <span class="field-value">{{ jobForm.workMode }} &bull; {{ jobForm.location }}</span>
-              </div>
-              <div class="review-field-row">
-                <span class="field-label">Salary Range</span>
-                <span class="field-value">{{ jobForm.salaryRange || 'Not disclosed' }}</span>
-              </div>
-              <div class="review-field-row">
-                <span class="field-label">Sponsorship</span>
-                <span class="field-value">{{ jobForm.sponsorshipAvailable ? 'Available' : 'Not available' }}</span>
-              </div>
-            </div>
-
-            <!-- Skills & Criteria -->
-            <div class="review-section-card glass-card">
-              <h5 class="review-card-heading">Requirements & Skills</h5>
-              <div class="review-field-row">
-                <span class="field-label">Required Skills</span>
-                <span class="field-value">{{ jobForm.requiredSkills }}</span>
-              </div>
-              <div class="review-field-row">
-                <span class="field-label">Preferred Skills</span>
-                <span class="field-value">{{ jobForm.preferredSkills || 'None listed' }}</span>
-              </div>
-              <div class="review-field-row">
-                <span class="field-label">Experience & Ed</span>
-                <span class="field-value">{{ jobForm.experienceLevel || 'Fresher/No requirements' }} &bull; {{ jobForm.educationLevel || 'Any Degree' }}</span>
-              </div>
+            <div class="form-group">
+              <label class="form-label" style="font-weight: 700; margin-bottom: 0.35rem; display: block;">Application Deadline</label>
+              <input type="date" [(ngModel)]="jobForm.deadline" class="form-input" style="width: 100%; padding: 0.75rem; border-radius: 8px; border: 1px solid var(--border-light);">
             </div>
           </div>
 
-          <div class="review-description-box glass-card" style="margin-top: 1rem;">
-            <h5 class="review-card-heading">Full Job Description</h5>
-            <p class="review-desc-text">{{ jobForm.description }}</p>
+          <!-- Preview Card -->
+          <div class="job-preview-box glass-card" style="margin-top: 1.5rem; padding: 1.5rem; border: 1px dashed rgba(var(--primary-rgb), 0.3); border-radius: 12px; background: rgba(var(--primary-rgb), 0.03);">
+            <div class="preview-header" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.75rem;">
+              <h3 style="margin: 0; font-size: 0.9rem; font-weight: 700; color: var(--text-secondary);">📋 Job Preview</h3>
+              <p class="preview-badge" style="margin: 0; font-size: 0.78rem; font-weight: 700; padding: 0.2rem 0.6rem; border-radius: 20px; background: rgba(var(--primary-rgb), 0.1); color: var(--primary-color);">
+                {{ jobForm.jobType?.replace('_', ' ') }} &bull; {{ jobForm.workMode }}
+              </p>
+            </div>
+            <h2 class="preview-job-title" style="margin: 0 0 0.3rem; font-size: 1.3rem; font-weight: 900; color: var(--text-primary);">{{ jobForm.title || 'Untitled Role' }}</h2>
+            <p class="preview-location" style="margin: 0 0 0.75rem; font-size: 0.85rem; color: var(--text-secondary);">
+              {{ jobForm.location || 'Location not set' }}
+              <span *ngIf="salaryMin || salaryMax"> &bull; ₹{{ salaryMin || 0 }} - ₹{{ salaryMax || 0 }} LPA</span>
+            </p>
+            <div class="preview-skills-row" style="display: flex; flex-wrap: wrap; gap: 0.4rem;" *ngIf="requiredSkillsArray.length > 0">
+              <span *ngFor="let skill of requiredSkillsArray.slice(0, 5)" class="skill-chip" style="font-size: 0.78rem; font-weight: 700; padding: 0.25rem 0.65rem; border-radius: 20px; background: rgba(var(--primary-rgb), 0.1); color: var(--primary-color); border: 1px solid rgba(var(--primary-rgb), 0.2);">{{ skill }}</span>
+            </div>
           </div>
         </div>
 
         <!-- Form Actions -->
-        <div class="form-actions-row" style="margin-top: 2rem;">
+        <div class="form-actions-row" style="margin-top: 2rem; display: flex; justify-content: space-between;">
           <button type="button" class="btn btn-secondary" (click)="prevJobStep()" *ngIf="jobStep() > 1">Previous</button>
-          <button type="button" class="btn btn-primary" (click)="nextJobStep()" *ngIf="jobStep() < 5">Next Step</button>
-          <button type="button" class="btn btn-success" (click)="submitJob()" *ngIf="jobStep() === 5" [disabled]="isSubmittingJob()">
+          <div *ngIf="jobStep() === 1"></div>
+          <button type="button" class="btn btn-primary" (click)="nextJobStep()" *ngIf="jobStep() < 4">Next Step</button>
+          <button type="button" class="btn btn-success" (click)="submitJob()" *ngIf="jobStep() === 4" [disabled]="isSubmittingJob()">
             <span *ngIf="!isSubmittingJob()">{{ jobForm.id ? 'Save Changes' : 'Publish Job Listing' }}</span>
             <span *ngIf="isSubmittingJob()" class="spinner-inline"></span>
           </button>

@@ -118,10 +118,12 @@ public class RecruiterService {
         company.setIndustry(request.getIndustry());
         company.setLocation(request.getLocation());
         company.setDescription(request.getDescription());
+        company.setVerified(true);
         Company savedCompany = companyRepository.save(company);
 
         recruiter.setCompany(savedCompany);
         recruiter.setJobTitle(request.getJobTitle());
+        recruiter.setVerified(true);
         Recruiter savedRecruiter = recruiterRepository.save(recruiter);
 
         return mapToResponse(savedRecruiter, user.getEmail());

@@ -2,7 +2,7 @@
   <div class="onboarding-card-wrapper glass-card">
     
     <!-- Step Progress Line -->
-    <div class="progress-stepper" *ngIf="currentStep() <= 3">
+    <div class="progress-stepper" *ngIf="currentStep() <= 2">
       <div class="step-indicator" [class.active]="currentStep() >= 1">
         <span class="step-number">1</span>
         <span class="step-text">Company Profile</span>
@@ -11,11 +11,6 @@
       <div class="step-indicator" [class.active]="currentStep() >= 2">
         <span class="step-number">2</span>
         <span class="step-text">Company Details</span>
-      </div>
-      <div class="step-connector-line" [class.active]="currentStep() >= 3"></div>
-      <div class="step-indicator" [class.active]="currentStep() >= 3">
-        <span class="step-number">3</span>
-        <span class="step-text">Verification</span>
       </div>
     </div>
 
@@ -79,26 +74,11 @@
       </div>
     </div>
 
-    <!-- STEP 3: Verification Loader -->
-    <div class="step-container text-center animate-scale-up pad-vertical-lg" *ngIf="currentStep() === 3">
-      <div class="verification-loader-box">
-        <div class="spinner-loader lg-spinner"></div>
-        <h2 class="verifying-title">Verifying Credentials</h2>
-        <p class="verifying-subtitle">Connecting with registries & validating domain authorizations...</p>
-        
-        <div class="verification-steps-timeline">
-          <div class="ver-step-item checked">✓ Matching organization database records</div>
-          <div class="ver-step-item checked">✓ Checking email domain validation</div>
-          <div class="ver-step-item active">⏳ Awaiting corporate verification status...</div>
-        </div>
-      </div>
-    </div>
-
     <!-- Form Navigation Footer Actions -->
-    <div class="onboarding-nav-footer" *ngIf="currentStep() < 3">
+    <div class="onboarding-nav-footer" *ngIf="currentStep() <= 2">
       <button type="button" class="btn btn-secondary btn-nav" (click)="prevStep()" [disabled]="currentStep() === 1">Back</button>
       <button type="button" class="btn btn-primary btn-nav" (click)="nextStep()">
-        {{ currentStep() === 2 ? 'Submit for Verification' : 'Next' }}
+        {{ currentStep() === 2 ? 'Submit & Finish' : 'Next' }}
       </button>
     </div>
 

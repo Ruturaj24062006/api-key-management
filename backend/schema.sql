@@ -139,6 +139,9 @@ CREATE TABLE IF NOT EXISTS jobs (
     status VARCHAR(50) NOT NULL DEFAULT 'DRAFT',
     embedding vector(384),
     fts tsvector,
+    department VARCHAR(255),
+    gpa_cutoff DOUBLE PRECISION,
+    deadline TIMESTAMP,
     created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP
 );

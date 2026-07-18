@@ -65,13 +65,16 @@ export class RecruiterDashboard implements OnInit, OnDestroy {
     requirements: '',
     location: '',
     jobType: 'FULL_TIME',
-    experienceLevel: '',
+    experienceLevel: 'Entry-level',
     salaryRange: '',
     requiredSkills: '',
     preferredSkills: '',
     workMode: 'HYBRID',
-    educationLevel: '',
-    sponsorshipAvailable: false
+    educationLevel: "Bachelor's",
+    sponsorshipAvailable: false,
+    department: '',
+    gpaCutoff: undefined,
+    deadline: ''
   };
   jobStep = signal<number>(1);
   isSubmittingJob = signal<boolean>(false);
@@ -79,6 +82,12 @@ export class RecruiterDashboard implements OnInit, OnDestroy {
   aiPrompt = '';
   jobErrorMessage = signal<string | null>(null);
   jobSuccessMessage = signal<string | null>(null);
+
+  requiredSkillsArray: string[] = [];
+  newRequiredSkill = '';
+
+  salaryMin: number | null = null;
+  salaryMax: number | null = null;
 
   // Candidate Matching & Application Management
   searchQuery = signal<string>('');
@@ -243,7 +252,7 @@ export class RecruiterDashboard implements OnInit, OnDestroy {
             jobTitle: profileData.jobTitle || ''
           };
 
-          if (!profileData.isVerified || !profileData.companyName || !profileData.industry) {
+          if (!profileData.companyName || !profileData.industry) {
             this.router.navigate(['/recruiter/onboarding']);
           } else {
             this.loadStats();
@@ -695,14 +704,21 @@ export class RecruiterDashboard implements OnInit, OnDestroy {
       requirements: '',
       location: '',
       jobType: 'FULL_TIME',
-      experienceLevel: '',
+      experienceLevel: 'Entry-level',
       salaryRange: '',
       requiredSkills: '',
       preferredSkills: '',
       workMode: 'HYBRID',
-      educationLevel: '',
-      sponsorshipAvailable: false
+      educationLevel: "Bachelor's",
+      sponsorshipAvailable: false,
+      department: '',
+      gpaCutoff: undefined,
+      deadline: ''
     };
+    this.requiredSkillsArray = [];
+    this.newRequiredSkill = '';
+    this.salaryMin = null;
+    this.salaryMax = null;
     this.jobStep.set(1);
     this.aiPrompt = '';
   }
@@ -722,7 +738,10 @@ export class RecruiterDashboard implements OnInit, OnDestroy {
           try {
             const data = JSON.parse(res.data);
             if (data.description) this.jobForm.description = data.description;
-            if (data.requiredSkills) this.jobForm.requiredSkills = data.requiredSkills;
+            if (data.requiredSkills) {
+              this.jobForm.requiredSkills = data.requiredSkills;
+              this.requiredSkillsArray = data.requiredSkills.split(',').map((s: string) => s.trim()).filter(Boolean);
+            }
             if (data.preferredSkills) this.jobForm.preferredSkills = data.preferredSkills;
             if (data.experienceLevel) this.jobForm.experienceLevel = data.experienceLevel;
             this.jobSuccessMessage.set('✓ AI has successfully generated the job details. Review below.');
@@ -739,6 +758,23 @@ export class RecruiterDashboard implements OnInit, OnDestroy {
     });
   }
 
+  addRequiredSkill(): void {
+    const s = this.newRequiredSkill.trim();
+    if (s) {
+      if (!this.requiredSkillsArray.includes(s)) {
+        this.requiredSkillsArray.push(s);
+        this.jobForm.requiredSkills = this.requiredSkillsArray.join(', ');
+      }
+      this.newRequiredSkill = '';
+      this.jobErrorMessage.set(null);
+    }
+  }
+
+  removeRequiredSkill(index: number): void {
+    this.requiredSkillsArray.splice(index, 1);
+    this.jobForm.requiredSkills = this.requiredSkillsArray.join(', ');
+  }
+
   nextJobStep(): void {
     if (this.jobStep() === 1) {
       if (!this.jobForm.title?.trim() || !this.jobForm.description?.trim()) {
@@ -746,13 +782,13 @@ export class RecruiterDashboard implements OnInit, OnDestroy {
         return;
       }
     } else if (this.jobStep() === 2) {
-      if (!this.jobForm.requiredSkills?.trim()) {
-        this.jobErrorMessage.set('Required Skills are required in Step 2.');
+      if (!this.jobForm.location?.trim() || !this.jobForm.workMode) {
+        this.jobErrorMessage.set('Location and Work Mode are required in Step 2.');
         return;
       }
     } else if (this.jobStep() === 3) {
-      if (!this.jobForm.location?.trim() || !this.jobForm.workMode) {
-        this.jobErrorMessage.set('Location and Work Mode are required in Step 3.');
+      if (this.requiredSkillsArray.length === 0) {
+        this.jobErrorMessage.set('At least one required skill is required in Step 3.');
         return;
       }
     }
@@ -768,15 +804,32 @@ export class RecruiterDashboard implements OnInit, OnDestroy {
     this.isSubmittingJob.set(true);
     this.jobErrorMessage.set(null);
 
-    const action = this.jobForm.id 
-      ? this.jobService.updateJob(this.jobForm.id, this.jobForm)
-      : this.jobService.createJob(this.jobForm);
+    if (this.salaryMin !== null || this.salaryMax !== null) {
+      const min = this.salaryMin !== null ? `₹${this.salaryMin} LPA` : '';
+      const max = this.salaryMax !== null ? `₹${this.salaryMax} LPA` : '';
+      if (min && max) {
+        this.jobForm.salaryRange = `${min} - ${max}`;
+      } else {
+        this.jobForm.salaryRange = min || max;
+      }
+    } else {
+      this.jobForm.salaryRange = '';
+    }
+
+    const payload = { ...this.jobForm };
+    if (payload.deadline) {
+      payload.deadline = new Date(payload.deadline).toISOString();
+    }
+
+    const action = payload.id 
+      ? this.jobService.updateJob(payload.id, payload)
+      : this.jobService.createJob(payload);
 
     action.subscribe({
       next: (res) => {
         this.isSubmittingJob.set(false);
         if (res.success) {
-          const isEdit = !!this.jobForm.id;
+          const isEdit = !!payload.id;
           this.jobSuccessMessage.set(isEdit ? 'Job updated successfully!' : 'Job posted successfully!');
           // Immediately refresh all data from backend so it persists across page reloads
           this.refreshAll();
@@ -797,25 +850,28 @@ export class RecruiterDashboard implements OnInit, OnDestroy {
         if (err.status === 0) {
           console.warn('Backend server down. Activating developer mock save fallback...', err);
           const mockJob = {
-            id: this.jobForm.id || Math.random().toString(36).substring(7),
-            title: this.jobForm.title,
-            description: this.jobForm.description,
-            requirements: this.jobForm.requirements || '',
-            location: this.jobForm.location || 'Remote',
-            jobType: this.jobForm.jobType || 'FULL_TIME',
-            experienceLevel: this.jobForm.experienceLevel || '',
-            salaryRange: this.jobForm.salaryRange || '',
-            requiredSkills: this.jobForm.requiredSkills || '',
-            preferredSkills: this.jobForm.preferredSkills || '',
-            workMode: this.jobForm.workMode || 'HYBRID',
-            educationLevel: this.jobForm.educationLevel || '',
-            sponsorshipAvailable: this.jobForm.sponsorshipAvailable || false,
+            id: payload.id || Math.random().toString(36).substring(7),
+            title: payload.title,
+            description: payload.description,
+            requirements: payload.requirements || '',
+            location: payload.location || 'Remote',
+            jobType: payload.jobType || 'FULL_TIME',
+            experienceLevel: payload.experienceLevel || '',
+            salaryRange: payload.salaryRange || '',
+            requiredSkills: payload.requiredSkills || '',
+            preferredSkills: payload.preferredSkills || '',
+            workMode: payload.workMode || 'HYBRID',
+            educationLevel: payload.educationLevel || '',
+            sponsorshipAvailable: payload.sponsorshipAvailable || false,
+            department: payload.department || '',
+            gpaCutoff: payload.gpaCutoff,
+            deadline: payload.deadline,
             status: 'ACTIVE',
             createdAt: new Date().toISOString()
           };
 
-          if (this.jobForm.id) {
-            const updated = this.myJobs().map(j => j.id === this.jobForm.id ? mockJob : j);
+          if (payload.id) {
+            const updated = this.myJobs().map(j => j.id === payload.id ? mockJob : j);
             this.myJobs.set(updated);
           } else {
             this.myJobs.set([mockJob, ...this.myJobs()]);
@@ -824,7 +880,7 @@ export class RecruiterDashboard implements OnInit, OnDestroy {
           // Recalculate dashboard metrics
           this.calculateMetricsAndGraphs(this.allCompanyApplications());
 
-          this.jobSuccessMessage.set(this.jobForm.id ? 'Job updated successfully (offline)!' : 'Job posted successfully (offline)!');
+          this.jobSuccessMessage.set(payload.id ? 'Job updated successfully (offline)!' : 'Job posted successfully (offline)!');
           setTimeout(() => {
             this.selectMenu('all-jobs');
             this.jobSuccessMessage.set(null);
@@ -847,14 +903,41 @@ export class RecruiterDashboard implements OnInit, OnDestroy {
       requirements: job.requirements || '',
       location: job.location || '',
       jobType: job.jobType || 'FULL_TIME',
-      experienceLevel: job.experienceLevel || '',
+      experienceLevel: job.experienceLevel || 'Entry-level',
       salaryRange: job.salaryRange || '',
       requiredSkills: job.requiredSkills || '',
       preferredSkills: job.preferredSkills || '',
       workMode: job.workMode || 'HYBRID',
-      educationLevel: job.educationLevel || '',
-      sponsorshipAvailable: job.sponsorshipAvailable || false
+      educationLevel: job.educationLevel || "Bachelor's",
+      sponsorshipAvailable: job.sponsorshipAvailable || false,
+      department: job.department || '',
+      gpaCutoff: job.gpaCutoff,
+      deadline: job.deadline ? job.deadline.substring(0, 10) : ''
     };
+    if (job.requiredSkills) {
+      this.requiredSkillsArray = job.requiredSkills.split(',').map((s: string) => s.trim()).filter(Boolean);
+    } else {
+      this.requiredSkillsArray = [];
+    }
+    if (job.salaryRange) {
+      const match = job.salaryRange.match(/₹?(\d+)\s*(?:LPA)?\s*-\s*₹?(\d+)\s*(?:LPA)?/i);
+      if (match) {
+        this.salaryMin = parseInt(match[1], 10);
+        this.salaryMax = parseInt(match[2], 10);
+      } else {
+        const singleMatch = job.salaryRange.match(/₹?(\d+)/);
+        if (singleMatch) {
+          this.salaryMin = parseInt(singleMatch[1], 10);
+          this.salaryMax = null;
+        } else {
+          this.salaryMin = null;
+          this.salaryMax = null;
+        }
+      }
+    } else {
+      this.salaryMin = null;
+      this.salaryMax = null;
+    }
     this.jobStep.set(1);
     this.activeMenu.set('edit-job');
   }
@@ -882,14 +965,41 @@ export class RecruiterDashboard implements OnInit, OnDestroy {
       requirements: job.requirements || '',
       location: job.location || '',
       jobType: job.jobType || 'FULL_TIME',
-      experienceLevel: job.experienceLevel || '',
+      experienceLevel: job.experienceLevel || 'Entry-level',
       salaryRange: job.salaryRange || '',
       requiredSkills: job.requiredSkills || '',
       preferredSkills: job.preferredSkills || '',
       workMode: job.workMode || 'HYBRID',
-      educationLevel: job.educationLevel || '',
-      sponsorshipAvailable: job.sponsorshipAvailable || false
+      educationLevel: job.educationLevel || "Bachelor's",
+      sponsorshipAvailable: job.sponsorshipAvailable || false,
+      department: job.department || '',
+      gpaCutoff: job.gpaCutoff,
+      deadline: job.deadline ? job.deadline.substring(0, 10) : ''
     };
+    if (job.requiredSkills) {
+      this.requiredSkillsArray = job.requiredSkills.split(',').map((s: string) => s.trim()).filter(Boolean);
+    } else {
+      this.requiredSkillsArray = [];
+    }
+    if (job.salaryRange) {
+      const match = job.salaryRange.match(/₹?(\d+)\s*(?:LPA)?\s*-\s*₹?(\d+)\s*(?:LPA)?/i);
+      if (match) {
+        this.salaryMin = parseInt(match[1], 10);
+        this.salaryMax = parseInt(match[2], 10);
+      } else {
+        const singleMatch = job.salaryRange.match(/₹?(\d+)/);
+        if (singleMatch) {
+          this.salaryMin = parseInt(singleMatch[1], 10);
+          this.salaryMax = null;
+        } else {
+          this.salaryMin = null;
+          this.salaryMax = null;
+        }
+      }
+    } else {
+      this.salaryMin = null;
+      this.salaryMax = null;
+    }
     this.jobStep.set(1);
     this.activeMenu.set('create-job');
   }

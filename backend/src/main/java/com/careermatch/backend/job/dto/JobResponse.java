@@ -24,6 +24,9 @@ public class JobResponse {
     private String educationLevel;
     private Boolean sponsorshipAvailable;
     private String status;
+    private String department;
+    private Double gpaCutoff;
+    private LocalDateTime deadline;
     private LocalDateTime createdAt;
 }
 
