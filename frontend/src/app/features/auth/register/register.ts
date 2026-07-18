@@ -23,10 +23,9 @@ export class Register {
     private readonly router: Router
   ) {
     this.registerForm = this.fb.group({
+      fullName: ['', [Validators.required]],
       email: ['', [Validators.required, Validators.email]],
       password: ['', [Validators.required, Validators.minLength(6)]],
-      firstName: ['', [Validators.required]],
-      lastName: ['', [Validators.required]],
       companyName: ['']
     });
   }
@@ -36,22 +35,14 @@ export class Register {
     this.errorMessage.set(null);
     this.successMessage.set(null);
 
-    const firstName = this.registerForm.get('firstName');
-    const lastName = this.registerForm.get('lastName');
     const companyName = this.registerForm.get('companyName');
 
     if (role === 'ROLE_STUDENT') {
-      firstName?.setValidators([Validators.required]);
-      lastName?.setValidators([Validators.required]);
       companyName?.clearValidators();
     } else {
-      firstName?.clearValidators();
-      lastName?.clearValidators();
       companyName?.setValidators([Validators.required]);
     }
 
-    firstName?.updateValueAndValidity();
-    lastName?.updateValueAndValidity();
     companyName?.updateValueAndValidity();
   }
 
@@ -66,45 +57,28 @@ export class Register {
     this.successMessage.set(null);
 
     const formVal = this.registerForm.value;
+    const parts = (formVal.fullName || '').trim().split(/\s+/);
+    const firstName = parts[0] || '';
+    const lastName = parts.slice(1).join(' ') || '';
+
     const payload: any = {
       email: formVal.email,
       password: formVal.password,
-      role: this.selectedRole()   // Always ROLE_STUDENT or ROLE_RECRUITER
+      role: this.selectedRole(),
+      firstName: firstName,
+      lastName: lastName
     };
 
-    if (this.selectedRole() === 'ROLE_STUDENT') {
-      payload.firstName = formVal.firstName;
-      payload.lastName = formVal.lastName;
-    } else {
+    if (this.selectedRole() === 'ROLE_RECRUITER') {
       payload.companyName = formVal.companyName;
     }
 
     this.authService.register(payload).subscribe({
       next: (res) => {
+        this.isLoading.set(false);
         if (res.success) {
-          this.successMessage.set('Registration successful! Logging in and redirecting to dashboard...');
-          
-          // Auto-login after successful registration
-          this.authService.login({ email: payload.email, password: payload.password }).subscribe({
-            next: (loginRes: any) => {
-              this.isLoading.set(false);
-              if (loginRes.success && loginRes.data) {
-                if (this.selectedRole() === 'ROLE_STUDENT') {
-                  this.router.navigate(['/student/dashboard']);
-                } else {
-                  this.router.navigate(['/recruiter/dashboard']);
-                }
-              } else {
-                this.router.navigate(['/login']);
-              }
-            },
-            error: () => {
-              this.isLoading.set(false);
-              this.router.navigate(['/login']);
-            }
-          });
+          this.successMessage.set('Registration successful! Please proceed to the login page.');
         } else {
-          this.isLoading.set(false);
           this.errorMessage.set(res.message || 'Registration failed. Please try again.');
         }
       },
@@ -112,7 +86,6 @@ export class Register {
         this.isLoading.set(false);
 
         if (err.status === 0) {
-          // Backend unreachable — do NOT create a fake session.
           this.errorMessage.set(
             'Cannot reach the server. Please check your connection or try again later.'
           );

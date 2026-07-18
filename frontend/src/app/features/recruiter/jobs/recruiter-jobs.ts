@@ -3,12 +3,10 @@ import { Router } from '@angular/router';
 import { NgIf, NgFor, NgClass, DatePipe } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { JobService, JobCreateDto } from '../../../core/services/job.service';
-import { Navbar } from '../../../shared/components/navbar/navbar';
-import { Footer } from '../../../shared/components/footer/footer';
 
 @Component({
   selector: 'app-recruiter-jobs',
-  imports: [Navbar, Footer, NgIf, NgFor, NgClass, DatePipe, FormsModule],
+  imports: [NgIf, NgFor, NgClass, DatePipe, FormsModule],
   templateUrl: './recruiter-jobs.html',
   styleUrl: './recruiter-jobs.css'
 })

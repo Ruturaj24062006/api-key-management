@@ -4,12 +4,10 @@ import { NgIf, NgFor } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { StudentProfileService } from '../../../core/services/student-profile.service';
 import { JobMatchesService } from '../../../core/services/job-matches.service';
-import { Navbar } from '../../../shared/components/navbar/navbar';
-import { Footer } from '../../../shared/components/footer/footer';
 
 @Component({
   selector: 'app-profile-review',
-  imports: [Navbar, Footer, NgIf, NgFor, FormsModule],
+  imports: [NgIf, NgFor, FormsModule],
   templateUrl: './profile-review.html',
   styleUrl: './profile-review.css'
 })

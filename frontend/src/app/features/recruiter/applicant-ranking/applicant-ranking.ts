@@ -5,12 +5,10 @@ import { FormsModule } from '@angular/forms';
 import { JobApplicationsService } from '../../../core/services/job-applications.service';
 import { JobService } from '../../../core/services/job.service';
 import { StudentProfileService } from '../../../core/services/student-profile.service';
-import { Navbar } from '../../../shared/components/navbar/navbar';
-import { Footer } from '../../../shared/components/footer/footer';
 
 @Component({
   selector: 'app-applicant-ranking',
-  imports: [Navbar, Footer, NgIf, NgFor, NgClass, DatePipe, PercentPipe, DecimalPipe, FormsModule],
+  imports: [NgIf, NgFor, NgClass, DatePipe, PercentPipe, DecimalPipe, FormsModule],
   templateUrl: './applicant-ranking.html',
   styleUrl: './applicant-ranking.css'
 })

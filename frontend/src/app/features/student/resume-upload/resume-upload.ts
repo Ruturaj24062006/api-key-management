@@ -2,12 +2,10 @@ import { Component, OnInit, OnDestroy, signal } from '@angular/core';
 import { Router } from '@angular/router';
 import { NgIf } from '@angular/common';
 import { StudentProfileService } from '../../../core/services/student-profile.service';
-import { Navbar } from '../../../shared/components/navbar/navbar';
-import { Footer } from '../../../shared/components/footer/footer';
 
 @Component({
   selector: 'app-resume-upload',
-  imports: [Navbar, Footer, NgIf],
+  imports: [NgIf],
   templateUrl: './resume-upload.html',
   styleUrl: './resume-upload.css'
 })

@@ -1,54 +1,97 @@
-<div class="auth-wrapper">
-  <div class="auth-card">
-    <div class="auth-header">
-      <div class="brand-logo"><a routerLink="/">NEXUS</a></div>
-      <h2 class="auth-title">Welcome Back</h2>
-      <p class="auth-subtitle">Log in to your NEXUS account.</p>
-    </div>
-
-    <!-- Error Alert Box -->
-    <div *ngIf="errorMessage()" class="alert alert-error">
-      {{ errorMessage() }}
-    </div>
-
-    <form [formGroup]="loginForm" (ngSubmit)="onSubmit()" class="auth-form">
-      <!-- Email Input -->
-      <div class="form-group" [ngClass]="{'has-error': loginForm.get('email')?.touched && loginForm.get('email')?.invalid}">
-        <label for="email" class="form-label">Email Address</label>
-        <input type="email" id="email" formControlName="email" placeholder="you@example.com" class="form-input" autocomplete="email">
-        <span *ngIf="loginForm.get('email')?.touched && loginForm.get('email')?.errors?.['required']" class="error-msg">Email is required</span>
-        <span *ngIf="loginForm.get('email')?.touched && loginForm.get('email')?.errors?.['email']" class="error-msg">Please enter a valid email</span>
+<div class="auth-split-wrapper">
+  <!-- Left Side: Visual Showcase Panel -->
+  <div class="auth-visual-panel">
+    <div class="visual-content">
+      <div class="visual-brand">
+        <svg class="brand-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+          <polygon points="12 2 2 7 12 12 22 7 12 2"/>
+          <polyline points="2 17 12 22 22 17"/>
+          <polyline points="2 12 17 17 22 12"/>
+        </svg>
+        <span class="brand-name">NEXUS</span>
       </div>
 
-      <!-- Password Input -->
-      <div class="form-group" [ngClass]="{'has-error': loginForm.get('password')?.touched && loginForm.get('password')?.invalid}">
-        <div class="label-row">
-          <label for="password" class="form-label">Password</label>
-          <a routerLink="/forgot-password" class="forgot-link">Forgot?</a>
+      <div class="visual-hero">
+        <h1 class="visual-title">The Intelligent Bridge Between Resumes & Roles</h1>
+        <p class="visual-subtitle">Leverage advanced match metrics, clear sponsorship scoring, and instant ranking metrics designed specifically for students and recruiters.</p>
+      </div>
+
+      <div class="visual-features">
+        <div class="visual-feature-item">
+          <div class="feature-badge">✨</div>
+          <div class="feature-details">
+            <h3>AI Match Diagnostics</h3>
+            <p>Know exactly how candidate resumes match job specifications down to specific missing skills.</p>
+          </div>
         </div>
-        <input type="password" id="password" formControlName="password" placeholder="••••••••" class="form-input" autocomplete="current-password">
-        <span *ngIf="loginForm.get('password')?.touched && loginForm.get('password')?.errors?.['required']" class="error-msg">Password is required</span>
-        <span *ngIf="loginForm.get('password')?.touched && loginForm.get('password')?.errors?.['minlength']" class="error-msg">Password must be at least 6 characters</span>
+        <div class="visual-feature-item">
+          <div class="feature-badge">🔒</div>
+          <div class="feature-details">
+            <h3>Role-Based Onboarding</h3>
+            <p>Custom pipelines optimized specifically for student matches or company recruiter candidate ranking.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="visual-footer">
+      <span>© 2026 NEXUS. Empowering academic and professional transitions.</span>
+    </div>
+  </div>
+
+  <!-- Right Side: Form Panel -->
+  <div class="auth-form-panel">
+    <div class="auth-card">
+      <div class="auth-header">
+        <div class="brand-logo"><a routerLink="/">NEXUS</a></div>
+        <h2 class="auth-title">Welcome Back</h2>
+        <p class="auth-subtitle">Log in to your NEXUS account.</p>
       </div>
 
-      <!-- Submit Button -->
-      <button type="submit" [disabled]="loginForm.invalid || isLoading()" class="btn btn-primary btn-block">
-        <span *ngIf="!isLoading()">Log In</span>
-        <span *ngIf="isLoading()" class="spinner-inline"></span>
-      </button>
-    </form>
+      <!-- Error Alert Box -->
+      <div *ngIf="errorMessage()" class="alert alert-error">
+        {{ errorMessage() }}
+      </div>
 
-    <!-- Social SSO Divider -->
-    <div class="sso-divider">
-      <span class="divider-text">or continue with</span>
-    </div>
+      <form [formGroup]="loginForm" (ngSubmit)="onSubmit()" class="auth-form">
+        <!-- Email Input -->
+        <div class="form-group" [ngClass]="{'has-error': loginForm.get('email')?.touched && loginForm.get('email')?.invalid}">
+          <label for="email" class="form-label">Email Address</label>
+          <input type="email" id="email" formControlName="email" placeholder="you@example.com" class="form-input" autocomplete="email">
+          <span *ngIf="loginForm.get('email')?.touched && loginForm.get('email')?.errors?.['required']" class="error-msg">Email is required</span>
+          <span *ngIf="loginForm.get('email')?.touched && loginForm.get('email')?.errors?.['email']" class="error-msg">Please enter a valid email</span>
+        </div>
 
-    <div class="google-btn-container" style="display: flex; justify-content: center; width: 100%; margin-top: 1rem;">
-      <div id="googleBtn"></div>
-    </div>
+        <!-- Password Input -->
+        <div class="form-group" [ngClass]="{'has-error': loginForm.get('password')?.touched && loginForm.get('password')?.invalid}">
+          <div class="label-row">
+            <label for="password" class="form-label">Password</label>
+            <a routerLink="/forgot-password" class="forgot-link">Forgot?</a>
+          </div>
+          <input type="password" id="password" formControlName="password" placeholder="••••••••" class="form-input" autocomplete="current-password">
+          <span *ngIf="loginForm.get('password')?.touched && loginForm.get('password')?.errors?.['required']" class="error-msg">Password is required</span>
+          <span *ngIf="loginForm.get('password')?.touched && loginForm.get('password')?.errors?.['minlength']" class="error-msg">Password must be at least 6 characters</span>
+        </div>
 
-    <div class="auth-footer">
-      New to NEXUS? <a routerLink="/register" class="auth-link">Create an account</a>
+        <!-- Submit Button -->
+        <button type="submit" [disabled]="loginForm.invalid || isLoading()" class="btn btn-primary btn-block">
+          <span *ngIf="!isLoading()">Log In</span>
+          <span *ngIf="isLoading()" class="spinner-inline"></span>
+        </button>
+      </form>
+
+      <!-- Social SSO Divider -->
+      <div class="sso-divider">
+        <span class="divider-text">or continue with</span>
+      </div>
+
+      <div class="google-btn-container" style="display: flex; justify-content: center; width: 100%; margin-top: 1rem;">
+        <div id="googleBtn"></div>
+      </div>
+
+      <div class="auth-footer">
+        New to NEXUS? <a routerLink="/register" class="auth-link">Create an account</a>
+      </div>
     </div>
   </div>
 </div>

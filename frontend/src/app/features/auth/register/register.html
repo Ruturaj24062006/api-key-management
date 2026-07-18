@@ -1,81 +1,121 @@
-<div class="auth-wrapper">
-  <div class="auth-card">
-    <div class="auth-header">
-      <div class="brand-logo"><a routerLink="/">NEXUS</a></div>
-      <h2 class="auth-title">Create Account</h2>
-      <p class="auth-subtitle">Join NEXUS to align your career or candidate search.</p>
-    </div>
+<div class="auth-split-wrapper">
+  <!-- Left Side: Visual Showcase Panel -->
+  <div class="auth-visual-panel">
+    <div class="visual-content">
+      <div class="visual-brand">
+        <svg class="brand-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+          <polygon points="12 2 2 7 12 12 22 7 12 2"/>
+          <polyline points="2 17 12 22 22 17"/>
+          <polyline points="2 12 17 17 22 12"/>
+        </svg>
+        <span class="brand-name">NEXUS</span>
+      </div>
 
-    <!-- Success & Error Banners -->
-    <div *ngIf="successMessage()" class="alert alert-success">
-      <span>{{ successMessage() }}</span>
-      <a routerLink="/login" class="btn btn-secondary btn-sm" style="margin-top: 0.5rem; display: inline-block;">Go to Login &rarr;</a>
-    </div>
-    <div *ngIf="errorMessage()" class="alert alert-error">
-      <span>{{ errorMessage() }}</span>
-      <a *ngIf="errorMessage()?.includes('log in') || errorMessage()?.includes('registered')" routerLink="/login" class="btn btn-secondary btn-sm" style="margin-top: 0.5rem; display: inline-block;">Go to Login &rarr;</a>
-    </div>
+      <div class="visual-hero">
+        <h1 class="visual-title">The Intelligent Bridge Between Resumes & Roles</h1>
+        <p class="visual-subtitle">Leverage advanced match metrics, clear sponsorship scoring, and instant ranking metrics designed specifically for students and recruiters.</p>
+      </div>
 
-    <!-- Role Selection Tabs -->
-    <div class="role-tabs">
-      <button type="button" class="role-tab" [class.active]="selectedRole() === 'ROLE_STUDENT'" (click)="selectRole('ROLE_STUDENT')">
-        Student
-      </button>
-      <button type="button" class="role-tab" [class.active]="selectedRole() === 'ROLE_RECRUITER'" (click)="selectRole('ROLE_RECRUITER')">
-        Recruiter
-      </button>
-    </div>
-
-    <form [formGroup]="registerForm" (ngSubmit)="onSubmit()" class="auth-form">
-      <!-- Dynamic Student Fields -->
-      <div *ngIf="selectedRole() === 'ROLE_STUDENT'" class="form-row-grid">
-        <div class="form-group" [ngClass]="{'has-error': registerForm.get('firstName')?.touched && registerForm.get('firstName')?.invalid}">
-          <label for="firstName" class="form-label">First Name</label>
-          <input type="text" id="firstName" formControlName="firstName" placeholder="John" class="form-input" autocomplete="given-name">
-          <span *ngIf="registerForm.get('firstName')?.touched && registerForm.get('firstName')?.errors?.['required']" class="error-msg">Required</span>
+      <div class="visual-features">
+        <div class="visual-feature-item">
+          <div class="feature-badge">✨</div>
+          <div class="feature-details">
+            <h3>AI Match Diagnostics</h3>
+            <p>Know exactly how candidate resumes match job specifications down to specific missing skills.</p>
+          </div>
         </div>
-
-        <div class="form-group" [ngClass]="{'has-error': registerForm.get('lastName')?.touched && registerForm.get('lastName')?.invalid}">
-          <label for="lastName" class="form-label">Last Name</label>
-          <input type="text" id="lastName" formControlName="lastName" placeholder="Doe" class="form-input" autocomplete="family-name">
-          <span *ngIf="registerForm.get('lastName')?.touched && registerForm.get('lastName')?.errors?.['required']" class="error-msg">Required</span>
+        <div class="visual-feature-item">
+          <div class="feature-badge">🔒</div>
+          <div class="feature-details">
+            <h3>Role-Based Onboarding</h3>
+            <p>Custom pipelines optimized specifically for student matches or company recruiter candidate ranking.</p>
+          </div>
         </div>
       </div>
+    </div>
 
-      <!-- Dynamic Recruiter Fields -->
-      <div *ngIf="selectedRole() === 'ROLE_RECRUITER'">
-        <div class="form-group" [ngClass]="{'has-error': registerForm.get('companyName')?.touched && registerForm.get('companyName')?.invalid}">
-          <label for="companyName" class="form-label">Company Name</label>
-          <input type="text" id="companyName" formControlName="companyName" placeholder="Acme Inc" class="form-input" autocomplete="organization">
-          <span *ngIf="registerForm.get('companyName')?.touched && registerForm.get('companyName')?.errors?.['required']" class="error-msg">Company Name is required</span>
+    <div class="visual-footer">
+      <span>© 2026 NEXUS. Empowering academic and professional transitions.</span>
+    </div>
+  </div>
+
+  <!-- Right Side: Form Panel -->
+  <div class="auth-form-panel">
+    <div class="auth-card animate-fade-in">
+      <div class="auth-header">
+        <div class="brand-logo"><a routerLink="/">NEXUS</a></div>
+        <h2 class="auth-title">Create Account</h2>
+        <p class="auth-subtitle">Join NEXUS to align your career or candidate search.</p>
+      </div>
+
+      <!-- Success Banner (Full Block Replacement) -->
+      <div *ngIf="successMessage()" class="alert alert-success" style="text-align: center; padding: 2.5rem 1.5rem; border: none; background: rgba(40, 167, 69, 0.08); border-radius: 12px; margin-bottom: 0;">
+        <div style="font-size: 3.5rem; margin-bottom: 1rem;">✨</div>
+        <h3 style="margin-bottom: 0.75rem; font-size: 1.4rem; font-weight: 800; color: #1e7e34;">Registration Successful!</h3>
+        <p style="margin-bottom: 1.75rem; color: var(--text-secondary); font-size: 0.95rem;">{{ successMessage() }}</p>
+        <a routerLink="/login" class="btn btn-primary btn-block" style="display: block; padding: 0.85rem; border-radius: 8px; font-weight: 700; text-align: center; background: var(--primary-color); color: #fff; text-decoration: none; box-shadow: 0 4px 15px rgba(var(--primary-rgb), 0.2);">Go to Login Page</a>
+      </div>
+
+      <!-- Error Banner -->
+      <div *ngIf="errorMessage()" class="alert alert-error" style="margin-bottom: 1.5rem;">
+        <span>{{ errorMessage() }}</span>
+        <a *ngIf="errorMessage()?.includes('log in') || errorMessage()?.includes('registered')" routerLink="/login" class="btn btn-secondary btn-sm" style="margin-top: 0.5rem; display: inline-block;">Go to Login &rarr;</a>
+      </div>
+
+      <!-- Wrap all forms and other elements in conditional *ngIf -->
+      <div *ngIf="!successMessage()">
+        <!-- Role Selection Tabs -->
+        <div class="role-tabs" style="margin-bottom: 1.5rem;">
+          <button type="button" class="role-tab" [class.active]="selectedRole() === 'ROLE_STUDENT'" (click)="selectRole('ROLE_STUDENT')">
+            Student
+          </button>
+          <button type="button" class="role-tab" [class.active]="selectedRole() === 'ROLE_RECRUITER'" (click)="selectRole('ROLE_RECRUITER')">
+            Recruiter
+          </button>
+        </div>
+
+        <form [formGroup]="registerForm" (ngSubmit)="onSubmit()" class="auth-form">
+          <!-- Full Name Field (Common for both) -->
+          <div class="form-group" [ngClass]="{'has-error': registerForm.get('fullName')?.touched && registerForm.get('fullName')?.invalid}">
+            <label for="fullName" class="form-label">Full Name</label>
+            <input type="text" id="fullName" formControlName="fullName" placeholder="e.g. John Doe" class="form-input" autocomplete="name">
+            <span *ngIf="registerForm.get('fullName')?.touched && registerForm.get('fullName')?.errors?.['required']" class="error-msg">Full Name is required</span>
+          </div>
+
+          <!-- Recruiter specific: Company Name Field -->
+          <div *ngIf="selectedRole() === 'ROLE_RECRUITER'" class="form-group" [ngClass]="{'has-error': registerForm.get('companyName')?.touched && registerForm.get('companyName')?.invalid}">
+            <label for="companyName" class="form-label">Company Name</label>
+            <input type="text" id="companyName" formControlName="companyName" placeholder="e.g. Acme Inc" class="form-input" autocomplete="organization">
+            <span *ngIf="registerForm.get('companyName')?.touched && registerForm.get('companyName')?.errors?.['required']" class="error-msg">Company Name is required</span>
+          </div>
+
+          <!-- Common Fields: Email (labeled 'Work Email Address' for recruiter) -->
+          <div class="form-group" [ngClass]="{'has-error': registerForm.get('email')?.touched && registerForm.get('email')?.invalid}">
+            <label for="email" class="form-label">{{ selectedRole() === 'ROLE_RECRUITER' ? 'Work Email Address' : 'Email Address' }}</label>
+            <input type="email" id="email" formControlName="email" placeholder="you@example.com" class="form-input" autocomplete="email">
+            <span *ngIf="registerForm.get('email')?.touched && registerForm.get('email')?.errors?.['required']" class="error-msg">Email is required</span>
+            <span *ngIf="registerForm.get('email')?.touched && registerForm.get('email')?.errors?.['email']" class="error-msg">Please enter a valid email</span>
+          </div>
+
+          <!-- Common Fields: Password -->
+          <div class="form-group" [ngClass]="{'has-error': registerForm.get('password')?.touched && registerForm.get('password')?.invalid}">
+            <label for="password" class="form-label">Password</label>
+            <input type="password" id="password" formControlName="password" placeholder="Min. 6 characters" class="form-input" autocomplete="new-password">
+            <span *ngIf="registerForm.get('password')?.touched && registerForm.get('password')?.errors?.['required']" class="error-msg">Password is required</span>
+            <span *ngIf="registerForm.get('password')?.touched && registerForm.get('password')?.errors?.['minlength']" class="error-msg">Must be at least 6 characters</span>
+          </div>
+
+          <!-- Register Button -->
+          <button type="submit" [disabled]="registerForm.invalid || isLoading()" class="btn btn-primary btn-block">
+            <span *ngIf="!isLoading()">Register</span>
+            <span *ngIf="isLoading()" class="spinner-inline"></span>
+          </button>
+        </form>
+
+        <div class="auth-footer" style="margin-top: 1.5rem; text-align: center;">
+          Already have an account? <a routerLink="/login" class="auth-link">Log in</a>
         </div>
       </div>
-
-      <!-- Common Fields: Email -->
-      <div class="form-group" [ngClass]="{'has-error': registerForm.get('email')?.touched && registerForm.get('email')?.invalid}">
-        <label for="email" class="form-label">Email Address</label>
-        <input type="email" id="email" formControlName="email" placeholder="you@example.com" class="form-input" autocomplete="email">
-        <span *ngIf="registerForm.get('email')?.touched && registerForm.get('email')?.errors?.['required']" class="error-msg">Email is required</span>
-        <span *ngIf="registerForm.get('email')?.touched && registerForm.get('email')?.errors?.['email']" class="error-msg">Please enter a valid email</span>
-      </div>
-
-      <!-- Common Fields: Password -->
-      <div class="form-group" [ngClass]="{'has-error': registerForm.get('password')?.touched && registerForm.get('password')?.invalid}">
-        <label for="password" class="form-label">Password</label>
-        <input type="password" id="password" formControlName="password" placeholder="Min. 6 characters" class="form-input" autocomplete="new-password">
-        <span *ngIf="registerForm.get('password')?.touched && registerForm.get('password')?.errors?.['required']" class="error-msg">Password is required</span>
-        <span *ngIf="registerForm.get('password')?.touched && registerForm.get('password')?.errors?.['minlength']" class="error-msg">Must be at least 6 characters</span>
-      </div>
-
-      <!-- Register Button -->
-      <button type="submit" [disabled]="registerForm.invalid || isLoading()" class="btn btn-primary btn-block">
-        <span *ngIf="!isLoading()">Register</span>
-        <span *ngIf="isLoading()" class="spinner-inline"></span>
-      </button>
-    </form>
-
-    <div class="auth-footer">
-      Already have an account? <a routerLink="/login" class="auth-link">Log in</a>
     </div>
   </div>
 </div>

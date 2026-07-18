@@ -29,12 +29,6 @@ export class Login implements OnInit {
   }
 
   ngOnInit(): void {
-    // If a valid session already exists, redirect to the user's correct dashboard —
-    // NOT hardcoded to student.
-    if (this.authService.isAuthenticated()) {
-      this.authService.redirectToDashboard(this.router);
-      return;
-    }
     this.initGoogleSignIn();
   }
 
