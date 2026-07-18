@@ -127,11 +127,14 @@ export class StudentDashboard implements OnInit, OnDestroy {
   ngOnInit(): void {
     this.updateGreeting();
     const currentUrl = this.router.url;
-    if (currentUrl.includes('find-jobs') || currentUrl.includes('jobs') || currentUrl.includes('discover')) {
+    if (currentUrl.endsWith('/find-jobs') || currentUrl.endsWith('/jobs')) {
       this.activeTab.set('discover');
       this.searchJobs();
     } else if (currentUrl.includes('applications')) {
       this.activeTab.set('applications');
+    } else {
+      // Always stay on recommendations (Dashboard view) when opening /student/dashboard
+      this.activeTab.set('recommendations');
     }
     this.checkProfileCompletenessAndLoad();
   }
@@ -498,17 +501,6 @@ export class StudentDashboard implements OnInit, OnDestroy {
     if (tab === 'discover') {
       if (this.searchResults().length === 0) {
         this.searchJobs();
-      }
-      if (typeof window !== 'undefined') {
-        window.history.replaceState({}, '', '/student/find-jobs');
-      }
-    } else if (tab === 'recommendations') {
-      if (typeof window !== 'undefined') {
-        window.history.replaceState({}, '', '/student/dashboard');
-      }
-    } else if (tab === 'applications') {
-      if (typeof window !== 'undefined') {
-        window.history.replaceState({}, '', '/student/dashboard');
       }
     }
   }
@@ -918,8 +910,7 @@ export class StudentDashboard implements OnInit, OnDestroy {
 
   private onConfirmSuccess(): void {
     this.closeUploadModal();
-    this.router.navigate(['/student/find-jobs']);
-
+    this.changeTab('discover');
   }
 
   respondToInterview(applicationId: string, response: string): void {
