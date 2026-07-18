@@ -220,17 +220,6 @@
 
       <!-- RECOMMENDATIONS SECTION -->
       <div class="recommendations-section animate-fade-in" *ngIf="activeTab() === 'recommendations'">
-        <div class="matches-header-bar">
-          <div>
-            <h2 class="matches-title">Strong matches ({{ matches().length }})</h2>
-            <p class="matches-subtitle">Jobs that best fit for this resume and profile</p>
-          </div>
-        </div>
-        
-        <!-- Loading state -->
-        <div class="empty-matches-box glass-card text-center" *ngIf="matches().length === 0">
-          <p>Analyzing job markets and matching with your skills...</p>
-        </div>
 
         <!-- Recommendations Cards List (Matching Image 2 Design) -->
         <div class="recommendations-grid" *ngIf="matches().length > 0">
