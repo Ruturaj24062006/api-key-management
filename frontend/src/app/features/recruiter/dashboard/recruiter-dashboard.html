@@ -406,12 +406,36 @@
 
     <!-- ═══════════════════════════ 3. ALL JOBS PANEL ═══════════════════════════ -->
     <div class="workspace-panel" *ngIf="activeMenu() === 'all-jobs'">
+      <!-- Header Actions -->
       <div class="workspace-header-actions">
         <div>
           <h1 class="workspace-title">Manage Job Listings</h1>
-          <p class="workspace-subtitle">View, edit, clone, or close your published opportunities</p>
+          <p class="workspace-subtitle">Filter, view, edit, duplicate, or delete your published job postings</p>
         </div>
-        <button class="btn btn-primary btn-sm" (click)="selectMenu('create-job')">+ Post New Job</button>
+        <div class="job-actions-toolbar">
+          <button class="btn btn-primary btn-sm" (click)="selectMenu('create-job')">+ Create Job</button>
+          <button class="btn btn-secondary btn-sm" (click)="exportJobs()">Export Jobs</button>
+          
+          <label class="btn btn-secondary btn-sm label-file-input">
+            Import Jobs
+            <input type="file" (change)="importJobs($event)" accept=".json" style="display: none;">
+          </label>
+
+          <button class="btn btn-warning btn-sm" (click)="showArchivedOnly.set(!showArchivedOnly())">
+            {{ showArchivedOnly() ? 'Show Active Listings' : 'Show Closed/Archived' }}
+          </button>
+        </div>
+      </div>
+
+      <!-- Mini metrics graph for Job module -->
+      <div class="job-mini-stats glass-card animate-fade-in" *ngIf="myJobs().length > 0">
+        <div class="mini-stat-info">
+          <span>Active listings ratio:</span>
+          <strong>{{ activeJobsCount() }} Active / {{ closedJobsCount() }} Closed</strong>
+        </div>
+        <div class="mini-stat-bar-bg">
+          <div class="mini-stat-bar-fill" [style.width.%]="(myJobs().length > 0 ? (activeJobsCount() / myJobs().length)*100 : 0)"></div>
+        </div>
       </div>
 
       <div class="stats-loading-row" *ngIf="isLoadingJobs()">
@@ -419,33 +443,63 @@
         <span>Syncing published listings...</span>
       </div>
 
-      <div class="empty-matches-box glass-card text-center" *ngIf="!isLoadingJobs() && myJobs().length === 0">
-        <p>No jobs found. Click "+ Post New Job" to list your first opportunity.</p>
+      <div class="empty-matches-box glass-card text-center" *ngIf="!isLoadingJobs() && getFilteredJobs().length === 0">
+        <p>No jobs found under this category. Click "+ Create Job" or toggle filters.</p>
       </div>
 
-      <div class="jobs-list-grid animate-fade-in" *ngIf="!isLoadingJobs() && myJobs().length > 0">
-        <div class="job-item-card glass-card" *ngFor="let job of myJobs()">
-          <div class="job-item-header">
-            <div>
-              <h3 class="job-item-title">{{ job.title }}</h3>
-              <p class="job-item-meta">{{ job.location }} &bull; {{ job.jobType }} &bull; {{ job.workMode }}</p>
-            </div>
-            <span class="job-status-badge" [class.closed]="job.status === 'CLOSED'">{{ job.status }}</span>
-          </div>
-
-          <div class="job-item-body">
-            <p class="job-item-desc">{{ job.description | slice:0:150 }}{{ job.description.length > 150 ? '...' : '' }}</p>
-            <div class="job-item-skills">
-              <span class="tag-skill" *ngFor="let s of job.requiredSkills.split(',')">{{ s.trim() }}</span>
-            </div>
-          </div>
-
-          <div class="job-item-actions">
-            <button class="btn btn-secondary btn-sm" (click)="editJob(job)">Edit</button>
-            <button class="btn btn-secondary btn-sm" (click)="duplicateJob(job)">Duplicate</button>
-            <button class="btn btn-danger btn-sm" (click)="closeJob(job.id)" *ngIf="job.status !== 'CLOSED'">Close</button>
-          </div>
-        </div>
+      <!-- Job Table -->
+      <div class="table-container glass-card animate-fade-in" *ngIf="!isLoadingJobs() && getFilteredJobs().length > 0">
+        <table class="job-workspace-table">
+          <thead>
+            <tr>
+              <th>Role</th>
+              <th>Company</th>
+              <th>Applications</th>
+              <th>Recommended</th>
+              <th>Location</th>
+              <th>Status</th>
+              <th>Deadline</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let job of getFilteredJobs()">
+              <td>
+                <div class="job-role-info">
+                  <span class="job-role-title">{{ job.title }}</span>
+                  <span class="job-role-type">{{ job.jobType }} &bull; {{ job.workMode }}</span>
+                </div>
+              </td>
+              <td>{{ profile?.companyName || 'N/A' }}</td>
+              <td>
+                <span class="badge-count" (click)="selectedJobIdForApplications.set(job.id); selectMenu('applications-all')">
+                  {{ getJobApplicationsCount(job.id) }}
+                </span>
+              </td>
+              <td>
+                <span class="badge-count recommended" (click)="selectedJobIdForMatching.set(job.id); selectMenu('matching-recommended')">
+                  {{ getJobRecommendedCount(job.id) }}
+                </span>
+              </td>
+              <td>{{ job.location || 'Remote' }}</td>
+              <td>
+                <span class="job-table-status-pill text-uppercase" [class.closed]="job.status === 'CLOSED'" [class.active]="job.status === 'ACTIVE'">
+                  {{ job.status }}
+                </span>
+              </td>
+              <td>{{ getJobDeadline(job.createdAt) | date:'mediumDate' }}</td>
+              <td>
+                <div class="job-table-actions-row">
+                  <button class="action-link-btn text-primary" (click)="viewJobDetailModal(job)">View</button>
+                  <button class="action-link-btn text-secondary" (click)="editJob(job)">Edit</button>
+                  <button class="action-link-btn text-success" (click)="duplicateJob(job)">Duplicate</button>
+                  <button class="action-link-btn text-warning" (click)="closeJob(job.id)" *ngIf="job.status !== 'CLOSED'">Close</button>
+                  <button class="action-link-btn text-danger" (click)="deleteJob(job.id)">Delete</button>
+                </div>
+              </td>
+            </tr>
+          </tbody>
+        </table>
       </div>
     </div>
 
@@ -761,6 +815,44 @@
       <div class="modal-actions-row">
         <button class="btn btn-secondary" (click)="closeActionModal()">Cancel</button>
         <button class="btn btn-primary" (click)="submitAction()">Confirm</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- JOB DETAIL VIEWER MODAL -->
+<div class="modal-backdrop" *ngIf="selectedJobForDetail()">
+  <div class="modal-container detail-modal animate-slide-in">
+    <div class="modal-header">
+      <h2 class="modal-title">Job Details Overview</h2>
+      <button class="close-btn" (click)="closeJobDetailModal()">&times;</button>
+    </div>
+
+    <div class="modal-body" *ngIf="selectedJobForDetail() as job">
+      <div class="job-detail-header-info">
+        <h3>{{ job.title }}</h3>
+        <p class="job-detail-meta">{{ job.location || 'Remote' }} &bull; {{ job.jobType }} &bull; {{ job.workMode }}</p>
+      </div>
+
+      <div class="job-detail-body-section">
+        <h4>Description</h4>
+        <p class="job-detail-text">{{ job.description }}</p>
+
+        <h4 *ngIf="job.requirements">Requirements</h4>
+        <p class="job-detail-text" *ngIf="job.requirements">{{ job.requirements }}</p>
+
+        <h4 *ngIf="job.salaryRange">Salary Range</h4>
+        <p class="job-detail-text" *ngIf="job.salaryRange">{{ job.salaryRange }}</p>
+
+        <h4>Required Skills</h4>
+        <div class="job-detail-skills">
+          <span class="tag-skill" *ngFor="let s of job.requiredSkills.split(',')">{{ s.trim() }}</span>
+        </div>
+      </div>
+
+      <div class="modal-actions-row">
+        <button class="btn btn-secondary" (click)="closeJobDetailModal()">Close</button>
+        <button class="btn btn-primary" (click)="editJob(job); closeJobDetailModal()">Edit Listing</button>
       </div>
     </div>
   </div>

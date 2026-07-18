@@ -1059,3 +1059,227 @@
   font-weight: 500;
 }
 
+/* ═══════════════════════════════ JOB MODULE WORKSPACE TABLE & TOOLBAR ═══════════════════════════════ */
+.job-actions-toolbar {
+  display: flex;
+  gap: 0.75rem;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.label-file-input {
+  cursor: pointer;
+  margin-bottom: 0;
+  display: inline-block;
+}
+
+.job-mini-stats {
+  padding: 1.25rem 1.75rem;
+  background: white;
+  border-radius: 14px;
+  margin-bottom: 2.2rem;
+  border: 1px solid rgba(118, 38, 22, 0.06);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 2.5rem;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.02);
+}
+
+.mini-stat-info {
+  display: flex;
+  gap: 0.88rem;
+  font-size: 0.88rem;
+  font-weight: 700;
+  color: var(--text-dark);
+  white-space: nowrap;
+}
+
+.mini-stat-info strong {
+  color: var(--primary-color);
+}
+
+.mini-stat-bar-bg {
+  flex: 1;
+  height: 8px;
+  background: rgba(0, 0, 0, 0.04);
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.mini-stat-bar-fill {
+  height: 100%;
+  background: linear-gradient(90deg, var(--primary-color) 0%, #d84b35 100%);
+  border-radius: 4px;
+  transition: width 0.4s ease;
+}
+
+.table-container {
+  overflow-x: auto;
+  background: white;
+  border-radius: 16px;
+  border: 1px solid rgba(118, 38, 22, 0.06);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.02);
+}
+
+.job-workspace-table {
+  width: 100%;
+  border-collapse: collapse;
+  text-align: left;
+}
+
+.job-workspace-table th {
+  padding: 1.25rem 1.5rem;
+  background: rgba(118, 38, 22, 0.02);
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+}
+
+.job-workspace-table td {
+  padding: 1.25rem 1.5rem;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+  font-size: 0.88rem;
+  color: var(--text-dark);
+  vertical-align: middle;
+}
+
+.job-role-info {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.job-role-title {
+  font-weight: 800;
+  color: var(--text-dark);
+  font-size: 0.95rem;
+}
+
+.job-role-type {
+  font-size: 0.78rem;
+  color: var(--text-muted);
+  font-weight: 600;
+}
+
+.badge-count {
+  display: inline-block;
+  padding: 0.25rem 0.65rem;
+  border-radius: 20px;
+  font-weight: 700;
+  font-size: 0.8rem;
+  background: rgba(66, 133, 244, 0.08);
+  color: #4285f4;
+  cursor: pointer;
+  transition: background 0.15s ease;
+}
+
+.badge-count:hover {
+  background: rgba(66, 133, 244, 0.15);
+}
+
+.badge-count.recommended {
+  background: rgba(30, 142, 62, 0.08);
+  color: #1e8e3e;
+}
+
+.badge-count.recommended:hover {
+  background: rgba(30, 142, 62, 0.15);
+}
+
+.job-table-status-pill {
+  font-size: 0.72rem;
+  font-weight: 800;
+  padding: 0.25rem 0.65rem;
+  border-radius: 20px;
+  display: inline-block;
+}
+
+.job-table-status-pill.active {
+  background: rgba(30, 142, 62, 0.1);
+  color: #1e8e3e;
+}
+
+.job-table-status-pill.closed {
+  background: rgba(197, 34, 31, 0.1);
+  color: #c5221f;
+}
+
+.job-table-actions-row {
+  display: flex;
+  gap: 0.75rem;
+  align-items: center;
+}
+
+.action-link-btn {
+  background: transparent;
+  border: none;
+  font-size: 0.82rem;
+  font-weight: 700;
+  cursor: pointer;
+  padding: 0;
+  transition: filter 0.15s ease;
+}
+
+.action-link-btn:hover {
+  filter: brightness(0.85);
+  text-decoration: underline;
+}
+
+/* Job Detail modal specific styling */
+.job-detail-header-info {
+  margin-bottom: 2rem;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+  padding-bottom: 1.25rem;
+}
+
+.job-detail-header-info h3 {
+  font-family: var(--font-serif);
+  font-size: 1.5rem;
+  font-weight: 900;
+  color: var(--text-dark);
+}
+
+.job-detail-meta {
+  font-size: 0.9rem;
+  color: var(--text-muted);
+  margin-top: 0.35rem;
+  font-weight: 600;
+}
+
+.job-detail-body-section {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+  margin-bottom: 2.2rem;
+}
+
+.job-detail-body-section h4 {
+  font-size: 0.92rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--text-muted);
+  margin-bottom: 0.25rem;
+}
+
+.job-detail-text {
+  font-size: 0.95rem;
+  line-height: 1.5;
+  color: var(--text-dark);
+  background: rgba(0, 0, 0, 0.01);
+  padding: 1rem;
+  border-radius: 8px;
+  border-left: 3px solid rgba(0, 0, 0, 0.06);
+}
+
+.job-detail-skills {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+

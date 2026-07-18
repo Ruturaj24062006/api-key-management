@@ -73,6 +73,8 @@ export class RecruiterDashboard implements OnInit {
   jobSuccessMessage = signal<string | null>(null);
 
   // Candidate Matching & Application Management
+  showArchivedOnly = signal<boolean>(false);
+  selectedJobForDetail = signal<any | null>(null);
   selectedJobIdForMatching = signal<string>('');
   matchingCandidates = signal<any[]>([]);
   isLoadingCandidates = signal<boolean>(false);
@@ -324,6 +326,101 @@ export class RecruiterDashboard implements OnInit {
       }
     });
     this.recentActivitiesList.set(activities.sort((a, b) => b.time.getTime() - a.time.getTime()).slice(0, 6));
+  }
+
+  getFilteredJobs(): any[] {
+    const showArchived = this.showArchivedOnly();
+    return this.myJobs().filter(j => showArchived ? (j.status === 'CLOSED' || j.status === 'PAUSED') : (j.status === 'ACTIVE' || j.status === 'DRAFT'));
+  }
+
+  getJobApplicationsCount(jobId: string): number {
+    return this.allCompanyApplications().filter(a => a.jobId === jobId).length;
+  }
+
+  getJobRecommendedCount(jobId: string): number {
+    return this.allCompanyApplications().filter(a => a.jobId === jobId && (a.matchScore || 0) >= 70).length;
+  }
+
+  getJobDeadline(createdAtStr: string): Date {
+    const date = createdAtStr ? new Date(createdAtStr) : new Date();
+    date.setDate(date.getDate() + 30);
+    return date;
+  }
+
+  deleteJob(jobId: string): void {
+    if (confirm('Are you sure you want to permanently delete this job listing? This action cannot be undone.')) {
+      this.jobService.deleteJob(jobId).subscribe({
+        next: (res) => {
+          if (res.success) {
+            alert('Job deleted successfully.');
+            this.loadMyJobs();
+            this.loadStats();
+          }
+        }
+      });
+    }
+  }
+
+  exportJobs(): void {
+    const jobs = this.myJobs();
+    const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(jobs, null, 2));
+    const downloadAnchor = document.createElement('a');
+    downloadAnchor.setAttribute("href", dataStr);
+    downloadAnchor.setAttribute("download", `jobs_export_${new Date().toISOString().slice(0,10)}.json`);
+    document.body.appendChild(downloadAnchor);
+    downloadAnchor.click();
+    downloadAnchor.remove();
+  }
+
+  importJobs(event: any): void {
+    const file = event.target.files[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = (e: any) => {
+      try {
+        const jobs = JSON.parse(e.target.result);
+        if (Array.isArray(jobs)) {
+          let count = 0;
+          jobs.forEach((j: any) => {
+            const payload: JobCreateDto = {
+              title: j.title || 'Imported Job',
+              description: j.description || 'No description provided.',
+              requirements: j.requirements || '',
+              location: j.location || '',
+              jobType: j.jobType || 'FULL_TIME',
+              experienceLevel: j.experienceLevel || '',
+              salaryRange: j.salaryRange || '',
+              requiredSkills: j.requiredSkills || '',
+              preferredSkills: j.preferredSkills || '',
+              workMode: j.workMode || 'HYBRID',
+              educationLevel: j.educationLevel || '',
+              sponsorshipAvailable: j.sponsorshipAvailable || false
+            };
+            this.jobService.createJob(payload).subscribe({
+              next: () => {
+                count++;
+                if (count === jobs.length) {
+                  alert(`Successfully imported ${count} jobs!`);
+                  this.loadMyJobs();
+                  this.loadStats();
+                }
+              }
+            });
+          });
+        }
+      } catch (err) {
+        alert('Invalid file format. Please upload a valid JSON jobs file.');
+      }
+    };
+    reader.readAsText(file);
+  }
+
+  viewJobDetailModal(job: any): void {
+    this.selectedJobForDetail.set(job);
+  }
+
+  closeJobDetailModal(): void {
+    this.selectedJobForDetail.set(null);
   }
 
   // Sidebar Menu Actions
