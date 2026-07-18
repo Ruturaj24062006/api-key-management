@@ -21,6 +21,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
 import java.util.UUID;
+import java.util.concurrent.CompletableFuture;
 
 @Service
 @RequiredArgsConstructor
@@ -49,46 +50,65 @@ public class ResumeService {
      * 6. Fire JobMatchingRequestedEvent → triggers hybrid RAG matching pipeline
      */
     public void processResume(UUID resumeId) {
+        long startProcess = System.currentTimeMillis();
         log.info("Starting background AI processing for resume ID: {}", resumeId);
         Resume resume = resumeRepository.findById(resumeId)
                 .orElseThrow(() -> new ResourceNotFoundException("Resume not found: " + resumeId));
 
-        String parsedText = resume.getParsedText();
-        if (parsedText == null || parsedText.isBlank()) {
-            // Safety net: should not happen because controller stores text before dispatching
-            log.warn("Resume {} has no parsedText — using placeholder fallback.", resumeId);
-            parsedText = "Resume candidate skills Java Spring Boot Angular Database SQL";
-            resume.setParsedText(parsedText);
-        }
+        final String parsedText = resume.getParsedText() != null && !resume.getParsedText().isBlank() 
+                ? resume.getParsedText() 
+                : "Resume candidate skills Java Spring Boot Angular Database SQL";
 
         try {
-            // ── Step 1: Generate 384-dimension embedding ─────────────────────────
-            log.info("Generating all-MiniLM-L6-v2 embedding for resume {}...", resumeId);
-            float[] vector;
-            try {
-                vector = embeddingService.generateEmbedding(parsedText);
-            } catch (Exception e) {
-                log.warn("Embedding generation failed for resume {}: {}. Using zero-vector fallback.", resumeId, e.getMessage());
-                vector = new float[384];
-                for (int i = 0; i < 384; i++) vector[i] = 0.01f;
-            }
+            // ── Parallel Execution of Embedding & Groq Profile Extraction ─────────
+            log.info("Triggering parallel Embedding Generation and Groq LLM Profile Extraction for resume {}...", resumeId);
+            
+            CompletableFuture<float[]> embeddingFuture = CompletableFuture.supplyAsync(() -> {
+                long startEmbed = System.currentTimeMillis();
+                try {
+                    float[] vec = embeddingService.generateEmbedding(parsedText);
+                    long duration = System.currentTimeMillis() - startEmbed;
+                    log.info("[TIMING] Async Embedding generation took {} ms", duration);
+                    return vec;
+                } catch (Exception e) {
+                    log.warn("Embedding generation failed: {}. Using zero-vector fallback.", e.getMessage());
+                    float[] fallback = new float[384];
+                    for (int i = 0; i < 384; i++) fallback[i] = 0.01f;
+                    return fallback;
+                }
+            });
+
+            CompletableFuture<String> groqFuture = CompletableFuture.supplyAsync(() -> {
+                long startGroq = System.currentTimeMillis();
+                try {
+                    String profileJson = groqService.extractResumeProfile(parsedText);
+                    long duration = System.currentTimeMillis() - startGroq;
+                    log.info("[TIMING] Async Groq Profile extraction took {} ms", duration);
+                    return profileJson;
+                } catch (Exception e) {
+                    log.warn("Groq extraction failed: {}. Using mock profile.", e.getMessage());
+                    return groqService.getMockProfileJson();
+                }
+            });
+
+            // Wait for both tasks to finish in parallel
+            CompletableFuture.allOf(embeddingFuture, groqFuture).join();
+
+            float[] vector = embeddingFuture.get();
+            String jsonProfile = groqFuture.get();
+
             resume.setEmbedding(vector);
-
-            // ── Step 2: Extract structured JSON profile via Groq ────────────────
-            log.info("Extracting structured profile via Groq llama-3.3-70b-versatile for resume {}...", resumeId);
-            try {
-                String jsonProfile = groqService.extractResumeProfile(parsedText);
-                resume.setExtractedJson(jsonProfile);
-            } catch (Exception e) {
-                log.warn("Groq extraction failed for resume {}: {}. Using mock profile.", resumeId, e.getMessage());
-                resume.setExtractedJson(groqService.getMockProfileJson());
-            }
-
+            resume.setExtractedJson(jsonProfile);
             resume.setProcessingStatus("SUCCESS");
 
             // ── Step 3: Save + deactivate old resumes ───────────────────────────
+            long startSave = System.currentTimeMillis();
             saveResumeAndDeactivateOthers(resume);
-            log.info("Resume {} fully processed (embedding + Groq extraction). Status = SUCCESS.", resumeId);
+            long saveDuration = System.currentTimeMillis() - startSave;
+            log.info("[TIMING] Supabase/DB save and deactivation took {} ms", saveDuration);
+
+            log.info("[TIMING] Total background processResume pipeline completed in {} ms.", 
+                    System.currentTimeMillis() - startProcess);
 
             // ── Step 4: Trigger async job matching pipeline ──────────────────────
             fireJobMatchingEvent(resume.getStudent().getId(), resumeId);

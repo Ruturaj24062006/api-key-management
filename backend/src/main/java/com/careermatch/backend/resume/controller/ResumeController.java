@@ -97,15 +97,20 @@ public class ResumeController {
         // ── Step 1: Write the uploaded bytes to a unique temp file ────────────────
         String storedFilename = null;
         String parsedText;
+        long startUploadTime = System.currentTimeMillis();
         try {
+            long startStore = System.currentTimeMillis();
             storedFilename = fileStorageService.storeFile(file);
-            log.info("Temp resume file stored as {} for extraction.", storedFilename);
+            long storeDuration = System.currentTimeMillis() - startStore;
+            log.info("[TIMING] Temp resume file stored in {} ms.", storeDuration);
 
             // ── Step 2: Extract text from the temp file ───────────────────────────
+            long startParse = System.currentTimeMillis();
             try (InputStream is = fileStorageService.getFileAsStream(storedFilename)) {
                 parsedText = pdfParserService.parsePdf(is);
             }
-            log.info("Text extracted from resume ({} chars). Deleting temp file now.", parsedText.length());
+            long parseDuration = System.currentTimeMillis() - startParse;
+            log.info("[TIMING] PDF parsing call took {} ms (length = {} chars).", parseDuration, parsedText.length());
 
         } catch (Exception e) {
             log.warn("Text extraction failed; using fallback placeholder text. Reason: {}", e.getMessage());
@@ -118,6 +123,7 @@ public class ResumeController {
         }
 
         // ── Step 4: Persist Resume row — no file URL, only extracted text ────────
+        long startDb = System.currentTimeMillis();
         Resume resume = Resume.builder()
                 .student(student)
                 .fileUrl("")          // No file retained — intentionally empty
@@ -127,6 +133,9 @@ public class ResumeController {
                 .build();
 
         Resume saved = resumeRepository.save(resume);
+        long dbDuration = System.currentTimeMillis() - startDb;
+        log.info("[TIMING] Initial DB Resume save took {} ms.", dbDuration);
+        log.info("[TIMING] Total upload controller request took {} ms.", System.currentTimeMillis() - startUploadTime);
 
         // ── Step 5: Publish async task via RabbitMQ (fallback to local event) ────
         ResumeUploadedEvent event = new ResumeUploadedEvent(saved.getId(), student.getId());

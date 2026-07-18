@@ -19,11 +19,14 @@ public class PdfParserService {
     private final Tika tika = new Tika();
 
     public String parsePdf(InputStream inputStream) throws IOException {
+        long startTime = System.currentTimeMillis();
         // Copy stream to a temp file
         Path tempFile = Files.createTempFile("resume-", ".tmp");
         try (OutputStream out = Files.newOutputStream(tempFile)) {
             inputStream.transferTo(out);
         }
+
+        String extractedText = null;
 
         // 1. Try Apache PDFBox directly (highly reliable in standard JRE environments)
         try {
@@ -33,8 +36,7 @@ public class PdfParserService {
                 String text = pdfStripper.getText(document);
                 if (text != null && !text.isBlank()) {
                     log.info("Apache PDFBox PDF extraction succeeded.");
-                    Files.deleteIfExists(tempFile);
-                    return text;
+                    extractedText = text;
                 }
             }
         } catch (Exception e) {
@@ -42,33 +44,62 @@ public class PdfParserService {
         }
 
         // 2. Try Apache Tika (pure Java, in-process, no OS dependencies)
-        try {
-            log.info("Attempting PDF text extraction via Apache Tika...");
-            String text = tika.parseToString(Files.newInputStream(tempFile));
-            if (text != null && !text.isBlank()) {
-                log.info("Apache Tika PDF extraction succeeded.");
-                Files.deleteIfExists(tempFile);
-                return text;
+        if (extractedText == null) {
+            try {
+                log.info("Attempting PDF text extraction via Apache Tika...");
+                String text = tika.parseToString(Files.newInputStream(tempFile));
+                if (text != null && !text.isBlank()) {
+                    log.info("Apache Tika PDF extraction succeeded.");
+                    extractedText = text;
+                }
+            } catch (Exception e) {
+                log.warn("Apache Tika extraction failed: {}. Falling back to PyMuPDF.", e.getMessage());
             }
-        } catch (Exception e) {
-            log.warn("Apache Tika extraction failed: {}. Falling back to PyMuPDF.", e.getMessage());
         }
 
         // 3. Fallback to PyMuPDF (fitz Python script)
-        try {
-            log.info("Attempting PDF text extraction via PyMuPDF (fitz) script fallback...");
-            String text = runPythonParser(tempFile.toAbsolutePath().toString());
-            if (text != null && !text.isBlank()) {
-                log.info("PyMuPDF PDF extraction succeeded.");
-                return text;
+        if (extractedText == null) {
+            try {
+                log.info("Attempting PDF text extraction via PyMuPDF (fitz) script fallback...");
+                String text = runPythonParser(tempFile.toAbsolutePath().toString());
+                if (text != null && !text.isBlank()) {
+                    log.info("PyMuPDF PDF extraction succeeded.");
+                    extractedText = text;
+                }
+            } catch (Exception e) {
+                log.error("PyMuPDF fallback extraction failed: {}", e.getMessage());
+            } finally {
+                Files.deleteIfExists(tempFile);
             }
-        } catch (Exception e) {
-            log.error("PyMuPDF fallback extraction failed: {}", e.getMessage());
-        } finally {
+        } else {
             Files.deleteIfExists(tempFile);
         }
 
-        throw new RuntimeException("All PDF parsers failed to extract text from resume");
+        if (extractedText == null) {
+            throw new RuntimeException("All PDF parsers failed to extract text from resume");
+        }
+
+        long parseDuration = System.currentTimeMillis() - startTime;
+        log.info("[TIMING] Raw PDF extraction took {} ms", parseDuration);
+
+        long cleanStart = System.currentTimeMillis();
+        String cleaned = cleanText(extractedText);
+        long cleanDuration = System.currentTimeMillis() - cleanStart;
+        log.info("[TIMING] Text cleaning took {} ms. Length reduced from {} to {} chars.", 
+                cleanDuration, extractedText.length(), cleaned.length());
+
+        return cleaned;
+    }
+
+    public String cleanText(String text) {
+        if (text == null) return "";
+        // Remove non-printable control characters (except newline, tab)
+        String cleaned = text.replaceAll("[\\x00-\\x08\\x0B\\x0C\\x0E-\\x1F\\x7F]", "");
+        // Collapse multiple spaces to a single space
+        cleaned = cleaned.replaceAll("[ ]+", " ");
+        // Collapse multiple consecutive newlines to a single newline
+        cleaned = cleaned.replaceAll("\\n+", "\n");
+        return cleaned.trim();
     }
 
     private String runPythonParser(String absolutePath) throws Exception {
