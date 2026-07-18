@@ -1,217 +1,231 @@
 <app-navbar></app-navbar>
 
-<main class="dashboard-wrapper">
-  <div class="container">
+<div class="student-job-board-container">
+  <div class="board-layout-grid">
     
-    <!-- Header Greeting -->
-    <div class="dashboard-header animate-fade-in">
-      <div class="header-greeting-row">
-        <div>
-          <h1 class="dashboard-greeting-title">{{ greetingText() }}, {{ getStudentName() }}</h1>
-          <p class="dashboard-greeting-subtitle">Your profile is <strong>{{ profile()?.profileCompletedPct || 0 }}%</strong> complete</p>
-        </div>
-        <button (click)="onLogout()" class="btn btn-secondary btn-sm logout-btn-dash">Log out</button>
-      </div>
-    </div>
-
-    <!-- 3-Step Onboarding Hero Banner (When Profile is Incomplete / Resume Not Uploaded) -->
-    <div class="job-board-onboarding-card glass-card animate-fade-in" *ngIf="(profile()?.profileCompletedPct || 0) < 85">
-      <div class="onboarding-card-header text-center">
-        <h2 class="onboarding-main-title">Create your job board in <span class="accent-orange">3 simple steps</span></h2>
-        <p class="onboarding-main-subtitle">
-          Upload your resume, tell us your preferred role and location, and get a personalized job board ranked by match score, missing keywords, and role fit.
-        </p>
+    <!-- LEFT SIDEBAR (Matching Image 1 & Image 2 Layout) -->
+    <aside class="board-sidebar glass-card animate-fade-in">
+      <div class="sidebar-brand-box">
+        <span class="brand-title">JOB MATCH PRO</span>
       </div>
 
-      <div class="three-steps-grid">
-        <!-- Step 1 -->
-        <div class="step-card-box">
-          <div class="step-header-row">
-            <div class="step-number-circle">1</div>
-            <span class="step-badge badge-start">Start here</span>
-          </div>
-          <h3 class="step-card-title">Upload Resume</h3>
-          <p class="step-card-desc">We read your skills, experience, education, and technical keywords directly from your resume.</p>
+      <div class="sidebar-menu-section">
+        <div class="sidebar-section-header">
+          <span>Job Boards</span>
+          <button type="button" class="icon-add-btn" (click)="navigateToResumeUpload()" title="Create new job board">+</button>
         </div>
 
-        <!-- Step 2 -->
-        <div class="step-card-box">
-          <div class="step-header-row">
-            <div class="step-number-circle">2</div>
-            <span class="step-badge badge-next">Next</span>
-          </div>
-          <h3 class="step-card-title">Select Preferences</h3>
-          <p class="step-card-desc">Choose your target job role, preferred city, experience level, job type, and work mode.</p>
-        </div>
-
-        <!-- Step 3 -->
-        <div class="step-card-box">
-          <div class="step-header-row">
-            <div class="step-number-circle">3</div>
-            <span class="step-badge badge-final">Final</span>
-          </div>
-          <h3 class="step-card-title">Choose Job Profile</h3>
-          <p class="step-card-desc">Get a dedicated job board ranked by AI match score for Software Engineer, AI Engineer, and more.</p>
-        </div>
+        <ul class="job-boards-list">
+          <li class="board-item" [class.active]="selectedJobBoard() === 'All Matches'" (click)="selectJobBoard('All Matches')">
+            <span class="board-bullet">•</span> All Matches
+          </li>
+          <li class="board-item" [class.active]="selectedJobBoard() === 'Java Developer'" (click)="selectJobBoard('Java Developer')">
+            <span class="board-bullet">•</span> Java Developer
+          </li>
+          <li class="board-item" [class.active]="selectedJobBoard() === '.Net Developer'" (click)="selectJobBoard('.Net Developer')">
+            <span class="board-bullet">•</span> .Net Developer
+          </li>
+          <li class="board-item" [class.active]="selectedJobBoard() === 'Frontend Engineer'" (click)="selectJobBoard('Frontend Engineer')">
+            <span class="board-bullet">•</span> Frontend Engineer
+          </li>
+          <li class="board-item" [class.active]="selectedJobBoard() === 'AI Engineer'" (click)="selectJobBoard('AI Engineer')">
+            <span class="board-bullet">•</span> AI Engineer
+          </li>
+          <li class="create-new-board-btn" (click)="navigateToResumeUpload()">
+            + Create a new job board
+          </li>
+        </ul>
       </div>
 
-      <!-- Upload CTA Callout Box -->
-      <div class="onboarding-cta-callout">
-        <div class="callout-left-icon">
-          <svg class="cta-arrow-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"></path>
-          </svg>
+      <div class="sidebar-menu-section">
+        <ul class="nav-links-list">
+          <li class="nav-link-item" [class.active]="activeTab() === 'recommendations'" (click)="changeTab('recommendations')">
+            🎯 Recommendations
+          </li>
+          <li class="nav-link-item" [class.active]="activeTab() === 'discover'" (click)="changeTab('discover')">
+            🔍 Discover Jobs
+          </li>
+          <li class="nav-link-item" [class.active]="activeTab() === 'applications'" (click)="changeTab('applications')">
+            📋 Applications ({{ applicationsCount() }})
+          </li>
+          <li class="nav-link-item" (click)="navigateToResumeUpload()">
+            📄 Upload Resume
+          </li>
+          <li class="nav-link-item" (click)="router.navigate(['/student/profile-review'])">
+            ✏️ Review Profile
+          </li>
+        </ul>
+      </div>
+
+      <div class="sidebar-plan-card glass-card">
+        <div class="plan-info">
+          <span class="plan-lbl">Current Plan:</span>
+          <span class="plan-val">Free</span>
         </div>
-        <div class="callout-text-group">
-          <h4 class="callout-title">Upload your resume to start matching</h4>
-          <p class="callout-desc">PDF or DOCX supported. Your resume helps us calculate job match scores and missing keywords.</p>
-        </div>
-        <button type="button" class="btn btn-primary btn-lg upload-hero-btn" (click)="navigateToResumeUpload()">
-          Upload Resume
+        <button type="button" class="btn btn-primary btn-sm upgrade-pro-btn" (click)="navigateToResumeUpload()">
+          🚀 UPGRADE TO PRO
         </button>
       </div>
-    </div>
+    </aside>
 
-    <!-- Tab Navigation -->
-    <div class="dashboard-tabs animate-fade-in">
-      <button class="tab-btn" [class.active]="activeTab() === 'recommendations'" (click)="changeTab('recommendations')">
-        Recommendations
-      </button>
-      <button class="tab-btn" [class.active]="activeTab() === 'discover'" (click)="changeTab('discover')">
-        Discover Jobs
-      </button>
-      <button class="tab-btn" [class.active]="activeTab() === 'applications'" (click)="changeTab('applications')">
-        Applications
-      </button>
-    </div>
-
-    <!-- KPI Grid -->
-    <div class="kpi-grid animate-fade-in">
-      <!-- Card 1: Recommended Jobs -->
-      <div class="kpi-card glass-card">
-        <div class="kpi-card-content">
-          <span class="kpi-label">Recommended Jobs</span>
-          <span class="kpi-value">{{ matches().length }}</span>
-        </div>
-        <div class="kpi-icon-box">
-          <svg class="kpi-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path>
-          </svg>
-        </div>
-      </div>
-
-      <!-- Card 2: Average Match Score -->
-      <div class="kpi-card glass-card">
-        <div class="kpi-card-content">
-          <span class="kpi-label">Average Match Score</span>
-          <span class="kpi-value">{{ averageMatchScore() }}%</span>
-        </div>
-        <div class="kpi-icon-box">
-          <svg class="kpi-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2z"></path>
-          </svg>
-        </div>
-      </div>
-
-      <!-- Card 3: Applications -->
-      <div class="kpi-card glass-card">
-        <div class="kpi-card-content">
-          <span class="kpi-label">Applications</span>
-          <span class="kpi-value">{{ applicationsCount() }}</span>
-        </div>
-        <div class="kpi-icon-box">
-          <svg class="kpi-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"></path>
-          </svg>
-        </div>
-      </div>
-
-      <!-- Card 4: Profile Strength -->
-      <div class="kpi-card glass-card">
-        <div class="kpi-card-content">
-          <span class="kpi-label">Profile Strength</span>
-          <span class="kpi-value">{{ profile()?.profileCompletedPct || 0 }}%</span>
-        </div>
-        <div class="kpi-icon-box">
-          <svg class="kpi-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
-          </svg>
-        </div>
-      </div>
-    </div>
-
-    <!-- Recommendations Section -->
-    <div class="recommendations-section animate-fade-in" *ngIf="activeTab() === 'recommendations'">
-      <h2 class="section-title">Job Recommendations</h2>
+    <!-- MAIN CONTENT AREA -->
+    <main class="board-main-content">
       
-      <!-- Loading Skeleton / No Matches state -->
-      <div class="empty-matches-box glass-card text-center" *ngIf="matches().length === 0">
-        <p>Analyzing job markets and matching with your skills...</p>
+      <!-- Top Greeting Banner -->
+      <div class="greeting-banner-card glass-card animate-fade-in">
+        <div class="greeting-banner-avatar">
+          {{ getStudentName().charAt(0) }}
+        </div>
+        <div class="greeting-banner-text">
+          <h1 class="greeting-title">Hello {{ getStudentName() }} 👋</h1>
+          <p class="greeting-subtitle">Create a job board once. Job Match Pro will keep finding relevant jobs for your resume and preferences.</p>
+        </div>
+        <div class="mins-saved-badge">
+          ⚡ 18,98,595+ mins. saved
+        </div>
       </div>
 
-      <!-- Recommendations Grid -->
-      <div class="recommendations-grid" *ngIf="matches().length > 0">
-        <div *ngFor="let m of matches()" class="job-recommendation-card glass-card" (click)="viewMatchDetails(m.id)">
-          <div class="job-card-top">
-            <div class="job-card-logo-row">
-              <div class="company-logo-avatar">
+      <!-- 3-Step Onboarding Hero Banner (When Profile is Incomplete / Resume Not Uploaded) -->
+      <div class="job-board-onboarding-card glass-card animate-fade-in" *ngIf="(profile()?.profileCompletedPct || 0) < 85">
+        <div class="onboarding-card-header text-center">
+          <h2 class="onboarding-main-title">Create your job board in <span class="accent-orange">3 simple steps</span></h2>
+          <p class="onboarding-main-subtitle">
+            Upload your resume, tell us your preferred role and location, and get a personalized job board ranked by match score, missing keywords, and role fit.
+          </p>
+        </div>
+
+        <div class="three-steps-grid">
+          <!-- Step 1 -->
+          <div class="step-card-box">
+            <div class="step-header-row">
+              <div class="step-number-circle">1</div>
+              <span class="step-badge badge-start">Start here</span>
+            </div>
+            <h3 class="step-card-title">Upload Resume</h3>
+            <p class="step-card-desc">We read your skills, experience, education, and technical keywords directly from your resume.</p>
+          </div>
+
+          <!-- Step 2 -->
+          <div class="step-card-box">
+            <div class="step-header-row">
+              <div class="step-number-circle">2</div>
+              <span class="step-badge badge-next">Next</span>
+            </div>
+            <h3 class="step-card-title">Select Preferences</h3>
+            <p class="step-card-desc">Choose your target job role, preferred city, experience level, job type, and work mode.</p>
+          </div>
+
+          <!-- Step 3 -->
+          <div class="step-card-box">
+            <div class="step-header-row">
+              <div class="step-number-circle">3</div>
+              <span class="step-badge badge-final">Final</span>
+            </div>
+            <h3 class="step-card-title">Choose Job Profile</h3>
+            <p class="step-card-desc">Get a dedicated job board ranked by AI match score for Software Engineer, AI Engineer, and more.</p>
+          </div>
+        </div>
+
+        <!-- Upload CTA Callout Box -->
+        <div class="onboarding-cta-callout">
+          <div class="callout-left-icon">
+            <svg class="cta-arrow-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"></path>
+            </svg>
+          </div>
+          <div class="callout-text-group">
+            <h4 class="callout-title">Upload your resume to start matching</h4>
+            <p class="callout-desc">PDF or DOCX supported. Your resume helps us calculate job match scores and missing keywords.</p>
+          </div>
+          <button type="button" class="btn btn-primary btn-lg upload-hero-btn" (click)="navigateToResumeUpload()">
+            Upload Resume
+          </button>
+        </div>
+      </div>
+
+      <!-- RECOMMENDATIONS SECTION -->
+      <div class="recommendations-section animate-fade-in" *ngIf="activeTab() === 'recommendations'">
+        <div class="matches-header-bar">
+          <div>
+            <h2 class="matches-title">Strong matches ({{ matches().length }})</h2>
+            <p class="matches-subtitle">Jobs that best fit for this resume and profile</p>
+          </div>
+          <div class="dashboard-tabs-inline">
+            <button class="tab-btn-pill" [class.active]="activeTab() === 'recommendations'" (click)="changeTab('recommendations')">Matches</button>
+            <button class="tab-btn-pill" [class.active]="activeTab() === 'discover'" (click)="changeTab('discover')">Discover</button>
+            <button class="tab-btn-pill" [class.active]="activeTab() === 'applications'" (click)="changeTab('applications')">Applications</button>
+          </div>
+        </div>
+        
+        <!-- Loading state -->
+        <div class="empty-matches-box glass-card text-center" *ngIf="matches().length === 0">
+          <p>Analyzing job markets and matching with your skills...</p>
+        </div>
+
+        <!-- Recommendations Cards List (Matching Image 2 Design) -->
+        <div class="recommendations-grid" *ngIf="matches().length > 0">
+          <div *ngFor="let m of matches()" class="job-match-card-v2 glass-card animate-fade-in" (click)="viewMatchDetails(m.id)">
+            
+            <!-- Top Meta Line: Source, Date, Bookmark -->
+            <div class="card-meta-line">
+              <div class="meta-left-tags">
+                <span class="source-tag">NEXUS AI</span>
+                <span class="posted-date-tag">{{ m.createdAt ? (m.createdAt | date:'mediumDate') : 'Recently posted' }}</span>
+              </div>
+              <button type="button" class="bookmark-btn" [class.active]="isBookmarked(m.id)" (click)="toggleBookmark(m.id, $event)">
+                <svg class="bookmark-icon" fill="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                  <path d="M17 3H7c-1.1 0-1.99.9-1.99 2L5 21l7-3 7 3V5c0-1.1-.9-2-2-2z"/>
+                </svg>
+              </button>
+            </div>
+
+            <!-- Card Content Body -->
+            <div class="card-main-content-row">
+              <div class="company-avatar-box">
                 {{ m.companyName ? m.companyName.substring(0, 1) : 'J' }}
               </div>
-              <div class="job-title-group">
-                <h3 class="job-card-title">{{ m.jobTitle }}</h3>
-                <p class="job-card-company">{{ m.companyName }}</p>
+
+              <div class="job-info-col">
+                <h3 class="job-v2-title">{{ m.jobTitle }}</h3>
+                <p class="job-v2-company">{{ m.companyName }}</p>
+
+                <div class="specs-pills-row">
+                  <span class="spec-pill"><span class="icon">📍</span> {{ m.location }}</span>
+                  <span class="spec-pill" *ngIf="m.jobType"><span class="icon">💼</span> {{ m.jobType | lowercase }}</span>
+                  <span class="spec-pill" *ngIf="m.experienceLevel"><span class="icon">🎓</span> {{ m.experienceLevel }}</span>
+                  <span class="spec-pill" *ngIf="m.salaryRange"><span class="icon">💰</span> {{ m.salaryRange }}</span>
+                </div>
+
+                <!-- Missing skills row -->
+                <div class="missing-skills-block" *ngIf="m.requiredSkills">
+                  <span class="missing-label">Missing skills:</span>
+                  <div class="skills-chips-row">
+                    <span *ngFor="let s of getSkillsList(m.requiredSkills).slice(0, 4)" class="missing-chip">{{ s }}</span>
+                    <span *ngIf="getSkillsList(m.requiredSkills).length > 4" class="more-chip">
+                      +{{ getSkillsList(m.requiredSkills).length - 4 }} more
+                    </span>
+                  </div>
+                </div>
               </div>
+
+              <!-- Right Score Donut Ring & Action -->
+              <div class="card-score-action-col">
+                <div class="score-donut-ring" [style.background]="'conic-gradient(#f97316 ' + (m.compositeScore * 3.6) + 'deg, rgba(255,255,255,0.06) 0deg)'">
+                  <div class="donut-inner-circle">
+                    <span class="score-pct-txt">{{ m.compositeScore }}%</span>
+                  </div>
+                </div>
+                <span class="fit-label-txt">{{ getFitLabel(m.compositeScore) }}</span>
+
+                <button type="button" class="btn btn-primary view-details-orange-btn" (click)="viewMatchDetails(m.id)">
+                  View Details
+                </button>
+              </div>
+
             </div>
-            <div class="match-score-badge" [class.high-match]="m.compositeScore >= 80" [class.mid-match]="m.compositeScore < 80 && m.compositeScore >= 60">
-              Match Score: {{ m.compositeScore }}%
-            </div>
-          </div>
-
-          <div class="job-chips">
-            <span *ngIf="m.workMode" class="chip-item chip-workmode">{{ m.workMode }}</span>
-            <span *ngIf="m.jobType" class="chip-item chip-jobtype">{{ m.jobType | lowercase }}</span>
-            <span *ngIf="m.experienceLevel" class="chip-item chip-experience">{{ m.experienceLevel }}</span>
-          </div>
-
-          <div class="job-card-details">
-            <div class="detail-item">
-              <svg class="detail-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path>
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path>
-              </svg>
-              <span>{{ m.location }}</span>
-            </div>
-            <div class="detail-item">
-              <svg class="detail-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M12 16V5"></path>
-              </svg>
-              <span class="salary-txt">{{ m.salaryRange || '₹8–12 LPA' }}</span>
-            </div>
-          </div>
-
-          <!-- Skills preview -->
-          <div *ngIf="m.requiredSkills" class="job-skills-preview">
-            <span *ngFor="let s of m.requiredSkills.split(',').slice(0, 3)" class="skill-mini-badge">{{ s.trim() }}</span>
-          </div>
-
-          <!-- Deadline -->
-          <div *ngIf="m.deadline" class="deadline-badge-row">
-            <span class="deadline-lbl">Deadline:</span>
-            <span class="deadline-val">{{ m.deadline | date:'shortDate' }}</span>
-          </div>
-
-          <div class="job-card-actions">
-            <button type="button" class="btn btn-secondary btn-sm" (click)="viewMatchDetails(m.id)">View Details</button>
-            <button type="button" class="btn btn-primary btn-sm btn-ask-ai" (click)="askAiMatch(m.id, $event)">
-              <svg class="ai-sparkle-icon" fill="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                <path d="M9 21c0 .55-.45 1-1 1H4c-.55 0-1-.45-1-1v-4c0-.55.45-1 1-1h4c.55 0 1 .45 1 1v4zm11.5-8.5c-.83 0-1.5-.67-1.5-1.5V7c0-.83.67-1.5 1.5-1.5h1c.83 0 1.5.67 1.5 1.5v4c0 .83-.67 1.5-1.5 1.5h-1zm-6-2.5V3.5c0-.83.67-1.5 1.5-1.5h1c.83 0 1.5.67 1.5 1.5V10c0 .83-.67 1.5-1.5 1.5h-1c-.83 0-1.5-.67-1.5-1.5zm-5-3.5H4.5c-.83 0-1.5-.67-1.5-1.5V3c0-.83.67-1.5 1.5-1.5h1c.83 0 1.5.67 1.5 1.5v4c0 .83-.67 1.5-1.5 1.5z"></path>
-              </svg>
-              Ask AI
-            </button>
           </div>
         </div>
       </div>
-    </div>
 
     <!-- Discover Jobs Section -->
     <div class="discover-section animate-fade-in" *ngIf="activeTab() === 'discover'">
@@ -482,8 +496,10 @@
         </div>
       </div>
     </div>
+
+    </main>
   </div>
-</main>
+</div>
 
 <!-- Details & AI Insights Modal Overlay -->
 <div *ngIf="isDetailsModalOpen()" class="modal-overlay animate-fade-in" (click)="closeModal()">

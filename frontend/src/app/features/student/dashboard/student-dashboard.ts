@@ -44,6 +44,10 @@ export class StudentDashboard implements OnInit {
   searchResults = signal<MatchResponse[]>([]);
   isSearchLoading = signal<boolean>(false);
 
+  // Job Board & Bookmark signals
+  selectedJobBoard = signal<string>('All Matches');
+  savedJobIds = signal<Set<string>>(new Set());
+
   // AI Chat signals
   isAiChatOpen = signal<boolean>(false);
   aiChatMessages = signal<{ sender: 'user' | 'ai', text: string }[]>([]);
@@ -96,7 +100,7 @@ export class StudentDashboard implements OnInit {
     private readonly profileService: StudentProfileService,
     private readonly matchesService: JobMatchesService,
     private readonly applicationsService: JobApplicationsService,
-    private readonly router: Router
+    public readonly router: Router
   ) {}
 
   ngOnInit(): void {
@@ -462,6 +466,44 @@ export class StudentDashboard implements OnInit {
     this.filterSponsorship.set(false);
     this.sortOption.set('BEST_MATCH');
     this.searchJobs();
+  }
+
+  toggleBookmark(jobId: string, event: Event): void {
+    event.stopPropagation();
+    const set = new Set(this.savedJobIds());
+    if (set.has(jobId)) {
+      set.delete(jobId);
+    } else {
+      set.add(jobId);
+    }
+    this.savedJobIds.set(set);
+  }
+
+  isBookmarked(jobId: string): boolean {
+    return this.savedJobIds().has(jobId);
+  }
+
+  getFitLabel(score: number): string {
+    if (score >= 80) return 'Great Fit';
+    if (score >= 60) return 'Good Fit';
+    return 'Potential Fit';
+  }
+
+  getSkillsList(skillsStr?: string): string[] {
+    if (!skillsStr) return [];
+    return skillsStr.split(',').map(s => s.trim()).filter(Boolean);
+  }
+
+  selectJobBoard(boardName: string): void {
+    this.selectedJobBoard.set(boardName);
+    if (boardName !== 'All Matches') {
+      this.searchRole.set(boardName);
+      this.activeTab.set('discover');
+      this.searchJobs();
+    } else {
+      this.searchRole.set('');
+      this.activeTab.set('recommendations');
+    }
   }
 
   getStudentName(): string {
