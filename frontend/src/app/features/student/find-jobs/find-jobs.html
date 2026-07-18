@@ -250,21 +250,24 @@
                 <span class="score-fit-label-v2">{{ getFitLabel(m.compositeScore) }}</span>
               </div>
 
-              <div class="card-action-buttons-row" style="display: flex; gap: 0.5rem; margin-top: 0.5rem; width: 100%;">
-                <button type="button" class="btn btn-primary view-details-orange-v2" style="flex: 1; font-size: 0.78rem !important; padding: 0.5rem 0.65rem !important; margin: 0; background: #f97316 !important; border: none !important; border-radius: 6px; font-weight: 700; color: #fff;" (click)="viewMatchDetails(m.id)">
+              <div class="card-action-buttons-row" style="display: flex; gap: 0.4rem; margin-top: 0.5rem; width: 100%; flex-wrap: wrap;">
+                <button type="button" class="btn btn-primary ask-ai-btn-purple" style="flex: 1; font-size: 0.76rem !important; padding: 0.45rem 0.5rem !important; margin: 0; background: linear-gradient(135deg, #8b5cf6, #6d28d9) !important; border: none !important; border-radius: 6px; font-weight: 700; color: #fff; display: flex; align-items: center; justify-content: center; gap: 0.25rem;" (click)="askAiMatch(m.id, $event)">
+                  <span>Ask AI 🤖</span>
+                </button>
+                <button type="button" class="btn btn-primary view-details-orange-v2" style="flex: 1; font-size: 0.76rem !important; padding: 0.45rem 0.5rem !important; margin: 0; background: #f97316 !important; border: none !important; border-radius: 6px; font-weight: 700; color: #fff;" (click)="viewMatchDetails(m.id)">
                   View Details
                 </button>
                 <button type="button" 
                         *ngIf="!appliedJobIds().has(m.jobId)"
                         class="btn btn-success apply-now-green-v2" 
-                        style="flex: 1; font-size: 0.78rem !important; padding: 0.5rem 0.65rem !important; margin: 0; background: #22c55e !important; border: none !important; border-radius: 6px; font-weight: 700; color: #fff;"
+                        style="flex: 1; font-size: 0.76rem !important; padding: 0.45rem 0.5rem !important; margin: 0; background: #22c55e !important; border: none !important; border-radius: 6px; font-weight: 700; color: #fff;"
                         (click)="initiateApply(m.jobId, m.jobTitle, m.companyName, $event)">
-                  Apply Now
+                  Apply Now 🚀
                 </button>
                 <button type="button" 
                         *ngIf="appliedJobIds().has(m.jobId)"
                         class="btn btn-success apply-now-green-v2" 
-                        style="flex: 1; font-size: 0.78rem !important; padding: 0.5rem 0.65rem !important; margin: 0; background: #16a34a !important; border: none !important; border-radius: 6px; font-weight: 700; color: #fff; opacity: 0.8;"
+                        style="flex: 1; font-size: 0.76rem !important; padding: 0.45rem 0.5rem !important; margin: 0; background: #16a34a !important; border: none !important; border-radius: 6px; font-weight: 700; color: #fff; opacity: 0.85;"
                         disabled
                         (click)="$event.stopPropagation()">
                   Applied ✓

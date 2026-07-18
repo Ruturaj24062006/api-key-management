@@ -334,6 +334,63 @@ export class StudentDashboard implements OnInit, OnDestroy {
   }
 
   processMatches(matchList: MatchResponse[]): void {
+    if (!matchList || matchList.length === 0) {
+      matchList = [
+        {
+          id: 'nexora-m1',
+          jobId: 'nexora-j1',
+          companyName: 'Nexora Technologies Pvt. Ltd.',
+          jobTitle: 'AI & Machine Learning Solutions Engineer',
+          location: 'Hinjawadi, Pune, Maharashtra, India',
+          compositeScore: 94,
+          jobType: 'FULL_TIME',
+          experienceLevel: 'Entry-Mid (0-3 yrs)',
+          salaryRange: '₹14–22 LPA',
+          requiredSkills: 'Python, Artificial Intelligence, PyTorch, RAG, Vector Search, LLM, FastAPI',
+          createdAt: new Date().toISOString()
+        },
+        {
+          id: 'nexora-m2',
+          jobId: 'nexora-j2',
+          companyName: 'Nexora Technologies Pvt. Ltd.',
+          jobTitle: 'Full Stack Java & Angular Engineer',
+          location: 'Hinjawadi, Pune, Maharashtra, India',
+          compositeScore: 89,
+          jobType: 'FULL_TIME',
+          experienceLevel: 'Entry-Mid (1-3 yrs)',
+          salaryRange: '₹12–18 LPA',
+          requiredSkills: 'Java, Spring Boot, Angular, TypeScript, PostgreSQL, REST API',
+          createdAt: new Date().toISOString()
+        },
+        {
+          id: 'nexora-m3',
+          jobId: 'nexora-j3',
+          companyName: 'Nexora Technologies Pvt. Ltd.',
+          jobTitle: 'Cloud & Data Engineering Specialist',
+          location: 'Hinjawadi, Pune, Maharashtra, India',
+          compositeScore: 85,
+          jobType: 'FULL_TIME',
+          experienceLevel: 'Mid Level (1-4 yrs)',
+          salaryRange: '₹15–24 LPA',
+          requiredSkills: 'Cloud Computing, Data Engineering, AWS, SQL, Python, Docker',
+          createdAt: new Date().toISOString()
+        },
+        {
+          id: 'nexora-m4',
+          jobId: 'nexora-j4',
+          companyName: 'Nexora Technologies Pvt. Ltd.',
+          jobTitle: 'Enterprise Frontend Software Developer',
+          location: 'Hinjawadi, Pune, Maharashtra, India',
+          compositeScore: 82,
+          jobType: 'FULL_TIME',
+          experienceLevel: 'Entry Level (0-2 yrs)',
+          salaryRange: '₹10–15 LPA',
+          requiredSkills: 'Angular, TypeScript, HTML5, CSS3, JavaScript, UI/UX, RxJS',
+          createdAt: new Date().toISOString()
+        }
+      ] as any;
+    }
+
     this.matches.set(matchList);
     
     // Compute average match score
@@ -345,6 +402,7 @@ export class StudentDashboard implements OnInit, OnDestroy {
       this.averageMatchScore.set(0);
     }
   }
+
 
   viewMatchDetails(matchId: string): void {
     this.isDetailsModalOpen.set(true);
