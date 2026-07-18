@@ -20,7 +20,7 @@ An enterprise-grade, AI-driven recruitment platform designed to seamlessly conne
 ---
 
 ## 🌐 Live Application & Demo Video
-- **Project Demo Video & Resources**: [Google Drive Folder](https://drive.google.com/drive/folders/1fae56KZ36IzFFKrRKQhli21psqtY6LKp?usp=sharing)
+- **Project Demo Video**: [Google Drive Folder](https://drive.google.com/drive/folders/1fae56KZ36IzFFKrRKQhli21psqtY6LKp?usp=sharing)
 - **Frontend Web App**: [https://nexus-frontend-gmd1.onrender.com](https://nexus-frontend-gmd1.onrender.com)
 - **Backend REST API**: [https://nexus-backend-56gy.onrender.com](https://nexus-backend-56gy.onrender.com)
 - **GitHub Repository**: [https://github.com/Ruturaj24062006/Smart-Job-Matching-Dashboard](https://github.com/Ruturaj24062006/Smart-Job-Matching-Dashboard)
@@ -30,15 +30,7 @@ An enterprise-grade, AI-driven recruitment platform designed to seamlessly conne
 ## 🔑 Pre-Seeded Accounts & Test Credentials
 
 You can log in directly using the pre-seeded recruiter/company accounts or register a new student account:
-
-### 🏢 Recruiter Account (Nexora Technologies / Demo Recruiter)
-**Email**: [EMAIL_ADDRESS]
-**Password**: `NexoraRecruiterPass123!`
-**Role**: `ROLE_RECRUITER`
-
-### 🎓 Student Account Registration
-- Navigate to `/register` to create a fresh student account.
-- Post-login automatically redirects to the **Student Dashboard** as the default landing view.
+Create  new acccount directly
 
 ---
 
