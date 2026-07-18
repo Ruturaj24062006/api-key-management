@@ -47,9 +47,17 @@ public class JobService {
             throw new BadRequestException("Recruiter must be associated with a company to post jobs");
         }
 
-        // Generate embedding for Job search context
-        String context = request.getTitle() + " " + request.getDescription() + " " + request.getRequirements();
-        float[] vector = embeddingService.generateEmbedding(context);
+        // Generate embedding for Job search context (fail-safe)
+        String context = (request.getTitle() != null ? request.getTitle() : "") + " " +
+                (request.getDescription() != null ? request.getDescription() : "") + " " +
+                (request.getRequirements() != null ? request.getRequirements() : "");
+        float[] vector;
+        try {
+            vector = embeddingService.generateEmbedding(context);
+        } catch (Exception e) {
+            log.warn("Failed to generate AI embedding for job context. Defaulting to zero vector: {}", e.getMessage());
+            vector = new float[384];
+        }
 
         Job job = Job.builder()
                 .recruiter(recruiter)
@@ -73,14 +81,18 @@ public class JobService {
         Job saved = jobRepository.save(job);
         log.info("Posted job ID: {} by Recruiter: {}", saved.getId(), recruiter.getId());
 
-        // Dispatch JobPostedEvent to trigger match updates for all students, fallback to Spring ApplicationEvent if RabbitMQ is offline
+        // Dispatch JobPostedEvent to trigger match updates for all students (fail-safe)
         JobPostedEvent event = new JobPostedEvent(saved.getId(), recruiter.getCompany().getId());
         try {
             rabbitTemplate.convertAndSend(QueueConfig.EXCHANGE, QueueConfig.JOB_POSTED_ROUTING_KEY, event);
             log.info("JobPostedEvent dispatched via RabbitMQ for job ID: {}", saved.getId());
         } catch (Exception e) {
-            log.warn("RabbitMQ not available. Falling back to local in-process event listener to update candidate matches for job {}: {}", saved.getId(), e.getMessage());
-            eventPublisher.publishEvent(event);
+            log.warn("RabbitMQ not available. Falling back to local in-process event listener for job {}: {}", saved.getId(), e.getMessage());
+            try {
+                eventPublisher.publishEvent(event);
+            } catch (Exception ex) {
+                log.error("Failed to publish local fallback event for job {}: {}", saved.getId(), ex.getMessage());
+            }
         }
 
         return saved;
