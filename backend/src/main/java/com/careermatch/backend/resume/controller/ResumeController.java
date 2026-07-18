@@ -53,7 +53,8 @@ public class ResumeController {
     @PreAuthorize("hasAuthority('ROLE_STUDENT')")
     @Operation(summary = "Upload resume PDF/DOC/DOCX and trigger background parsing pipeline")
     public ResponseEntity<ApiResponse<ResumeResponse>> uploadResume(@RequestParam("file") MultipartFile file) {
-        String origName = file.getOriginalFilename();
+        log.info("Resume upload request received. Original filename: {}, ContentType: {}", file != null ? file.getOriginalFilename() : "null", file != null ? file.getContentType() : "null");
+        String origName = file != null ? file.getOriginalFilename() : null;
         String contentType = file.getContentType();
 
         boolean isPdf = (contentType != null && contentType.toLowerCase().contains("pdf")) ||
