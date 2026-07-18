@@ -48,6 +48,20 @@ export class StudentDashboard implements OnInit {
   selectedJobBoard = signal<string>('All Matches');
   savedJobIds = signal<Set<string>>(new Set());
 
+  // Upload & Review Popup Modal signals
+  isUploadModalOpen = signal<boolean>(false);
+  uploadStep = signal<'select' | 'uploading' | 'review'>('select');
+  uploadProgress = signal<number>(0);
+  uploadError = signal<string | null>(null);
+  extractedData = signal<any>(null);
+  currentResumeId = signal<string | null>(null);
+
+  // Review editable fields
+  reviewRole: string = '';
+  reviewCity: string = '';
+  reviewExperience: string = '';
+  reviewWorkMode: string = 'HYBRID';
+
   // AI Chat signals
   isAiChatOpen = signal<boolean>(false);
   aiChatMessages = signal<{ sender: 'user' | 'ai', text: string }[]>([]);
@@ -524,6 +538,120 @@ export class StudentDashboard implements OnInit {
 
   setApplicationsFilter(filter: string): void {
     this.applicationsFilter.set(filter);
+  }
+
+  // Upload & Review Modal Handlers
+  openUploadModal(): void {
+    this.uploadStep.set('select');
+    this.uploadProgress.set(0);
+    this.uploadError.set(null);
+    this.extractedData.set(null);
+    this.isUploadModalOpen.set(true);
+  }
+
+  closeUploadModal(): void {
+    this.isUploadModalOpen.set(false);
+  }
+
+  onModalFileSelected(event: any): void {
+    const file = event.target.files?.[0] || event.dataTransfer?.files?.[0];
+    if (!file) return;
+
+    const ext = file.name.split('.').pop()?.toLowerCase();
+    if (!['pdf', 'docx', 'doc'].includes(ext || '')) {
+      this.uploadError.set('Please upload a valid PDF or Word Document (.docx, .doc)');
+      return;
+    }
+
+    this.startModalUpload(file);
+  }
+
+  private startModalUpload(file: File): void {
+    this.uploadError.set(null);
+    this.uploadStep.set('uploading');
+    this.uploadProgress.set(25);
+
+    const progressTimer = setInterval(() => {
+      if (this.uploadProgress() < 85) {
+        this.uploadProgress.update(p => p + 15);
+      } else {
+        clearInterval(progressTimer);
+      }
+    }, 250);
+
+    this.profileService.uploadResume(file).subscribe({
+      next: (res) => {
+        clearInterval(progressTimer);
+        this.uploadProgress.set(100);
+        if (res.data && res.data.id) {
+          this.currentResumeId.set(res.data.id);
+        }
+
+        // Fetch latest extracted details
+        setTimeout(() => {
+          this.fetchExtractedResumeData();
+        }, 1000);
+      },
+      error: (err) => {
+        clearInterval(progressTimer);
+        this.uploadStep.set('select');
+        this.uploadError.set(err.error?.message || 'Failed to upload resume. Please try again.');
+      }
+    });
+  }
+
+  private fetchExtractedResumeData(): void {
+    this.profileService.getLatestResume().subscribe({
+      next: (res) => {
+        if (res.success && res.data) {
+          const rawJson = res.data.extractedJson;
+          let parsed = null;
+          if (rawJson) {
+            try {
+              parsed = typeof rawJson === 'string' ? JSON.parse(rawJson) : rawJson;
+            } catch (e) {
+              console.error('JSON parse error', e);
+            }
+          }
+          this.extractedData.set(parsed || {});
+          
+          // Pre-fill editable review fields
+          this.reviewRole = parsed?.preferredRole || parsed?.name || 'Software Engineer';
+          this.reviewCity = parsed?.location || 'Bengaluru';
+          this.reviewExperience = parsed?.experienceLevel || 'Entry-Mid';
+          this.reviewWorkMode = parsed?.workMode || 'HYBRID';
+
+          this.uploadStep.set('review');
+        } else {
+          this.uploadStep.set('review');
+        }
+      },
+      error: () => {
+        this.uploadStep.set('review');
+      }
+    });
+  }
+
+  confirmModalAndSearchJobs(): void {
+    const resumeId = this.currentResumeId();
+    if (resumeId) {
+      this.profileService.confirmResume(resumeId).subscribe({
+        next: () => {
+          this.onConfirmSuccess();
+        },
+        error: () => {
+          this.onConfirmSuccess();
+        }
+      });
+    } else {
+      this.onConfirmSuccess();
+    }
+  }
+
+  private onConfirmSuccess(): void {
+    this.closeUploadModal();
+    this.activeTab.set('recommendations');
+    this.triggerMatchGeneration();
   }
 
   respondToInterview(applicationId: string, response: string): void {

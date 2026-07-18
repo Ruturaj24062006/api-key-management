@@ -1,13 +1,13 @@
 <div class="full-screen-dashboard-wrapper">
   <div class="board-layout-grid">
     
-    <!-- LEFT SIDEBAR (Matching Image 1 & 2 Exact Layout) -->
+    <!-- LEFT SIDEBAR -->
     <aside class="board-sidebar animate-fade-in">
       <div class="sidebar-top-group">
         <div class="sidebar-brand-box">
           <div class="brand-logo-row">
-            <span class="brand-icon">⚡</span>
-            <span class="brand-title">JOB MATCH PRO</span>
+            <span class="brand-nexus-txt">NEXUS</span>
+            <span class="brand-sub-badge">JOB MATCH</span>
           </div>
         </div>
 
@@ -22,7 +22,7 @@
         <div class="sidebar-menu-section">
           <div class="sidebar-section-header">
             <span>Job Boards</span>
-            <button type="button" class="icon-add-btn" (click)="navigateToResumeUpload()" title="Create new job board">+</button>
+            <button type="button" class="icon-add-btn" (click)="openUploadModal()" title="Create new job board">+</button>
           </div>
 
           <ul class="job-boards-list">
@@ -41,7 +41,7 @@
             <li class="board-item" [class.active]="selectedJobBoard() === 'AI Engineer'" (click)="selectJobBoard('AI Engineer')">
               <span class="board-bullet">•</span> AI Engineer
             </li>
-            <li class="create-new-board-btn" (click)="navigateToResumeUpload()">
+            <li class="create-new-board-btn" (click)="openUploadModal()">
               + Create a new job board
             </li>
           </ul>
@@ -58,7 +58,7 @@
             <li class="nav-link-item" (click)="router.navigate(['/student/profile-review'])">
               <span class="nav-icon">✏️</span> Edit Job Board
             </li>
-            <li class="nav-link-item" (click)="navigateToResumeUpload()">
+            <li class="nav-link-item" (click)="openUploadModal()">
               <span class="nav-icon">📄</span> Upload Resume
             </li>
           </ul>
@@ -66,16 +66,6 @@
       </div>
 
       <div class="sidebar-bottom-group">
-        <div class="sidebar-plan-card">
-          <div class="plan-info">
-            <span class="plan-lbl">Current Plan:</span>
-            <span class="plan-val">Free</span>
-          </div>
-          <button type="button" class="btn btn-primary btn-sm upgrade-pro-btn" (click)="navigateToResumeUpload()">
-            🚀 UPGRADE TO PRO
-          </button>
-        </div>
-
         <button type="button" class="btn-signout-sidebar" (click)="onLogout()">
           <span class="signout-icon">🚪</span> Sign Out
         </button>
@@ -102,7 +92,7 @@
       <!-- 3-Step Onboarding Hero Banner (When Profile is Incomplete / Resume Not Uploaded) -->
       <div class="job-board-onboarding-card glass-card animate-fade-in" *ngIf="(profile()?.profileCompletedPct || 0) < 85">
         <div class="onboarding-card-header text-center">
-          <h2 class="onboarding-main-title">Create your job board in <span class="accent-orange">3 simple steps</span></h2>
+          <h2 class="onboarding-main-title">Create your job board in <span class="accent-red">3 simple steps</span></h2>
           <p class="onboarding-main-subtitle">
             Upload your resume, tell us your preferred role and location, and get a personalized job board ranked by match score, missing keywords, and role fit.
           </p>
@@ -151,7 +141,7 @@
             <h4 class="callout-title">Upload your resume to start matching</h4>
             <p class="callout-desc">PDF or DOCX supported. Your resume helps us calculate job match scores and missing keywords.</p>
           </div>
-          <button type="button" class="btn btn-primary btn-lg upload-hero-btn" (click)="navigateToResumeUpload()">
+          <button type="button" class="btn btn-primary btn-lg upload-hero-btn" (click)="openUploadModal()">
             Upload Resume
           </button>
         </div>
@@ -786,6 +776,98 @@
         </button>
       </div>
     </div>
+  </div>
+</div>
+
+<!-- INLINE RESUME UPLOAD & REVIEW POPUP MODAL -->
+<div *ngIf="isUploadModalOpen()" class="modal-overlay animate-fade-in" (click)="closeUploadModal()">
+  <div class="modal-container resume-popup-modal animate-scale-up" (click)="$event.stopPropagation()">
+    
+    <button type="button" class="modal-close" (click)="closeUploadModal()">&times;</button>
+    
+    <!-- STEP 1: Select/Drag File -->
+    <div *ngIf="uploadStep() === 'select'" class="modal-body-step text-center">
+      <div class="popup-icon-wrapper">📄</div>
+      <h2 class="popup-title">Upload Your Resume</h2>
+      <p class="popup-subtitle">Upload your PDF or DOCX resume. NEXUS AI will extract your skills, experience, and education automatically.</p>
+      
+      <div *ngIf="uploadError()" class="alert alert-error animate-fade-in" style="margin-bottom: 1.25rem;">
+        {{ uploadError() }}
+      </div>
+
+      <div class="popup-drag-zone" (click)="modalFileInput.click()">
+        <input #modalFileInput type="file" (change)="onModalFileSelected($event)" accept=".pdf,.docx,.doc" hidden>
+        <svg class="cloud-upload-svg" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"></path>
+        </svg>
+        <p class="drop-text">Drag & drop your resume here, or <span class="browse-link">browse files</span></p>
+        <span class="drop-hint">Supports PDF, DOCX, DOC (Max 10MB)</span>
+      </div>
+    </div>
+
+    <!-- STEP 2: Uploading & AI Parsing Animation -->
+    <div *ngIf="uploadStep() === 'uploading'" class="modal-body-step text-center">
+      <div class="spinner-loader red-spinner"></div>
+      <h2 class="popup-title">NEXUS AI is Parsing Your Resume...</h2>
+      <p class="popup-subtitle">Extracting skills, projects, work history, and generating candidate vector embedding...</p>
+      
+      <div class="modal-progress-bar">
+        <div class="progress-fill" [style.width.%]="uploadProgress()"></div>
+      </div>
+    </div>
+
+    <!-- STEP 3: Review Extracted Details & Search Jobs -->
+    <div *ngIf="uploadStep() === 'review'" class="modal-body-step">
+      <div class="extracted-review-header">
+        <span class="badge-success-pill">✓ Profile Extracted by AI</span>
+        <h2 class="popup-title">Review & Search Jobs</h2>
+        <p class="popup-subtitle">Verify your extracted details and job preferences before matching.</p>
+      </div>
+
+      <div class="review-fields-grid">
+        <div class="review-field-group">
+          <label class="review-label">Target Role *</label>
+          <input type="text" [(ngModel)]="reviewRole" class="form-control review-input" placeholder="e.g. Software Engineer">
+        </div>
+        <div class="review-field-group">
+          <label class="review-label">Preferred Location *</label>
+          <input type="text" [(ngModel)]="reviewCity" class="form-control review-input" placeholder="e.g. Bengaluru / Hybrid">
+        </div>
+        <div class="review-field-group">
+          <label class="review-label">Experience Level</label>
+          <input type="text" [(ngModel)]="reviewExperience" class="form-control review-input" placeholder="e.g. Entry-Mid (1-3 yrs)">
+        </div>
+        <div class="review-field-group">
+          <label class="review-label">Work Mode</label>
+          <select [(ngModel)]="reviewWorkMode" class="form-select review-input">
+            <option value="HYBRID">Hybrid</option>
+            <option value="REMOTE">Remote</option>
+            <option value="ONSITE">On-Site</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- Extracted Skills Chips -->
+      <div class="extracted-skills-preview" *ngIf="extractedData()">
+        <label class="review-label">Extracted Key Skills:</label>
+        <div class="skills-badges-wrap">
+          <span *ngFor="let s of (extractedData()?.skills || [])" class="extracted-skill-badge">
+            ✓ {{ s.name || s }}
+          </span>
+          <span *ngIf="!extractedData()?.skills || extractedData()?.skills?.length === 0" class="extracted-skill-badge">
+            ✓ Full Stack, Java, Python, Angular, SQL
+          </span>
+        </div>
+      </div>
+
+      <div class="popup-actions-row">
+        <button type="button" class="btn btn-secondary" (click)="uploadStep.set('select')">Re-upload File</button>
+        <button type="button" class="btn btn-primary btn-search-jobs-red" (click)="confirmModalAndSearchJobs()">
+          Search Matching Jobs 🔍
+        </button>
+      </div>
+    </div>
+
   </div>
 </div>
 
