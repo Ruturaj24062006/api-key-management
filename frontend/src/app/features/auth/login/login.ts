@@ -3,6 +3,7 @@ import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angula
 import { Router, RouterLink } from '@angular/router';
 import { NgIf, NgClass } from '@angular/common';
 import { AuthService } from '../../../core/services/auth.service';
+import { StudentProfileService } from '../../../core/services/student-profile.service';
 
 @Component({
   selector: 'app-login',
@@ -18,6 +19,7 @@ export class Login implements OnInit {
   constructor(
     private readonly fb: FormBuilder,
     private readonly authService: AuthService,
+    private readonly profileService: StudentProfileService,
     private readonly router: Router
   ) {
     this.loginForm = this.fb.group({
@@ -89,7 +91,7 @@ export class Login implements OnInit {
     this.errorMessage.set(null);
 
     this.authService.loginWithGoogle(idToken).subscribe({
-      next: (res) => {
+      next: (res: any) => {
         this.isLoading.set(false);
         if (res.success && res.data) {
           this.redirectBasedOnRole(res.data.role);
@@ -97,7 +99,7 @@ export class Login implements OnInit {
           this.errorMessage.set(res.message || 'Google login failed.');
         }
       },
-      error: (err) => {
+      error: (err: any) => {
         this.isLoading.set(false);
         this.errorMessage.set(err.error?.message || 'Google login failed.');
       }
@@ -114,7 +116,7 @@ export class Login implements OnInit {
     this.errorMessage.set(null);
 
     this.authService.login(this.loginForm.value).subscribe({
-      next: (res) => {
+      next: (res: any) => {
         this.isLoading.set(false);
         if (res.success && res.data) {
           const role = res.data.role;
@@ -123,7 +125,7 @@ export class Login implements OnInit {
           this.errorMessage.set(res.message || 'Login failed. Please check your credentials.');
         }
       },
-      error: (err) => {
+      error: (err: any) => {
         console.warn('Backend server down. Activating developer mock session fallback...', err);
         const email = this.loginForm.value.email.toLowerCase();
         let role = 'ROLE_STUDENT';
@@ -153,7 +155,18 @@ export class Login implements OnInit {
   private redirectBasedOnRole(role: string): void {
     switch (role) {
       case 'ROLE_STUDENT':
-        this.router.navigate(['/student/dashboard']);
+        this.profileService.getProfile().subscribe({
+          next: (res: any) => {
+            if (res.data && res.data.profileCompletedPct >= 85) {
+              this.router.navigate(['/student/dashboard']);
+            } else {
+              this.router.navigate(['/student/resume-upload']);
+            }
+          },
+          error: () => {
+            this.router.navigate(['/student/resume-upload']);
+          }
+        });
         break;
       case 'ROLE_RECRUITER':
         this.router.navigate(['/recruiter/dashboard']);
