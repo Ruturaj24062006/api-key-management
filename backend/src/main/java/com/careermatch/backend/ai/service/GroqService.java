@@ -175,7 +175,7 @@ public class GroqService {
         return callGroq(systemPrompt, userPrompt, false);
     }
 
-    private String getMockProfileJson() {
+    public String getMockProfileJson() {
         return """
                 {
                   "firstName": "John",
