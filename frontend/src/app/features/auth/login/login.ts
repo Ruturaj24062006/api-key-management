@@ -141,20 +141,7 @@ export class Login implements OnInit {
 
     switch (fullRole) {
       case 'ROLE_STUDENT':
-        // Check profile completion to decide between dashboard and onboarding
-        this.profileService.getProfile().subscribe({
-          next: (res: any) => {
-            if (res.data && res.data.profileCompletedPct >= 85) {
-              this.router.navigate(['/student/dashboard']);
-            } else {
-              this.router.navigate(['/student/resume-upload']);
-            }
-          },
-          error: () => {
-            // Profile check failed — default to resume upload / onboarding
-            this.router.navigate(['/student/resume-upload']);
-          }
-        });
+        this.router.navigate(['/student/dashboard']);
         break;
 
       case 'ROLE_RECRUITER':

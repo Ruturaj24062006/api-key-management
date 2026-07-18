@@ -81,12 +81,30 @@ export class Register {
 
     this.authService.register(payload).subscribe({
       next: (res) => {
-        this.isLoading.set(false);
         if (res.success) {
-          this.successMessage.set('Registration successful! A verification link has been sent to your email.');
-          this.registerForm.reset();
-          this.selectedRole.set('ROLE_STUDENT');
+          this.successMessage.set('Registration successful! Logging in and redirecting to dashboard...');
+          
+          // Auto-login after successful registration
+          this.authService.login({ email: payload.email, password: payload.password }).subscribe({
+            next: (loginRes: any) => {
+              this.isLoading.set(false);
+              if (loginRes.success && loginRes.data) {
+                if (this.selectedRole() === 'ROLE_STUDENT') {
+                  this.router.navigate(['/student/dashboard']);
+                } else {
+                  this.router.navigate(['/recruiter/dashboard']);
+                }
+              } else {
+                this.router.navigate(['/login']);
+              }
+            },
+            error: () => {
+              this.isLoading.set(false);
+              this.router.navigate(['/login']);
+            }
+          });
         } else {
+          this.isLoading.set(false);
           this.errorMessage.set(res.message || 'Registration failed. Please try again.');
         }
       },
