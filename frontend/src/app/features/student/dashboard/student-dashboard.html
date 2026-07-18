@@ -225,11 +225,6 @@
             <h2 class="matches-title">Strong matches ({{ matches().length }})</h2>
             <p class="matches-subtitle">Jobs that best fit for this resume and profile</p>
           </div>
-          <div class="dashboard-tabs-inline">
-            <button class="tab-btn-pill" [class.active]="activeTab() === 'recommendations'" (click)="changeTab('recommendations')">Matches</button>
-            <button class="tab-btn-pill" [class.active]="activeTab() === 'discover'" (click)="changeTab('discover')">Discover</button>
-            <button class="tab-btn-pill" [class.active]="activeTab() === 'applications'" (click)="changeTab('applications')">Applications</button>
-          </div>
         </div>
         
         <!-- Loading state -->
