@@ -1,0 +1,200 @@
+[2026-07-18T10:04:06.349944803Z] 2026-07-18T10:04:06.349Z  INFO 7 --- [career-match-backend] [           main] .s.d.r.c.RepositoryConfigurationDelegate : Finished Spring Data repository scanning in 106 ms. Found 0 Redis repository interfaces.
+[2026-07-18T10:04:06.349833806Z] 2026-07-18T10:04:06.349Z  INFO 7 --- [career-match-backend] [           main] .RepositoryConfigurationExtensionSupport : Spring Data Redis - Could not safely identify store assignment for repository candidate interface com.careermatch.backend.recruiter.repository.RecruiterRepository; If you want this repository to be a Redis repository, consider annotating your entities with one of these annotations: org.springframework.data.redis.core.RedisHash (preferred), or consider extending one of the following types with your repository: org.springframework.data.keyvalue.repository.KeyValueRepository
+[2026-07-18T10:04:06.349658294Z] 2026-07-18T10:04:06.349Z  INFO 7 --- [career-match-backend] [           main] .RepositoryConfigurationExtensionSupport : Spring Data Redis - Could not safely identify store assignment for repository candidate interface com.careermatch.backend.application.repository.ApplicationRepository; If you want this repository to be a Redis repository, consider annotating your entities with one of these annotations: org.springframework.data.redis.core.RedisHash (preferred), or consider extending one of the following types with your repository: org.springframework.data.keyvalue.repository.KeyValueRepository
+[2026-07-18T10:04:06.349528425Z] 2026-07-18T10:04:06.349Z  INFO 7 --- [career-match-backend] [           main] .RepositoryConfigurationExtensionSupport : Spring Data Redis - Could not safely identify store assignment for repository candidate interface com.careermatch.backend.auth.repository.UserRepository; If you want this repository to be a Redis repository, consider annotating your entities with one of these annotations: org.springframework.data.redis.core.RedisHash (preferred), or consider extending one of the following types with your repository: org.springframework.data.keyvalue.repository.KeyValueRepository
+[2026-07-18T10:04:06.349343083Z] 2026-07-18T10:04:06.349Z  INFO 7 --- [career-match-backend] [           main] .RepositoryConfigurationExtensionSupport : Spring Data Redis - Could not safely identify store assignment for repository candidate interface com.careermatch.backend.student.repository.StudentRepository; If you want this repository to be a Redis repository, consider annotating your entities with one of these annotations: org.springframework.data.redis.core.RedisHash (preferred), or consider extending one of the following types with your repository: org.springframework.data.keyvalue.repository.KeyValueRepository
+[2026-07-18T10:04:06.349193313Z] 2026-07-18T10:04:06.349Z  INFO 7 --- [career-match-backend] [           main] .RepositoryConfigurationExtensionSupport : Spring Data Redis - Could not safely identify store assignment for repository candidate interface com.careermatch.backend.notification.repository.NotificationRepository; If you want this repository to be a Redis repository, consider annotating your entities with one of these annotations: org.springframework.data.redis.core.RedisHash (preferred), or consider extending one of the following types with your repository: org.springframework.data.keyvalue.repository.KeyValueRepository
+[2026-07-18T10:04:06.349020962Z] 2026-07-18T10:04:06.348Z  INFO 7 --- [career-match-backend] [           main] .RepositoryConfigurationExtensionSupport : Spring Data Redis - Could not safely identify store assignment for repository candidate interface com.careermatch.backend.job.repository.JobRepository; If you want this repository to be a Redis repository, consider annotating your entities with one of these annotations: org.springframework.data.redis.core.RedisHash (preferred), or consider extending one of the following types with your repository: org.springframework.data.keyvalue.repository.KeyValueRepository
+[2026-07-18T10:04:06.348855801Z] 2026-07-18T10:04:06.348Z  INFO 7 --- [career-match-backend] [           main] .RepositoryConfigurationExtensionSupport : Spring Data Redis - Could not safely identify store assignment for repository candidate interface com.careermatch.backend.company.repository.CompanyRepository; If you want this repository to be a Redis repository, consider annotating your entities with one of these annotations: org.springframework.data.redis.core.RedisHash (preferred), or consider extending one of the following types with your repository: org.springframework.data.keyvalue.repository.KeyValueRepository
+[2026-07-18T10:04:06.348638446Z] 2026-07-18T10:04:06.348Z  INFO 7 --- [career-match-backend] [           main] .RepositoryConfigurationExtensionSupport : Spring Data Redis - Could not safely identify store assignment for repository candidate interface com.careermatch.backend.resume.repository.ResumeRepository; If you want this repository to be a Redis repository, consider annotating your entities with one of these annotations: org.springframework.data.redis.core.RedisHash (preferred), or consider extending one of the following types with your repository: org.springframework.data.keyvalue.repository.KeyValueRepository
+[2026-07-18T10:04:06.348437543Z] 2026-07-18T10:04:06.348Z  INFO 7 --- [career-match-backend] [           main] .RepositoryConfigurationExtensionSupport : Spring Data Redis - Could not safely identify store assignment for repository candidate interface com.careermatch.backend.matching.repository.MatchRepository; If you want this repository to be a Redis repository, consider annotating your entities with one of these annotations: org.springframework.data.redis.core.RedisHash (preferred), or consider extending one of the following types with your repository: org.springframework.data.keyvalue.repository.KeyValueRepository
+[2026-07-18T10:04:06.050379252Z] 2026-07-18T10:04:06.050Z  INFO 7 --- [career-match-backend] [           main] .s.d.r.c.RepositoryConfigurationDelegate : Bootstrapping Spring Data Redis repositories in DEFAULT mode.
+[2026-07-18T10:04:06.049263928Z] 2026-07-18T10:04:06.048Z  INFO 7 --- [career-match-backend] [           main] .s.d.r.c.RepositoryConfigurationDelegate : Multiple Spring Data modules found, entering strict repository configuration mode
+[2026-07-18T10:04:05.648881576Z] 2026-07-18T10:04:05.648Z  INFO 7 --- [career-match-backend] [           main] .s.d.r.c.RepositoryConfigurationDelegate : Finished Spring Data repository scanning in 2600 ms. Found 9 JPA repository interfaces.
+[2026-07-18T10:04:02.947018822Z] 2026-07-18T10:04:02.946Z  INFO 7 --- [career-match-backend] [           main] .s.d.r.c.RepositoryConfigurationDelegate : Bootstrapping Spring Data JPA repositories in DEFAULT mode.
+[2026-07-18T10:04:02.945385294Z] 2026-07-18T10:04:02.945Z  INFO 7 --- [career-match-backend] [           main] .s.d.r.c.RepositoryConfigurationDelegate : Multiple Spring Data modules found, entering strict repository configuration mode
+[2026-07-18T10:03:45.349290604Z] 2026-07-18T10:03:45.349Z  INFO 7 --- [career-match-backend] [           main] c.c.backend.BackendApplication           : No active profile set, falling back to 1 default profile: "default"
+[2026-07-18T10:03:45.34832656Z] 2026-07-18T10:03:45.346Z  INFO 7 --- [career-match-backend] [           main] c.c.backend.BackendApplication           : Starting BackendApplication v0.0.1-SNAPSHOT using Java 21.0.11 with PID 7 (/app/app.jar started by root in /app)
+[2026-07-18T10:03:44.449384064Z] 
+[2026-07-18T10:03:44.449370803Z]  :: Spring Boot ::                (v3.3.1)
+[2026-07-18T10:03:44.442658228Z] 
+[2026-07-18T10:03:44.442652848Z]  =========|_|==============|___/=/_/_/_/
+[2026-07-18T10:03:44.442647077Z]   '  |____| .__|_| |_|_| |_\__, | / / / /
+[2026-07-18T10:03:44.442641197Z]  \\/  ___)| |_)| | | | | || (_| |  ) ) ) )
+[2026-07-18T10:03:44.442635516Z] ( ( )\___ | '_ | '_| | '_ \/ _` | \ \ \ \
+[2026-07-18T10:03:44.442628736Z]  /\\ / ___'_ __ _ _(_)_ __  __ _ \ \ \ \
+[2026-07-18T10:03:44.442615345Z]   .   ____          _            __ _ _
+[2026-07-18T10:03:44.442511148Z] 
+[2026-07-18T10:03:33.244443379Z] Standard Commons Logging discovery in action with spring-jcl: please remove commons-logging.jar from classpath in order to avoid potential conflicts
+[2026-07-18T10:02:43.587448345Z] 2026-07-18T10:02:43.586Z  INFO 7 --- [career-match-backend] [           main] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Shutdown completed.
+[2026-07-18T10:02:41.650785593Z] 2026-07-18T10:02:41.650Z  INFO 7 --- [career-match-backend] [           main] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Shutdown initiated...
+[2026-07-18T10:02:41.648562655Z] 2026-07-18T10:02:41.648Z  INFO 7 --- [career-match-backend] [           main] j.LocalContainerEntityManagerFactoryBean : Closing JPA EntityManagerFactory for persistence unit 'default'
+[2026-07-18T10:02:41.249231811Z] 2026-07-18T10:02:41.249Z  INFO 7 --- [career-match-backend] [ntContainer#2-2] o.s.a.r.l.SimpleMessageListenerContainer : Successfully waited for workers to finish.
+[2026-07-18T10:02:41.249225581Z] 2026-07-18T10:02:41.249Z  INFO 7 --- [career-match-backend] [ntContainer#2-2] o.s.a.r.l.SimpleMessageListenerContainer : Waiting for workers to finish.
+[2026-07-18T10:02:41.249110463Z] 2026-07-18T10:02:41.248Z  INFO 7 --- [career-match-backend] [ntContainer#1-2] o.s.a.r.l.SimpleMessageListenerContainer : Successfully waited for workers to finish.
+[2026-07-18T10:02:41.248824754Z] 2026-07-18T10:02:41.248Z  INFO 7 --- [career-match-backend] [ntContainer#1-2] o.s.a.r.l.SimpleMessageListenerContainer : Waiting for workers to finish.
+[2026-07-18T10:02:41.248699416Z] 2026-07-18T10:02:41.248Z  INFO 7 --- [career-match-backend] [ntContainer#0-2] o.s.a.r.l.SimpleMessageListenerContainer : Successfully waited for workers to finish.
+[2026-07-18T10:02:41.248660803Z] 2026-07-18T10:02:41.248Z  INFO 7 --- [career-match-backend] [ntContainer#0-2] o.s.a.r.l.SimpleMessageListenerContainer : Waiting for workers to finish.
+[2026-07-18T10:02:41.15245472Z] 
+[2026-07-18T10:02:41.15245211Z] 	... 95 common frames omitted
+[2026-07-18T10:02:41.15244896Z] 	at org.hibernate.type.descriptor.java.FloatPrimitiveArrayJavaType.wrap(FloatPrimitiveArrayJavaType.java:145) ~[hibernate-core-6.5.2.Final.jar!/:6.5.2.Final]
+[2026-07-18T10:02:41.15243853Z] 	at org.postgresql.jdbc.PgArray.getArray(PgArray.java:116) ~[postgresql-42.7.3.jar!/:42.7.3]
+[2026-07-18T10:02:41.152435549Z] 	at org.postgresql.jdbc.PgArray.getArrayImpl(PgArray.java:165) ~[postgresql-42.7.3.jar!/:42.7.3]
+[2026-07-18T10:02:41.152432419Z] 	at org.postgresql.jdbc.PgArray.buildArrayList(PgArray.java:307) ~[postgresql-42.7.3.jar!/:42.7.3]
+[2026-07-18T10:02:41.152429059Z] 	at org.postgresql.jdbc.TypeInfoCache.getArrayDelimiter(TypeInfoCache.java:658) ~[postgresql-42.7.3.jar!/:42.7.3]
+[2026-07-18T10:02:41.152425929Z] Caused by: org.postgresql.util.PSQLException: No results were returned by the query.
+[2026-07-18T10:02:41.152422949Z] 	... 46 common frames omitted
+[2026-07-18T10:02:41.152419768Z] 	at org.springframework.dao.support.PersistenceExceptionTranslationInterceptor.invoke(PersistenceExceptionTranslationInterceptor.java:138) ~[spring-tx-6.1.10.jar!/:6.1.10]
+[2026-07-18T10:02:41.152416688Z] 	at org.springframework.aop.framework.ReflectiveMethodInvocation.proceed(ReflectiveMethodInvocation.java:184) ~[spring-aop-6.1.10.jar!/:6.1.10]
+[2026-07-18T10:02:41.152413558Z] 	at org.springframework.transaction.interceptor.TransactionInterceptor.invoke(TransactionInterceptor.java:119) ~[spring-tx-6.1.10.jar!/:6.1.10]
+[2026-07-18T10:02:41.152410378Z] 	at org.springframework.transaction.interceptor.TransactionAspectSupport.invokeWithinTransaction(TransactionAspectSupport.java:392) ~[spring-tx-6.1.10.jar!/:6.1.10]
+[2026-07-18T10:02:41.152407137Z] 	at org.springframework.transaction.interceptor.TransactionInterceptor$1.proceedWithInvocation(TransactionInterceptor.java:123) ~[spring-tx-6.1.10.jar!/:6.1.10]
+[2026-07-18T10:02:41.152404047Z] 	at org.springframework.aop.framework.ReflectiveMethodInvocation.proceed(ReflectiveMethodInvocation.java:184) ~[spring-aop-6.1.10.jar!/:6.1.10]
+[2026-07-18T10:02:41.152400927Z] 	at org.springframework.data.projection.DefaultMethodInvokingMethodInterceptor.invoke(DefaultMethodInvokingMethodInterceptor.java:70) ~[spring-data-commons-3.3.1.jar!/:3.3.1]
+[2026-07-18T10:02:41.152397697Z] 	at org.springframework.aop.framework.ReflectiveMethodInvocation.proceed(ReflectiveMethodInvocation.java:184) ~[spring-aop-6.1.10.jar!/:6.1.10]
+[2026-07-18T10:02:41.152394516Z] 	at org.springframework.data.repository.core.support.QueryExecutorMethodInterceptor.invoke(QueryExecutorMethodInterceptor.java:143) ~[spring-data-commons-3.3.1.jar!/:3.3.1]
+[2026-07-18T10:02:41.152391486Z] 	at org.springframework.data.repository.core.support.QueryExecutorMethodInterceptor.doInvoke(QueryExecutorMethodInterceptor.java:168) ~[spring-data-commons-3.3.1.jar!/:3.3.1]
+[2026-07-18T10:02:41.152387796Z] 	at org.springframework.aop.framework.ReflectiveMethodInvocation.proceed(ReflectiveMethodInvocation.java:184) ~[spring-aop-6.1.10.jar!/:6.1.10]
+[2026-07-18T10:02:41.152384736Z] 	at org.springframework.data.repository.core.support.RepositoryFactorySupport$ImplementationMethodExecutionInterceptor.invoke(RepositoryFactorySupport.java:628) ~[spring-data-commons-3.3.1.jar!/:3.3.1]
+[2026-07-18T10:02:41.152382846Z] 	at org.springframework.data.repository.core.support.RepositoryComposition.invoke(RepositoryComposition.java:285) ~[spring-data-commons-3.3.1.jar!/:3.3.1]
+[2026-07-18T10:02:41.152380966Z] 	at org.springframework.data.repository.core.support.RepositoryComposition$RepositoryFragments.invoke(RepositoryComposition.java:516) ~[spring-data-commons-3.3.1.jar!/:3.3.1]
+[2026-07-18T10:02:41.152379095Z] 	at org.springframework.data.repository.core.support.RepositoryMethodInvoker.invoke(RepositoryMethodInvoker.java:158) ~[spring-data-commons-3.3.1.jar!/:3.3.1]
+[2026-07-18T10:02:41.152377055Z] 	at org.springframework.data.repository.core.support.RepositoryMethodInvoker.doInvoke(RepositoryMethodInvoker.java:170) ~[spring-data-commons-3.3.1.jar!/:3.3.1]
+[2026-07-18T10:02:41.152372095Z] 	at org.springframework.data.repository.core.support.RepositoryMethodInvoker$RepositoryFragmentMethodInvoker.lambda$new$0(RepositoryMethodInvoker.java:277) ~[spring-data-commons-3.3.1.jar!/:3.3.1]
+[2026-07-18T10:02:41.152369905Z] 	at org.springframework.aop.support.AopUtils.invokeJoinpointUsingReflection(AopUtils.java:354) ~[spring-aop-6.1.10.jar!/:6.1.10]
+[2026-07-18T10:02:41.152363774Z] 	at java.base/java.lang.reflect.Method.invoke(Unknown Source) ~[na:na]
+[2026-07-18T10:02:41.152361824Z] 	at java.base/jdk.internal.reflect.DirectMethodHandleAccessor.invoke(Unknown Source) ~[na:na]
+[2026-07-18T10:02:41.152359934Z] 	at org.springframework.data.jpa.repository.support.SimpleJpaRepository.findAll(SimpleJpaRepository.java:1) ~[spring-data-jpa-3.3.1.jar!/:3.3.1]
+[2026-07-18T10:02:41.152358074Z] 	at org.springframework.data.jpa.repository.support.SimpleJpaRepository.findAll(SimpleJpaRepository.java:391) ~[spring-data-jpa-3.3.1.jar!/:3.3.1]
+[2026-07-18T10:02:41.152356194Z] 	at org.hibernate.query.Query.getResultList(Query.java:120) ~[hibernate-core-6.5.2.Final.jar!/:6.5.2.Final]
+[2026-07-18T10:02:41.152354264Z] 	at org.hibernate.query.spi.AbstractSelectionQuery.list(AbstractSelectionQuery.java:423) ~[hibernate-core-6.5.2.Final.jar!/:6.5.2.Final]
+[2026-07-18T10:02:41.152352354Z] 	at org.hibernate.query.sqm.internal.QuerySqmImpl.doList(QuerySqmImpl.java:526) ~[hibernate-core-6.5.2.Final.jar!/:6.5.2.Final]
+[2026-07-18T10:02:41.152350384Z] 	at org.hibernate.query.sqm.internal.ConcreteSqmSelectQueryPlan.performList(ConcreteSqmSelectQueryPlan.java:302) ~[hibernate-core-6.5.2.Final.jar!/:6.5.2.Final]
+[2026-07-18T10:02:41.152348504Z] 	at org.hibernate.query.sqm.internal.ConcreteSqmSelectQueryPlan.withCacheableSqmInterpretation(ConcreteSqmSelectQueryPlan.java:382) ~[hibernate-core-6.5.2.Final.jar!/:6.5.2.Final]
+[2026-07-18T10:02:41.152346603Z] 	at org.hibernate.query.sqm.internal.ConcreteSqmSelectQueryPlan.lambda$new$2(ConcreteSqmSelectQueryPlan.java:139) ~[hibernate-core-6.5.2.Final.jar!/:6.5.2.Final]
+[2026-07-18T10:02:41.152344713Z] 	at org.hibernate.sql.exec.spi.JdbcSelectExecutor.list(JdbcSelectExecutor.java:65) ~[hibernate-core-6.5.2.Final.jar!/:6.5.2.Final]
+[2026-07-18T10:02:41.152342853Z] 	at org.hibernate.sql.exec.spi.JdbcSelectExecutor.list(JdbcSelectExecutor.java:76) ~[hibernate-core-6.5.2.Final.jar!/:6.5.2.Final]
+[2026-07-18T10:02:41.152340893Z] 	at org.hibernate.sql.exec.internal.JdbcSelectExecutorStandardImpl.executeQuery(JdbcSelectExecutorStandardImpl.java:83) ~[hibernate-core-6.5.2.Final.jar!/:6.5.2.Final]
+[2026-07-18T10:02:41.152339013Z] 	at org.hibernate.sql.exec.internal.JdbcSelectExecutorStandardImpl.doExecuteQuery(JdbcSelectExecutorStandardImpl.java:211) ~[hibernate-core-6.5.2.Final.jar!/:6.5.2.Final]
+[2026-07-18T10:02:41.152337123Z] 	at org.hibernate.sql.results.spi.ListResultsConsumer.consume(ListResultsConsumer.java:33) ~[hibernate-core-6.5.2.Final.jar!/:6.5.2.Final]
+[2026-07-18T10:02:41.152335203Z] 	at org.hibernate.sql.results.spi.ListResultsConsumer.consume(ListResultsConsumer.java:205) ~[hibernate-core-6.5.2.Final.jar!/:6.5.2.Final]
+[2026-07-18T10:02:41.152333332Z] 	at org.hibernate.sql.results.internal.StandardRowReader.readRow(StandardRowReader.java:87) ~[hibernate-core-6.5.2.Final.jar!/:6.5.2.Final]
+[2026-07-18T10:02:41.152331412Z] 	at org.hibernate.sql.results.internal.StandardRowReader.coordinateInitializers(StandardRowReader.java:113) ~[hibernate-core-6.5.2.Final.jar!/:6.5.2.Final]
+[2026-07-18T10:02:41.152329542Z] 	at org.hibernate.sql.results.internal.InitializersList.initializeInstance(InitializersList.java:73) ~[hibernate-core-6.5.2.Final.jar!/:6.5.2.Final]
+[2026-07-18T10:02:41.152327662Z] 	at org.hibernate.sql.results.graph.entity.AbstractEntityInitializer.initializeInstance(AbstractEntityInitializer.java:761) ~[hibernate-core-6.5.2.Final.jar!/:6.5.2.Final]
+[2026-07-18T10:02:41.152325652Z] 	at org.hibernate.sql.results.graph.entity.AbstractEntityInitializer.initializeEntity(AbstractEntityInitializer.java:769) ~[hibernate-core-6.5.2.Final.jar!/:6.5.2.Final]
+[2026-07-18T10:02:41.152320002Z] 	at org.hibernate.sql.results.graph.entity.AbstractEntityInitializer.initializeEntityInstance(AbstractEntityInitializer.java:794) ~[hibernate-core-6.5.2.Final.jar!/:6.5.2.Final]
+[2026-07-18T10:02:41.152318031Z] 	at org.hibernate.sql.results.graph.entity.AbstractEntityInitializer.extractConcreteTypeStateValues(AbstractEntityInitializer.java:1037) ~[hibernate-core-6.5.2.Final.jar!/:6.5.2.Final]
+[2026-07-18T10:02:41.152315991Z] 	at org.hibernate.sql.results.graph.DomainResultAssembler.assemble(DomainResultAssembler.java:35) ~[hibernate-core-6.5.2.Final.jar!/:6.5.2.Final]
+[2026-07-18T10:02:41.152314051Z] 	at org.hibernate.sql.results.graph.basic.BasicResultAssembler.assemble(BasicResultAssembler.java:59) ~[hibernate-core-6.5.2.Final.jar!/:6.5.2.Final]
+[2026-07-18T10:02:41.152312101Z] 	at org.hibernate.sql.results.graph.basic.BasicResultAssembler.extractRawValue(BasicResultAssembler.java:52) ~[hibernate-core-6.5.2.Final.jar!/:6.5.2.Final]
+[2026-07-18T10:02:41.152310081Z] 	at org.hibernate.sql.results.internal.RowProcessingStateStandardImpl.getJdbcValue(RowProcessingStateStandardImpl.java:120) ~[hibernate-core-6.5.2.Final.jar!/:6.5.2.Final]
+[2026-07-18T10:02:41.1523012Z] 	at org.hibernate.sql.results.jdbc.internal.JdbcValuesResultSetImpl.getCurrentRowValue(JdbcValuesResultSetImpl.java:379) ~[hibernate-core-6.5.2.Final.jar!/:6.5.2.Final]
+[2026-07-18T10:02:41.15229916Z] 	at org.hibernate.type.descriptor.jdbc.BasicExtractor.extract(BasicExtractor.java:44) ~[hibernate-core-6.5.2.Final.jar!/:6.5.2.Final]
+[2026-07-18T10:02:41.15229713Z] 	at org.hibernate.type.descriptor.jdbc.ArrayJdbcType$2.doExtract(ArrayJdbcType.java:182) ~[hibernate-core-6.5.2.Final.jar!/:6.5.2.Final]
+[2026-07-18T10:02:41.1522952Z] 	at org.hibernate.type.descriptor.java.FloatPrimitiveArrayJavaType.wrap(FloatPrimitiveArrayJavaType.java:28) ~[hibernate-core-6.5.2.Final.jar!/:6.5.2.Final]
+[2026-07-18T10:02:41.1522932Z] 	at org.hibernate.type.descriptor.java.FloatPrimitiveArrayJavaType.wrap(FloatPrimitiveArrayJavaType.java:149) ~[hibernate-core-6.5.2.Final.jar!/:6.5.2.Final]
+[2026-07-18T10:02:41.15229119Z] Caused by: org.hibernate.HibernateException: org.postgresql.util.PSQLException: No results were returned by the query.
+[2026-07-18T10:02:41.15228924Z] 	at org.springframework.boot.loader.launch.JarLauncher.main(JarLauncher.java:58) ~[app.jar:0.0.1-SNAPSHOT]
+[2026-07-18T10:02:41.152287329Z] 	at org.springframework.boot.loader.launch.Launcher.launch(Launcher.java:53) ~[app.jar:0.0.1-SNAPSHOT]
+[2026-07-18T10:02:41.152285459Z] 	at org.springframework.boot.loader.launch.Launcher.launch(Launcher.java:91) ~[app.jar:0.0.1-SNAPSHOT]
+[2026-07-18T10:02:41.152283489Z] 	at java.base/java.lang.reflect.Method.invoke(Unknown Source) ~[na:na]
+[2026-07-18T10:02:41.152281499Z] 	at java.base/jdk.internal.reflect.DirectMethodHandleAccessor.invoke(Unknown Source) ~[na:na]
+[2026-07-18T10:02:41.152279499Z] 	at com.careermatch.backend.BackendApplication.main(BackendApplication.java:10) ~[!/:0.0.1-SNAPSHOT]
+[2026-07-18T10:02:41.152277579Z] 	at org.springframework.boot.SpringApplication.run(SpringApplication.java:1352) ~[spring-boot-3.3.1.jar!/:3.3.1]
+[2026-07-18T10:02:41.152275469Z] 	at org.springframework.boot.SpringApplication.run(SpringApplication.java:1363) ~[spring-boot-3.3.1.jar!/:3.3.1]
+[2026-07-18T10:02:41.152273588Z] 	at org.springframework.boot.SpringApplication.run(SpringApplication.java:349) ~[spring-boot-3.3.1.jar!/:3.3.1]
+[2026-07-18T10:02:41.152271548Z] 	at org.springframework.boot.SpringApplicationRunListeners.ready(SpringApplicationRunListeners.java:80) ~[spring-boot-3.3.1.jar!/:3.3.1]
+[2026-07-18T10:02:41.152269528Z] 	at org.springframework.boot.SpringApplicationRunListeners.doWithListeners(SpringApplicationRunListeners.java:112) ~[spring-boot-3.3.1.jar!/:3.3.1]
+[2026-07-18T10:02:41.152262498Z] 	at org.springframework.boot.SpringApplicationRunListeners.doWithListeners(SpringApplicationRunListeners.java:118) ~[spring-boot-3.3.1.jar!/:3.3.1]
+[2026-07-18T10:02:41.152259387Z] 	at java.base/java.lang.Iterable.forEach(Unknown Source) ~[na:na]
+[2026-07-18T10:02:41.152256197Z] 	at org.springframework.boot.SpringApplicationRunListeners.lambda$ready$6(SpringApplicationRunListeners.java:80) ~[spring-boot-3.3.1.jar!/:3.3.1]
+[2026-07-18T10:02:41.152253017Z] 	at org.springframework.boot.context.event.EventPublishingRunListener.ready(EventPublishingRunListener.java:109) ~[spring-boot-3.3.1.jar!/:3.3.1]
+[2026-07-18T10:02:41.152250167Z] 	at org.springframework.context.support.AbstractApplicationContext.publishEvent(AbstractApplicationContext.java:384) ~[spring-context-6.1.10.jar!/:6.1.10]
+[2026-07-18T10:02:41.152247387Z] 	at org.springframework.context.support.AbstractApplicationContext.publishEvent(AbstractApplicationContext.java:451) ~[spring-context-6.1.10.jar!/:6.1.10]
+[2026-07-18T10:02:41.152244426Z] 	at org.springframework.context.event.SimpleApplicationEventMulticaster.multicastEvent(SimpleApplicationEventMulticaster.java:156) ~[spring-context-6.1.10.jar!/:6.1.10]
+[2026-07-18T10:02:41.152241496Z] 	at org.springframework.context.event.SimpleApplicationEventMulticaster.invokeListener(SimpleApplicationEventMulticaster.java:178) ~[spring-context-6.1.10.jar!/:6.1.10]
+[2026-07-18T10:02:41.152238486Z] 	at org.springframework.context.event.SimpleApplicationEventMulticaster.doInvokeListener(SimpleApplicationEventMulticaster.java:185) ~[spring-context-6.1.10.jar!/:6.1.10]
+[2026-07-18T10:02:41.152235366Z] 	at org.springframework.context.event.ApplicationListenerMethodAdapter.onApplicationEvent(ApplicationListenerMethodAdapter.java:168) ~[spring-context-6.1.10.jar!/:6.1.10]
+[2026-07-18T10:02:41.152232456Z] 	at org.springframework.context.event.ApplicationListenerMethodAdapter.processEvent(ApplicationListenerMethodAdapter.java:237) ~[spring-context-6.1.10.jar!/:6.1.10]
+[2026-07-18T10:02:41.152229336Z] 	at org.springframework.context.event.ApplicationListenerMethodAdapter.doInvoke(ApplicationListenerMethodAdapter.java:365) ~[spring-context-6.1.10.jar!/:6.1.10]
+[2026-07-18T10:02:41.152225905Z] 	at java.base/java.lang.reflect.Method.invoke(Unknown Source) ~[na:na]
+[2026-07-18T10:02:41.152222285Z] 	at java.base/jdk.internal.reflect.DirectMethodHandleAccessor.invoke(Unknown Source) ~[na:na]
+[2026-07-18T10:02:41.152208614Z] 	at com.careermatch.backend.job.service.JobDataSeeder$$SpringCGLIB$$0.seedJobsOnStartup(<generated>) ~[!/:0.0.1-SNAPSHOT]
+[2026-07-18T10:02:41.152205284Z] 	at org.springframework.aop.framework.CglibAopProxy$DynamicAdvisedInterceptor.intercept(CglibAopProxy.java:720) ~[spring-aop-6.1.10.jar!/:6.1.10]
+[2026-07-18T10:02:41.152202114Z] 	at org.springframework.aop.framework.CglibAopProxy$CglibMethodInvocation.proceed(CglibAopProxy.java:768) ~[spring-aop-6.1.10.jar!/:6.1.10]
+[2026-07-18T10:02:41.152199074Z] 	at org.springframework.aop.framework.ReflectiveMethodInvocation.proceed(ReflectiveMethodInvocation.java:184) ~[spring-aop-6.1.10.jar!/:6.1.10]
+[2026-07-18T10:02:41.152195883Z] 	at org.springframework.transaction.interceptor.TransactionInterceptor.invoke(TransactionInterceptor.java:119) ~[spring-tx-6.1.10.jar!/:6.1.10]
+[2026-07-18T10:02:41.152192863Z] 	at org.springframework.transaction.interceptor.TransactionAspectSupport.invokeWithinTransaction(TransactionAspectSupport.java:392) ~[spring-tx-6.1.10.jar!/:6.1.10]
+[2026-07-18T10:02:41.152189343Z] 	at org.springframework.transaction.interceptor.TransactionInterceptor$1.proceedWithInvocation(TransactionInterceptor.java:123) ~[spring-tx-6.1.10.jar!/:6.1.10]
+[2026-07-18T10:02:41.152186253Z] 	at org.springframework.aop.framework.CglibAopProxy$CglibMethodInvocation.proceed(CglibAopProxy.java:768) ~[spring-aop-6.1.10.jar!/:6.1.10]
+[2026-07-18T10:02:41.152182862Z] 	at org.springframework.aop.framework.ReflectiveMethodInvocation.proceed(ReflectiveMethodInvocation.java:163) ~[spring-aop-6.1.10.jar!/:6.1.10]
+[2026-07-18T10:02:41.152167012Z] 	at org.springframework.aop.framework.ReflectiveMethodInvocation.invokeJoinpoint(ReflectiveMethodInvocation.java:196) ~[spring-aop-6.1.10.jar!/:6.1.10]
+[2026-07-18T10:02:41.152163721Z] 	at org.springframework.aop.support.AopUtils.invokeJoinpointUsingReflection(AopUtils.java:354) ~[spring-aop-6.1.10.jar!/:6.1.10]
+[2026-07-18T10:02:41.152160151Z] 	at java.base/java.lang.reflect.Method.invoke(Unknown Source) ~[na:na]
+[2026-07-18T10:02:41.152155781Z] 	at java.base/jdk.internal.reflect.DirectMethodHandleAccessor.invoke(Unknown Source) ~[na:na]
+[2026-07-18T10:02:41.15215286Z] 	at com.careermatch.backend.job.service.JobDataSeeder.seedJobsOnStartup(JobDataSeeder.java:72) ~[!/:0.0.1-SNAPSHOT]
+[2026-07-18T10:02:41.15215004Z] 	at jdk.proxy2/jdk.proxy2.$Proxy161.findAll(Unknown Source) ~[na:na]
+[2026-07-18T10:02:41.15214665Z] 	at org.springframework.aop.framework.JdkDynamicAopProxy.invoke(JdkDynamicAopProxy.java:223) ~[spring-aop-6.1.10.jar!/:6.1.10]
+[2026-07-18T10:02:41.15214369Z] 	at org.springframework.aop.framework.ReflectiveMethodInvocation.proceed(ReflectiveMethodInvocation.java:184) ~[spring-aop-6.1.10.jar!/:6.1.10]
+[2026-07-18T10:02:41.15214031Z] 	at org.springframework.aop.interceptor.ExposeInvocationInterceptor.invoke(ExposeInvocationInterceptor.java:97) ~[spring-aop-6.1.10.jar!/:6.1.10]
+[2026-07-18T10:02:41.152137399Z] 	at org.springframework.aop.framework.ReflectiveMethodInvocation.proceed(ReflectiveMethodInvocation.java:184) ~[spring-aop-6.1.10.jar!/:6.1.10]
+[2026-07-18T10:02:41.152133899Z] 	at org.springframework.data.jpa.repository.support.CrudMethodMetadataPostProcessor$CrudMethodMetadataPopulatingMethodInterceptor.invoke(CrudMethodMetadataPostProcessor.java:165) ~[spring-data-jpa-3.3.1.jar!/:3.3.1]
+[2026-07-18T10:02:41.152130149Z] 	at org.springframework.aop.framework.ReflectiveMethodInvocation.proceed(ReflectiveMethodInvocation.java:184) ~[spring-aop-6.1.10.jar!/:6.1.10]
+[2026-07-18T10:02:41.152126919Z] 	at org.springframework.dao.support.PersistenceExceptionTranslationInterceptor.invoke(PersistenceExceptionTranslationInterceptor.java:160) ~[spring-tx-6.1.10.jar!/:6.1.10]
+[2026-07-18T10:02:41.152124289Z] 	at org.springframework.dao.support.DataAccessUtils.translateIfNecessary(DataAccessUtils.java:335) ~[spring-tx-6.1.10.jar!/:6.1.10]
+[2026-07-18T10:02:41.152122389Z] 	at org.springframework.dao.support.ChainedPersistenceExceptionTranslator.translateExceptionIfPossible(ChainedPersistenceExceptionTranslator.java:61) ~[spring-tx-6.1.10.jar!/:6.1.10]
+[2026-07-18T10:02:41.152120038Z] 	at org.springframework.orm.jpa.AbstractEntityManagerFactoryBean.translateExceptionIfPossible(AbstractEntityManagerFactoryBean.java:550) ~[spring-orm-6.1.10.jar!/:6.1.10]
+[2026-07-18T10:02:41.152117408Z] 	at org.springframework.orm.jpa.vendor.HibernateJpaDialect.translateExceptionIfPossible(HibernateJpaDialect.java:241) ~[spring-orm-6.1.10.jar!/:6.1.10]
+[2026-07-18T10:02:41.152115308Z] 	at org.springframework.orm.jpa.vendor.HibernateJpaDialect.convertHibernateAccessException(HibernateJpaDialect.java:341) ~[spring-orm-6.1.10.jar!/:6.1.10]
+[2026-07-18T10:02:41.152112658Z] org.springframework.orm.jpa.JpaSystemException: org.postgresql.util.PSQLException: No results were returned by the query.
+[2026-07-18T10:02:41.152109928Z] 
+[2026-07-18T10:02:41.152093276Z] 2026-07-18T10:02:41.150Z ERROR 7 --- [career-match-backend] [           main] o.s.boot.SpringApplication               : Application run failed
+[2026-07-18T10:02:39.695566361Z]         jobs j1_0
+[2026-07-18T10:02:39.695563131Z]     from
+[2026-07-18T10:02:39.69555996Z]         j1_0.work_mode 
+[2026-07-18T10:02:39.69555686Z]         j1_0.updated_at,
+[2026-07-18T10:02:39.69555365Z]         j1_0.title,
+[2026-07-18T10:02:39.69555055Z]         j1_0.status,
+[2026-07-18T10:02:39.69554737Z]         j1_0.sponsorship_available,
+[2026-07-18T10:02:39.69554363Z]         j1_0.salary_range,
+[2026-07-18T10:02:39.695525018Z]         j1_0.requirements,
+[2026-07-18T10:02:39.695521928Z]         j1_0.required_skills,
+[2026-07-18T10:02:39.695518588Z]         j1_0.recruiter_id,
+[2026-07-18T10:02:39.695515578Z]         j1_0.preferred_skills,
+[2026-07-18T10:02:39.695512468Z]         j1_0.location,
+[2026-07-18T10:02:39.695509367Z]         j1_0.job_type,
+[2026-07-18T10:02:39.695506287Z]         j1_0.gpa_cutoff,
+[2026-07-18T10:02:39.695503267Z]         j1_0.fts,
+[2026-07-18T10:02:39.695500087Z]         j1_0.experience_level,
+[2026-07-18T10:02:39.695496987Z]         j1_0.embedding,
+[2026-07-18T10:02:39.695494056Z]         j1_0.education_level,
+[2026-07-18T10:02:39.695490876Z]         j1_0.description,
+[2026-07-18T10:02:39.695487596Z]         j1_0.department,
+[2026-07-18T10:02:39.695484306Z]         j1_0.deadline,
+[2026-07-18T10:02:39.695481115Z]         j1_0.created_at,
+[2026-07-18T10:02:39.695467154Z]         j1_0.company_id,
+[2026-07-18T10:02:39.695464154Z]         j1_0.id,
+[2026-07-18T10:02:39.695460994Z]     select
+[2026-07-18T10:02:39.695457984Z] Hibernate: 
+[2026-07-18T10:02:39.695455074Z]         jobs j1_0
+[2026-07-18T10:02:39.695452164Z]     from
+[2026-07-18T10:02:39.695449013Z]         j1_0.work_mode 
+[2026-07-18T10:02:39.695445943Z]         j1_0.updated_at,
+[2026-07-18T10:02:39.695442823Z]         j1_0.title,
+[2026-07-18T10:02:39.695439283Z]         j1_0.status,
+[2026-07-18T10:02:39.695436292Z]         j1_0.sponsorship_available,
+[2026-07-18T10:02:39.695432382Z]         j1_0.salary_range,
+[2026-07-18T10:02:39.695429352Z]         j1_0.requirements,
+[2026-07-18T10:02:39.695426392Z]         j1_0.required_skills,
+[2026-07-18T10:02:39.695423191Z]         j1_0.recruiter_id,
+[2026-07-18T10:02:39.695419941Z]         j1_0.preferred_skills,
+[2026-07-18T10:02:39.695416721Z]         j1_0.location,
+[2026-07-18T10:02:39.695413681Z]         j1_0.job_type,
+[2026-07-18T10:02:39.695410461Z]         j1_0.gpa_cutoff,
+[2026-07-18T10:02:39.695407461Z]         j1_0.fts,
+[2026-07-18T10:02:39.69540428Z]         j1_0.experience_level,
+[2026-07-18T10:02:39.69540096Z]         j1_0.embedding,
+[2026-07-18T10:02:39.69539791Z]         j1_0.education_level,
+[2026-07-18T10:02:39.6953941Z]         j1_0.description,
+[2026-07-18T10:02:39.695373798Z]         j1_0.department,
