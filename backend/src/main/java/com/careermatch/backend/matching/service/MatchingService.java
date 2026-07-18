@@ -155,7 +155,21 @@ public class MatchingService {
                 .findByStudentIdOrderByCompositeScoreDesc(studentId)
                 .stream()
                 .filter(m -> m.getJob().getStatus() == JobStatus.ACTIVE)
+                .filter(m -> m.getCompositeScore() >= 30.0)
                 .collect(Collectors.toList());
+
+        // On DB miss, if student has entered skills in profile (even without resume), auto-generate matches
+        if (matches.isEmpty()) {
+            log.info("No DB matches found for student {} — generating matches directly from student profile skills.", studentId);
+            try {
+                matches = generateMatchesForStudent(studentId).stream()
+                        .filter(m -> m.getJob().getStatus() == JobStatus.ACTIVE)
+                        .filter(m -> m.getCompositeScore() >= 30.0)
+                        .collect(Collectors.toList());
+            } catch (Exception e) {
+                log.warn("Failed to auto-generate matches from profile for student {}: {}", studentId, e.getMessage());
+            }
+        }
 
         // Populate cache on miss
         if (!matches.isEmpty()) {

@@ -245,8 +245,12 @@ public class ResumeService {
     }
 
     private void updateStudentProfile(Student student, ExtractedProfile profile) {
-        if (profile.getFirstName() != null) student.setFirstName(profile.getFirstName());
-        if (profile.getLastName() != null) student.setLastName(profile.getLastName());
+        if ((student.getFirstName() == null || student.getFirstName().isBlank()) && profile.getFirstName() != null && !profile.getFirstName().isBlank()) {
+            student.setFirstName(profile.getFirstName());
+        }
+        if ((student.getLastName() == null || student.getLastName().isBlank()) && profile.getLastName() != null && !profile.getLastName().isBlank()) {
+            student.setLastName(profile.getLastName());
+        }
         if (profile.getLanguages() != null) student.setLanguages(profile.getLanguages());
         if (profile.getGithubUrl() != null) student.setGithubUrl(profile.getGithubUrl());
         if (profile.getLinkedinUrl() != null) student.setLinkedinUrl(profile.getLinkedinUrl());

@@ -75,28 +75,16 @@
 
             <!-- Collapsible sub-board list -->
             <div class="job-boards-sub-list" [class.collapsed]="!jobBoardsExpanded()">
-              <li class="board-item" [class.active]="selectedJobBoard() === '.Net Developer'" (click)="selectJobBoard('.Net Developer')">
+              <li *ngFor="let m of matches().slice(0, 4)" class="board-item" [class.active]="selectedJobBoard() === m.jobTitle" (click)="selectJobBoard(m.jobTitle)">
                 <span class="board-dot"></span>
-                <span>.Net Developer</span>
-              </li>
-              <li class="board-item" [class.active]="selectedJobBoard() === 'Java Developer'" (click)="selectJobBoard('Java Developer')">
-                <span class="board-dot"></span>
-                <span>Java Developer</span>
-              </li>
-              <li class="board-item" [class.active]="selectedJobBoard() === 'Frontend Engineer'" (click)="selectJobBoard('Frontend Engineer')">
-                <span class="board-dot"></span>
-                <span>Frontend Engineer</span>
-              </li>
-              <li class="board-item" [class.active]="selectedJobBoard() === 'AI Engineer'" (click)="selectJobBoard('AI Engineer')">
-                <span class="board-dot"></span>
-                <span>AI Engineer</span>
+                <span>{{ m.jobTitle }}</span>
               </li>
               <li class="create-new-board-btn" (click)="openUploadModal()">
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                   <line x1="12" y1="5" x2="12" y2="19"/>
                   <line x1="5" y1="12" x2="19" y2="12"/>
                 </svg>
-                <span>Create job board</span>
+                <span>Upload resume for board</span>
               </li>
             </div>
           </ul>
@@ -237,7 +225,17 @@
       <!-- RECOMMENDATIONS SECTION -->
       <div class="recommendations-section animate-fade-in" *ngIf="activeTab() === 'recommendations'">
 
-        <!-- Recommendations Cards List (Matching Image 2 Design) -->
+        <!-- Empty state when no matches exist in database -->
+        <div class="empty-matches-box glass-card text-center" *ngIf="matches().length === 0" style="padding: 3rem 1.5rem; border-radius: 12px; margin-top: 1rem; background: rgba(255,255,255,0.7); border: 1px dashed #e2d7c5;">
+          <div style="font-size: 2.5rem; margin-bottom: 0.5rem;">🔍</div>
+          <h3 style="font-size: 1.2rem; font-weight: 700; color: #374151; margin-bottom: 0.5rem;">No Job Matches Available</h3>
+          <p style="font-size: 0.88rem; color: #6b7280; max-width: 450px; margin: 0 auto 1.25rem; line-height: 1.4;">Upload your resume to let NEXUS AI parse your technical skills and generate personalized job match scores from active database jobs.</p>
+          <button type="button" class="btn btn-primary" style="background: #991b1b; color: #fff; padding: 0.65rem 1.5rem; font-size: 0.85rem; font-weight: 700; border-radius: 6px; border: none; cursor: pointer;" (click)="openUploadModal()">
+            Upload Resume
+          </button>
+        </div>
+
+        <!-- Recommendations Cards List -->
         <div class="recommendations-grid" *ngIf="matches().length > 0">
           <div *ngFor="let m of matches()" class="job-match-card-v2 glass-card animate-fade-in" (click)="viewMatchDetails(m.id)">
             

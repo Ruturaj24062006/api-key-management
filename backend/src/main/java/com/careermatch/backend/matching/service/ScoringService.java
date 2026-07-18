@@ -24,6 +24,16 @@ public class ScoringService {
         double eduCertFit = calculateEduCertFit(student);               // 5%
 
         double composite = techFit + projectFit + expFit + domainFit + behavioralFit + eduCertFit;
+
+        // Domain & Skill Mismatch Guard:
+        // If student profile has skills listed, but techFit and domainFit are both 0 (meaning zero overlap in skills and domain),
+        // then cap composite score to 0.0 so irrelevant jobs (e.g. Backend Dev shown to Marketing student) are filtered out.
+        boolean hasSkills = student.getSkills() != null && !student.getSkills().isEmpty();
+        if (hasSkills && techFit < 0.1 && domainFit < 0.1) {
+            log.info("Domain mismatch detected between student {} skills and job {}: capping score to 0.", student.getId(), job.getId());
+            composite = 0.0;
+        }
+
         log.info("Scoring student {} for Job {}: Tech={}, Proj={}, Exp={}, Dom={}, Behav={}, EduCert={}, Total={}",
                 student.getId(), job.getId(), techFit, projectFit, expFit, domainFit, behavioralFit, eduCertFit, composite);
         
@@ -38,14 +48,15 @@ public class ScoringService {
 
         String requirements = (job.getRequirements() != null ? job.getRequirements() : "").toLowerCase();
         String description = (job.getDescription() != null ? job.getDescription() : "").toLowerCase();
-        String jobText = requirements + " " + description;
+        String title = (job.getTitle() != null ? job.getTitle() : "").toLowerCase();
+        String jobText = title + " " + requirements + " " + description;
 
         Set<String> studentSkills = student.getSkills().stream()
                 .map(s -> s.getName().toLowerCase().trim())
                 .collect(Collectors.toSet());
 
         long matchCount = studentSkills.stream()
-                .filter(jobText::contains)
+                .filter(s -> !s.isBlank() && jobText.contains(s))
                 .count();
 
         double ratio = (double) matchCount / Math.max(5.0, studentSkills.size());
@@ -93,17 +104,35 @@ public class ScoringService {
         }
     }
 
-    // Domain Fit (10%) - Overlap of major/education and experience domain with job title
+    // Domain Fit (10%) - Overlap of major/education, experience domain, skills, and preferences with job title
     public double calculateDomainFit(Student student, Job job) {
-        String jobTitle = job.getTitle().toLowerCase();
+        String jobTitle = (job.getTitle() != null ? job.getTitle() : "").toLowerCase();
+        String jobReqs = (job.getRequirements() != null ? job.getRequirements() : "").toLowerCase();
+        String jobFull = jobTitle + " " + jobReqs;
         double score = 0.0;
 
         // Check education major domain
         if (student.getEducation() != null) {
             for (StudentEducation edu : student.getEducation()) {
                 String field = edu.getFieldOfStudy() != null ? edu.getFieldOfStudy().toLowerCase() : "";
-                if (field.contains("computer science") || field.contains("software") || field.contains("information technology") || field.contains("engineering")) {
-                    score = Math.max(score, 5.0);
+                if (!field.isBlank()) {
+                    for (String token : field.split("[\\s,/]+")) {
+                        if (token.length() > 3 && jobFull.contains(token)) {
+                            score = Math.max(score, 10.0);
+                            break;
+                        }
+                    }
+                }
+            }
+        }
+
+        // Check skills for domain match (e.g. marketing skills matching marketing job)
+        if (student.getSkills() != null) {
+            for (StudentSkill skill : student.getSkills()) {
+                String sName = skill.getName() != null ? skill.getName().toLowerCase() : "";
+                if (!sName.isBlank() && jobFull.contains(sName)) {
+                    score = Math.max(score, 10.0);
+                    break;
                 }
             }
         }
@@ -112,29 +141,24 @@ public class ScoringService {
         if (student.getExperience() != null) {
             for (StudentExperience exp : student.getExperience()) {
                 String title = exp.getJobTitle() != null ? exp.getJobTitle().toLowerCase() : "";
-                if ((jobTitle.contains("frontend") && title.contains("frontend")) ||
-                    (jobTitle.contains("backend") && title.contains("backend")) ||
-                    (jobTitle.contains("fullstack") && title.contains("fullstack")) ||
-                    (jobTitle.contains("mobile") && title.contains("mobile")) ||
-                    (jobTitle.contains("data") && title.contains("data"))) {
-                    score = Math.max(score, 10.0);
+                if (!title.isBlank()) {
+                    for (String token : title.split("[\\s,/]+")) {
+                        if (token.length() > 3 && jobFull.contains(token)) {
+                            score = Math.max(score, 10.0);
+                            break;
+                        }
+                    }
                 }
             }
         }
 
         if (student.getCareerPreferences() != null && !student.getCareerPreferences().isBlank()) {
             String prefs = student.getCareerPreferences().toLowerCase();
-            if ((jobTitle.contains("frontend") && prefs.contains("frontend")) ||
-                (jobTitle.contains("backend") && prefs.contains("backend")) ||
-                (jobTitle.contains("fullstack") && prefs.contains("fullstack")) ||
-                (jobTitle.contains("mobile") && prefs.contains("mobile")) ||
-                (jobTitle.contains("data") && prefs.contains("data")) ||
-                (jobTitle.contains("java") && prefs.contains("java")) ||
-                (jobTitle.contains(".net") && prefs.contains(".net")) ||
-                (jobTitle.contains("ai") && prefs.contains("ai")) ||
-                (jobTitle.contains("engineer") && prefs.contains("engineer")) ||
-                (jobTitle.contains("developer") && prefs.contains("developer"))) {
-                score = Math.max(score, 10.0);
+            for (String token : prefs.split("[\\s,/]+")) {
+                if (token.length() > 3 && jobFull.contains(token)) {
+                    score = Math.max(score, 10.0);
+                    break;
+                }
             }
         }
 

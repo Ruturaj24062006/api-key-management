@@ -198,9 +198,16 @@ public class StudentService {
                         .build())
                 .collect(Collectors.toList()) : new ArrayList<>();
 
+        String email = student.getUser() != null ? student.getUser().getEmail() : "";
+        String defaultName = (email != null && email.contains("@")) ? email.split("@")[0] : "Student";
+        String fName = (student.getFirstName() != null && !student.getFirstName().isBlank())
+                ? student.getFirstName()
+                : defaultName;
+        String lName = (student.getLastName() != null) ? student.getLastName() : "";
+
         return StudentProfileDto.builder()
-                .firstName(student.getFirstName())
-                .lastName(student.getLastName())
+                .firstName(fName)
+                .lastName(lName)
                 .bio(student.getBio())
                 .githubUrl(student.getGithubUrl())
                 .linkedinUrl(student.getLinkedinUrl())

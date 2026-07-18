@@ -259,12 +259,12 @@ export class StudentDashboard implements OnInit, OnDestroy {
   }
 
   processMatches(matchList: MatchResponse[]): void {
-    const list = matchList || [];
+    const list = (matchList && Array.isArray(matchList)) ? matchList : [];
     this.matches.set(list);
     
     // Compute average match score
     if (list.length > 0) {
-      const sum = list.reduce((acc, curr) => acc + curr.compositeScore, 0);
+      const sum = list.reduce((acc, curr) => acc + (curr.compositeScore || 0), 0);
       const avg = Math.round(sum / list.length);
       this.averageMatchScore.set(avg);
     } else {
