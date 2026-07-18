@@ -33,13 +33,27 @@ export class Login implements OnInit {
   }
 
   initGoogleSignIn(): void {
+    let attempts = 0;
     const checkGoogle = setInterval(() => {
-      if (typeof window !== 'undefined' && (window as any).google) {
+      attempts++;
+      if (attempts > 10) {
         clearInterval(checkGoogle);
+        return;
+      }
+      if (typeof window !== 'undefined' && (window as any).google?.accounts?.id) {
+        clearInterval(checkGoogle);
+        try {
+          const clientId = '562305543169-qgghq9tr4v4o0npsqg27sc6ndv7b0688.apps.googleusercontent.com';
 
-        const clientId = '562305543169-qgghq9tr4v4o0npsqg27sc6ndv7b0688.apps.googleusercontent.com';
+          if (!(window as any).googleInitialized) {
+            (window as any).google.accounts.id.initialize({
+              client_id: clientId,
+              callback: this.handleGoogleCredential.bind(this),
+              auto_select: false
+            });
+            (window as any).googleInitialized = true;
+          }
 
-        if ((window as any).googleInitialized) {
           const btnContainer = document.getElementById('googleBtn');
           if (btnContainer) {
             (window as any).google.accounts.id.renderButton(
@@ -47,21 +61,8 @@ export class Login implements OnInit {
               { theme: 'outline', size: 'large', width: 320, text: 'continue_with', shape: 'rectangular' }
             );
           }
-          return;
-        }
-
-        (window as any).google.accounts.id.initialize({
-          client_id: clientId,
-          callback: this.handleGoogleCredential.bind(this)
-        });
-        (window as any).googleInitialized = true;
-
-        const btnContainer = document.getElementById('googleBtn');
-        if (btnContainer) {
-          (window as any).google.accounts.id.renderButton(
-            btnContainer,
-            { theme: 'outline', size: 'large', width: 320, text: 'continue_with', shape: 'rectangular' }
-          );
+        } catch (err) {
+          console.warn('Google Sign-In initialization skipped:', err);
         }
       }
     }, 500);

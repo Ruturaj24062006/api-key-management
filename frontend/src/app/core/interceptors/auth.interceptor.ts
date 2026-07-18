@@ -12,7 +12,7 @@ export const authInterceptor: HttpInterceptorFn = (req, next) => {
   const isLocalhost = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
   let targetUrl = req.url;
   if (!isLocalhost && req.url.startsWith('http://localhost:8080')) {
-    targetUrl = req.url.replace('http://localhost:8080', 'https://nexus-backend-56gy.onrender.com');
+    targetUrl = req.url.replace('http://localhost:8080', 'https://nexus-backend-gmd1.onrender.com');
   }
 
   let authReq = req.clone({ url: targetUrl });
