@@ -60,60 +60,74 @@ public class SearchService {
         return jobRepository.searchHybrid(resume.getEmbedding(), keywords, limit);
     }
 
+    private static final java.util.Set<String> STOP_WORDS = java.util.Set.of(
+            "a", "an", "the", "and", "or", "in", "of", "to", "for", "with", "on", "at", "by", "from",
+            "is", "are", "was", "were", "be", "been", "being", "have", "has", "had", "do", "does", "did",
+            "but", "if", "not", "no", "as", "into", "like", "through", "after", "over", "between", "out",
+            "this", "that", "these", "those", "my", "your", "his", "her", "its", "our", "their"
+    );
+
     /**
      * Builds a rich BM25 query keyword string combining:
      * 1. Skill entity names (most precise)
      * 2. Job titles from experience (domain context)
      * 3. Lead tokens from parsed resume text (broad recall)
      *
-     * The resulting string is passed directly to plainto_tsquery() in PostgreSQL.
+     * Tokens are deduplicated, cleaned of stop words, and joined with " OR "
+     * for disjunctive Cover Density (BM25) scoring via websearch_to_tsquery().
      */
     private String buildKeywordString(Student student, Resume resume) {
-        StringBuilder sb = new StringBuilder();
+        java.util.Set<String> tokens = new java.util.LinkedHashSet<>();
 
         // Source 1: explicit skill tags
         if (student.getSkills() != null && !student.getSkills().isEmpty()) {
-            String skills = student.getSkills().stream()
-                    .map(StudentSkill::getName)
-                    .filter(s -> s != null && !s.isBlank())
-                    .collect(Collectors.joining(" "));
-            sb.append(skills);
+            for (StudentSkill skill : student.getSkills()) {
+                if (skill.getName() != null) {
+                    addCleanTokens(tokens, skill.getName());
+                }
+            }
         }
 
-        // Source 2: experience job titles (adds domain context like "backend", "ML engineer")
+        // Source 2: experience job titles (adds domain context like "backend", "engineer")
         if (student.getExperience() != null && !student.getExperience().isEmpty()) {
-            String titles = student.getExperience().stream()
-                    .map(e -> e.getJobTitle() != null ? e.getJobTitle() : "")
-                    .filter(t -> !t.isBlank())
-                    .collect(Collectors.joining(" "));
-            if (!titles.isBlank()) {
-                sb.append(" ").append(titles);
+            for (var exp : student.getExperience()) {
+                if (exp.getJobTitle() != null) {
+                    addCleanTokens(tokens, exp.getJobTitle());
+                }
             }
         }
 
         // Source 3: first 512 chars of parsed resume text (highest raw recall)
         if (resume != null && resume.getParsedText() != null && !resume.getParsedText().isBlank()) {
-            String resumeSnippet = resume.getParsedText()
-                    .replaceAll("[^a-zA-Z0-9 ]", " ") // remove special chars
-                    .replaceAll("\\s+", " ")
-                    .trim();
-            if (resumeSnippet.length() > 512) {
-                resumeSnippet = resumeSnippet.substring(0, 512);
+            String text = resume.getParsedText();
+            if (text.length() > 512) {
+                text = text.substring(0, 512);
             }
-            if (!resumeSnippet.isBlank()) {
-                sb.append(" ").append(resumeSnippet);
-            }
+            addCleanTokens(tokens, text);
         }
 
-        String result = sb.toString().trim();
-
-        // Final fallback if all sources are empty
-        if (result.isBlank()) {
-            result = student.getBio() != null && !student.getBio().isBlank()
-                    ? student.getBio()
-                    : "software developer engineer";
+        // Fallback if tokens set is empty
+        if (tokens.isEmpty() && student.getBio() != null && !student.getBio().isBlank()) {
+            addCleanTokens(tokens, student.getBio());
+        }
+        if (tokens.isEmpty()) {
+            tokens.add("software");
+            tokens.add("developer");
+            tokens.add("engineer");
         }
 
-        return result;
+        // Format for websearch_to_tsquery with OR operators for BM25 cover density scoring
+        return String.join(" OR ", tokens);
+    }
+
+    private void addCleanTokens(java.util.Set<String> set, String raw) {
+        if (raw == null || raw.isBlank()) return;
+        String[] words = raw.replaceAll("[^a-zA-Z0-9 ]", " ").toLowerCase().split("\\s+");
+        for (String w : words) {
+            String trimmed = w.trim();
+            if (trimmed.length() >= 2 && !STOP_WORDS.contains(trimmed)) {
+                set.add(trimmed);
+            }
+        }
     }
 }

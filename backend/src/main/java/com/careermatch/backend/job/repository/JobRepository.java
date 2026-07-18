@@ -24,10 +24,10 @@ public interface JobRepository extends JpaRepository<Job, UUID> {
           LIMIT 100
         ),
         fts_search AS (
-          SELECT id, ROW_NUMBER() OVER (ORDER BY ts_rank(fts, plainto_tsquery('english', :queryText)) DESC) as rank
+          SELECT id, ROW_NUMBER() OVER (ORDER BY ts_rank_cd(fts, websearch_to_tsquery('english', :queryText)) DESC) as rank
           FROM jobs
-          WHERE status = 'ACTIVE' AND fts @@ plainto_tsquery('english', :queryText)
-          ORDER BY ts_rank(fts, plainto_tsquery('english', :queryText)) DESC
+          WHERE status = 'ACTIVE' AND fts @@ websearch_to_tsquery('english', :queryText)
+          ORDER BY ts_rank_cd(fts, websearch_to_tsquery('english', :queryText)) DESC
           LIMIT 100
         )
         SELECT j.*
