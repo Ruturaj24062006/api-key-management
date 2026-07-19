@@ -35,6 +35,7 @@ public class SearchService {
      *   - Sparse leg: PostgreSQL tsvector BM25 full-text search (top-100)
      *   - Fusion: Reciprocal Rank Fusion (k=60) in SQL
      */
+    @org.springframework.transaction.annotation.Transactional(propagation = org.springframework.transaction.annotation.Propagation.REQUIRES_NEW, readOnly = true)
     public List<Job> searchJobsForStudent(Student student, int limit) {
         long tStart = System.currentTimeMillis();
         Resume resume = resumeRepository.findByStudentIdAndIsCurrentTrue(student.getId())
