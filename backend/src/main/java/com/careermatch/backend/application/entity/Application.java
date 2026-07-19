@@ -12,7 +12,7 @@ import java.time.LocalDateTime;
 import java.util.UUID;
 
 @Entity
-@Table(name = "applications")
+@Table(name = "applications", uniqueConstraints = {@UniqueConstraint(name = "uk_applications_student_job", columnNames = {"student_id", "job_id"})})
 @Data
 @Builder
 @NoArgsConstructor
