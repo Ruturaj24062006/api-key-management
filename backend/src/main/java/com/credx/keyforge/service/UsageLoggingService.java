@@ -14,6 +14,7 @@ import java.time.Instant;
 public class UsageLoggingService {
 
     private final ApiKeyUsageLogRepository usageLogRepository;
+    private final DashboardSseService dashboardSseService;
 
     @Transactional
     public void recordUsage(ApiKey apiKey, String endpoint, String httpMethod, int statusCode, long responseTimeMs) {
@@ -26,5 +27,11 @@ public class UsageLoggingService {
                 .occurredAt(Instant.now())
                 .build();
         usageLogRepository.save(log);
+
+        if (apiKey.getProject() != null && apiKey.getProject().getOrganization() != null) {
+            String orgId = apiKey.getProject().getOrganization().getId();
+            String ownerId = apiKey.getProject().getOrganization().getOwner().getId();
+            dashboardSseService.notifyUsageEvent(orgId, ownerId);
+        }
     }
 }

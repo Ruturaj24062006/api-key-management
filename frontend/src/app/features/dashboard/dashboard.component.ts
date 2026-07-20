@@ -21,7 +21,7 @@ const POLL_INTERVAL_MS = 15000;
         <h1>Dashboard</h1>
         <span class="kf-dashboard__live-indicator">
           <mat-icon class="kf-dashboard__live-dot">fiber_manual_record</mat-icon>
-          Live (polling every 15s)
+          Live (Server-Sent Events Stream)
         </span>
       </div>
 
@@ -55,10 +55,9 @@ const POLL_INTERVAL_MS = 15000;
         </div>
 
         <mat-card class="kf-dashboard__hint">
-          <mat-icon>info</mat-icon>
+          <mat-icon>sensors</mat-icon>
           <span>
-            This view polls the dashboard-stats endpoint on an interval. TODO: replace polling with a
-            WebSocket/SSE subscription once the backend exposes a push channel for usage events.
+            Connected to live backend SSE stream. Stats update instantly as API key requests are processed.
           </span>
         </mat-card>
       }
@@ -108,8 +107,9 @@ const POLL_INTERVAL_MS = 15000;
       gap: 12px;
       padding: 16px;
       font-size: 13px;
-      color: rgba(0, 0, 0, 0.6);
-      background: #eef1fb;
+      color: #1565c0;
+      background: #e3f2fd;
+      margin-top: 24px;
     }
   `],
 })
@@ -122,9 +122,6 @@ export class DashboardComponent {
   loading = signal(true);
 
   constructor() {
-    // Use effect to reactively start polling when org becomes available.
-    // This handles both the "org already set" case and the "org arrives after
-    // component init" race condition.
     effect(() => {
       const orgId = this.sessionState.currentOrgId();
       if (!orgId) {
@@ -132,19 +129,27 @@ export class DashboardComponent {
         return;
       }
       this.loading.set(true);
-      interval(POLL_INTERVAL_MS)
-        .pipe(
-          startWith(0),
-          switchMap(() => this.usageService.getDashboardStats(orgId)),
-          takeUntilDestroyed(this.destroyRef)
-        )
+
+      // Subscribe to backend SSE push stream for real-time usage metrics
+      this.usageService
+        .streamDashboardStats(orgId)
+        .pipe(takeUntilDestroyed(this.destroyRef))
         .subscribe({
           next: (data) => {
             this.stats.set(data);
             this.loading.set(false);
           },
           error: () => {
-            this.loading.set(false);
+            // Fallback to one-shot fetch if SSE stream connection closes or errors
+            this.usageService.getDashboardStats(orgId).subscribe({
+              next: (data) => {
+                this.stats.set(data);
+                this.loading.set(false);
+              },
+              error: () => {
+                this.loading.set(false);
+              },
+            });
           },
         });
     });
