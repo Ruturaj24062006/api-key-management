@@ -9,8 +9,11 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Instant;
 
+import lombok.extern.slf4j.Slf4j;
+
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class UsageLoggingService {
 
     private final ApiKeyUsageLogRepository usageLogRepository;
@@ -18,7 +21,7 @@ public class UsageLoggingService {
 
     @Transactional
     public void recordUsage(ApiKey apiKey, String endpoint, String httpMethod, int statusCode, long responseTimeMs) {
-        ApiKeyUsageLog log = ApiKeyUsageLog.builder()
+        ApiKeyUsageLog usageLog = ApiKeyUsageLog.builder()
                 .apiKey(apiKey)
                 .endpoint(endpoint)
                 .httpMethod(httpMethod)
@@ -26,12 +29,16 @@ public class UsageLoggingService {
                 .responseTimeMs(responseTimeMs)
                 .occurredAt(Instant.now())
                 .build();
-        usageLogRepository.save(log);
+        usageLogRepository.save(usageLog);
 
-        if (apiKey.getProject() != null && apiKey.getProject().getOrganization() != null) {
-            String orgId = apiKey.getProject().getOrganization().getId();
-            String ownerId = apiKey.getProject().getOrganization().getOwner().getId();
-            dashboardSseService.notifyUsageEvent(orgId, ownerId);
+        try {
+            if (apiKey.getProject() != null && apiKey.getProject().getOrganization() != null) {
+                String orgId = apiKey.getProject().getOrganization().getId();
+                String ownerId = apiKey.getProject().getOrganization().getOwner().getId();
+                dashboardSseService.notifyUsageEvent(orgId, ownerId);
+            }
+        } catch (Exception e) {
+            log.warn("Could not broadcast SSE event: {}", e.getMessage());
         }
     }
 }

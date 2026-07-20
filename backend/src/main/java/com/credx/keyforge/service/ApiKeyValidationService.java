@@ -33,6 +33,7 @@ public class ApiKeyValidationService {
      * population, every candidate returned by the prefix lookup is re-checked
      * against the full hashed secret below before being trusted.
      */
+    @Transactional(readOnly = true)
     public Optional<ApiKey> resolveKey(String presentedKey) {
         if (presentedKey == null || presentedKey.isBlank() || presentedKey.length() < 12) {
             return Optional.empty();
