@@ -1,7 +1,6 @@
 package com.credx.keyforge.dto.apikey;
 
 import com.credx.keyforge.entity.Scope;
-import jakarta.validation.constraints.Future;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotEmpty;

@@ -96,11 +96,9 @@ public class ApiKeyService {
         ApiKey apiKey = apiKeyRepository.findById(apiKeyId)
                 .orElseThrow(() -> new ResourceNotFoundException("API key not found"));
 
-        // Confirms the key exists, but doesn't verify the caller's org
-        // membership against apiKey.getProject().getOrganization() - the
-        // controller only passes apiKeyId here, not an organizationId to
-        // scope against. Fine for now since the UI always calls this with an
-        // id it just fetched from the user's own key list.
+        String orgId = apiKey.getProject().getOrganization().getId();
+        accessService.requireMembership(userId, orgId);
+
         return toResponse(apiKey);
     }
 
@@ -109,11 +107,14 @@ public class ApiKeyService {
         ApiKey apiKey = apiKeyRepository.findById(apiKeyId)
                 .orElseThrow(() -> new ResourceNotFoundException("API key not found"));
 
+        String orgId = apiKey.getProject().getOrganization().getId();
+        accessService.requireRole(userId, orgId, MembershipRole.OWNER, MembershipRole.ADMIN, MembershipRole.MEMBER);
+
         apiKey.setStatus(ApiKeyStatus.REVOKED);
         apiKey.setRevokedAt(Instant.now());
         apiKeyRepository.save(apiKey);
 
-        writeAuditLog(apiKey.getProject().getOrganization().getId(), "API_KEY_REVOKED", apiKey.getId());
+        writeAuditLog(orgId, "API_KEY_REVOKED", apiKey.getId());
     }
 
     /**
@@ -130,13 +131,46 @@ public class ApiKeyService {
     }
 
     /**
-     * Rotation is intentionally unimplemented: generate a new key, keep the
-     * old one valid for a grace period, then auto-expire it. Needs a
-     * scheduled job to expire the old key after the grace window, plus a
-     * decision on what "grace period" means per plan tier.
+     * Rotates an existing API key: generates a new key with identical configuration,
+     * while keeping the old key valid for a 24-hour grace period.
      */
+    @Transactional
     public ApiKeyCreatedResponse rotateApiKey(String userId, String apiKeyId) {
-        throw new UnsupportedOperationException("Key rotation is not implemented yet");
+        ApiKey oldKey = apiKeyRepository.findById(apiKeyId)
+                .orElseThrow(() -> new ResourceNotFoundException("API key not found"));
+
+        String orgId = oldKey.getProject().getOrganization().getId();
+        accessService.requireRole(userId, orgId, MembershipRole.OWNER, MembershipRole.ADMIN, MembershipRole.MEMBER);
+
+        if (oldKey.getStatus() != ApiKeyStatus.ACTIVE) {
+            throw new ForbiddenOperationException("Only active API keys can be rotated");
+        }
+
+        // Keep old key valid for a 24-hour grace period
+        oldKey.setExpiresAt(Instant.now().plusSeconds(86400));
+        apiKeyRepository.save(oldKey);
+
+        // Generate new API key
+        Project project = oldKey.getProject();
+        ApiKeyGenerator.GeneratedKey generated = apiKeyGenerator.generate(project.getEnvironment());
+
+        ApiKey newKey = ApiKey.builder()
+                .project(project)
+                .name(oldKey.getName())
+                .keyPrefix(generated.keyPrefix())
+                .hashedKey(generated.hashedKey())
+                .scopes(oldKey.getScopes())
+                .status(ApiKeyStatus.ACTIVE)
+                .expiresAt(null)
+                .rateLimitPerMinute(oldKey.getRateLimitPerMinute())
+                .currentWindowCount(0)
+                .currentWindowStart(Instant.now())
+                .build();
+        newKey = apiKeyRepository.save(newKey);
+
+        writeAuditLog(orgId, "API_KEY_ROTATED", newKey.getId());
+
+        return new ApiKeyCreatedResponse(toResponse(newKey), generated.fullKey());
     }
 
     private void writeAuditLog(String organizationId, String action, String targetId) {

@@ -3,7 +3,9 @@ package com.credx.keyforge.repository;
 import com.credx.keyforge.entity.AuditLog;
 import org.springframework.data.jpa.repository.JpaRepository;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+
 public interface AuditLogRepository extends JpaRepository<AuditLog, String> {
-    // TODO: add findAllByOrganizationIdOrderByCreatedAtDesc(String orgId, Pageable pageable)
-    // once the audit log read API (AuditLogController) is built out.
+    Page<AuditLog> findAllByOrganizationIdOrderByCreatedAtDesc(String organizationId, Pageable pageable);
 }

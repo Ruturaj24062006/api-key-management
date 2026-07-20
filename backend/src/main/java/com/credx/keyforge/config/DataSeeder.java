@@ -9,8 +9,11 @@ import org.springframework.boot.CommandLineRunner;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 
+import org.springframework.transaction.annotation.Transactional;
+
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
@@ -26,6 +29,7 @@ import java.util.Random;
 @Component
 @RequiredArgsConstructor
 @Slf4j
+@SuppressWarnings("null")
 public class DataSeeder implements CommandLineRunner {
 
     private final UserRepository userRepository;
@@ -34,12 +38,14 @@ public class DataSeeder implements CommandLineRunner {
     private final ProjectRepository projectRepository;
     private final ApiKeyRepository apiKeyRepository;
     private final ApiKeyUsageLogRepository usageLogRepository;
+    private final AuditLogRepository auditLogRepository;
     private final PasswordEncoder passwordEncoder;
     private final ApiKeyGenerator apiKeyGenerator;
 
     private final Random random = new Random(42);
 
     @Override
+    @Transactional
     public void run(String... args) {
         if (userRepository.count() > 0) {
             log.info("Data already present, skipping DataSeeder");
@@ -75,6 +81,7 @@ public class DataSeeder implements CommandLineRunner {
 
         seedUsageLogs(acmeApiProdKey, 400);
         seedUsageLogs(acmeApiMobileKey, 150);
+        seedUsageLogs(acmeInternalKey, 10);
         seedUsageLogs(nwCatalogKey, 30);
 
         log.info("Seed complete: {} users, {} orgs, {} projects, {} keys",
@@ -138,6 +145,18 @@ public class DataSeeder implements CommandLineRunner {
                 .build();
 
         apiKey = apiKeyRepository.save(apiKey);
+
+        User owner = project.getOrganization().getOwner();
+        AuditLog auditLog = AuditLog.builder()
+                .organizationId(project.getOrganization().getId())
+                .actorUserId(owner.getId())
+                .actorEmail(owner.getEmail())
+                .action(status == ApiKeyStatus.REVOKED ? "API_KEY_REVOKED" : "API_KEY_CREATED")
+                .targetType("API_KEY")
+                .targetId(apiKey.getId())
+                .build();
+        auditLogRepository.save(auditLog);
+
         log.info("Seeded key '{}' -> full key (dev only, would never be logged in prod): {}", name, generated.fullKey());
         return apiKey;
     }
@@ -145,6 +164,7 @@ public class DataSeeder implements CommandLineRunner {
     private void seedUsageLogs(ApiKey apiKey, int count) {
         String[] endpoints = {"/api/demo/protected-resource", "/v1/users", "/v1/users/me", "/v1/billing/invoices"};
         String[] methods = {"GET", "GET", "GET", "POST"};
+        List<ApiKeyUsageLog> logs = new ArrayList<>(count);
 
         for (int i = 0; i < count; i++) {
             int daysAgo = random.nextInt(30);
@@ -159,7 +179,8 @@ public class DataSeeder implements CommandLineRunner {
                     .responseTimeMs((long) (50 + random.nextInt(400)))
                     .occurredAt(Instant.now().minus(daysAgo, ChronoUnit.DAYS).minusSeconds(random.nextInt(86400)))
                     .build();
-            usageLogRepository.save(log);
+            logs.add(log);
         }
+        usageLogRepository.saveAll(logs);
     }
 }

@@ -2,10 +2,10 @@ spring:
   application:
     name: keyforge
   datasource:
-    url: ${DB_URL:jdbc:postgresql://localhost:5432/keyforge}
-    username: ${DB_USERNAME:keyforge_user}
-    password: ${DB_PASSWORD:keyforge_pass}
-    driver-class-name: org.postgresql.Driver
+    url: ${DB_URL:jdbc:h2:mem:keyforge;DB_CLOSE_DELAY=-1;MODE=PostgreSQL}
+    username: ${DB_USERNAME:sa}
+    password: ${DB_PASSWORD:}
+    driver-class-name: ${DB_DRIVER:org.h2.Driver}
   jpa:
     hibernate:
       ddl-auto: ${JPA_DDL_AUTO:update}

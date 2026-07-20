@@ -1,4 +1,4 @@
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpParams } from '@angular/common/http';
 import { Injectable, inject } from '@angular/core';
 import { Observable, tap } from 'rxjs';
 import { environment } from '../../../environments/environment';
@@ -8,6 +8,7 @@ import {
   Membership,
   Organization,
 } from '../models/organization.model';
+import { AuditLogPageResponse } from '../models/audit-log.model';
 import { SessionStateService } from '../state/session-state.service';
 
 @Injectable({ providedIn: 'root' })
@@ -36,5 +37,10 @@ export class OrganizationService {
 
   inviteMember(organizationId: string, request: InviteMemberRequest): Observable<Membership> {
     return this.http.post<Membership>(`${this.baseUrl}/${organizationId}/members`, request);
+  }
+
+  getAuditLogs(organizationId: string, page = 0, size = 20): Observable<AuditLogPageResponse> {
+    const params = new HttpParams().set('page', page).set('size', size);
+    return this.http.get<AuditLogPageResponse>(`${this.baseUrl}/${organizationId}/audit-logs`, { params });
   }
 }

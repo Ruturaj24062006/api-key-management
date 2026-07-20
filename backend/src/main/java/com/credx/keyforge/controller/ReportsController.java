@@ -22,6 +22,7 @@ public class ReportsController {
 
     private final ApiKeyService apiKeyService;
 
+    @SuppressWarnings("deprecation")
     @GetMapping("/projects/{projectId}/keys/export")
     public ResponseEntity<List<ApiKeyResponse>> exportKeys(@PathVariable String projectId) {
         return ResponseEntity.ok(apiKeyService.listAllApiKeysUnpaged(projectId));

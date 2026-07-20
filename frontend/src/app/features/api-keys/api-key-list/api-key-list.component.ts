@@ -90,7 +90,12 @@ import { KeyCreatedDialogComponent } from '../key-created-dialog/key-created-dia
             >
               <mat-icon>block</mat-icon>
             </button>
-            <button mat-icon-button matTooltip="Rotate key (coming soon)" (click)="rotateKey(key)">
+            <button
+              mat-icon-button
+              matTooltip="Rotate key"
+              [disabled]="key.status !== 'ACTIVE'"
+              (click)="rotateKey(key)"
+            >
               <mat-icon>autorenew</mat-icon>
             </button>
             <button mat-icon-button matTooltip="View usage analytics" (click)="viewAnalytics(key)">
@@ -203,8 +208,24 @@ export class ApiKeyListComponent implements OnInit {
     });
   }
 
-  rotateKey(_key: ApiKey): void {
-    this.snackBar.open('Key rotation is coming soon', 'Dismiss', { duration: 3000 });
+  rotateKey(key: ApiKey): void {
+    if (!confirm(`Rotate "${key.name}"? A new key will be generated, and the current key will remain active for a 24-hour grace period.`)) {
+      return;
+    }
+    this.apiKeyService.rotate(key.id).subscribe({
+      next: (created) => {
+        this.snackBar.open('API key rotated successfully', 'Dismiss', { duration: 3000 });
+        this.dialog.open(KeyCreatedDialogComponent, {
+          width: '520px',
+          disableClose: true,
+          data: { fullKey: created.fullKey, keyName: created.apiKey.name },
+        });
+        this.load();
+      },
+      error: () => {
+        this.snackBar.open('Failed to rotate API key', 'Dismiss', { duration: 3000 });
+      },
+    });
   }
 
   viewAnalytics(key: ApiKey): void {

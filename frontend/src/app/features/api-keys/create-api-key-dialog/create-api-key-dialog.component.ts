@@ -42,7 +42,10 @@ export interface CreateApiKeyDialogData {
         <label class="kf-key-form__scopes-label">Scopes</label>
         <div class="kf-key-form__scopes">
           @for (scope of allScopes; track scope.value) {
-            <mat-checkbox (change)="toggleScope(scope.value, $event.checked)">
+            <mat-checkbox
+              [checked]="isScopeSelected(scope.value)"
+              (change)="toggleScope(scope.value, $event.checked)"
+            >
               {{ scope.label }}
               <span class="kf-key-form__scope-desc">{{ scope.description }}</span>
             </mat-checkbox>
@@ -120,9 +123,6 @@ export class CreateApiKeyDialogComponent {
   submitting = signal(false);
   submittedOnce = signal(false);
 
-  // Selected scopes are tracked in a plain component field rather than a
-  // FormArray - simpler to wire up against the checkbox list above, and the
-  // form's `scopes` control just mirrors this array's length for validation.
   private selectedScopes: Scope[] = [];
 
   form = this.fb.nonNullable.group({
@@ -132,18 +132,25 @@ export class CreateApiKeyDialogComponent {
     rateLimitPerMinute: [60, [Validators.required]],
   });
 
+  isScopeSelected(scope: Scope): boolean {
+    return this.selectedScopes.includes(scope);
+  }
+
   toggleScope(scope: Scope, checked: boolean): void {
     if (checked) {
-      this.selectedScopes.push(scope);
+      if (!this.selectedScopes.includes(scope)) {
+        this.selectedScopes.push(scope);
+      }
     } else {
       const idx = this.selectedScopes.indexOf(scope);
       if (idx >= 0) {
         this.selectedScopes.splice(idx, 1);
       }
     }
-    // Keep the reactive form control in sync so Validators.required can see
-    // the current selection.
-    this.form.controls.scopes.setValue(this.selectedScopes.length > 0 ? this.selectedScopes : []);
+    const updated = [...this.selectedScopes];
+    this.form.controls.scopes.setValue(updated.length > 0 ? updated : []);
+    this.form.controls.scopes.markAsTouched();
+    this.form.controls.scopes.updateValueAndValidity();
   }
 
   submit(): void {
@@ -158,7 +165,7 @@ export class CreateApiKeyDialogComponent {
     this.apiKeyService
       .create(this.data.organizationId, this.data.projectId, {
         name: raw.name,
-        scopes: this.selectedScopes,
+        scopes: raw.scopes,
         expiresAt: raw.expiresAt ? new Date(raw.expiresAt).toISOString() : null,
         rateLimitPerMinute: raw.rateLimitPerMinute,
       })

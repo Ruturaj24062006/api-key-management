@@ -11,6 +11,8 @@ import com.credx.keyforge.exception.ResourceNotFoundException;
 import com.credx.keyforge.repository.ApiKeyRepository;
 import com.credx.keyforge.repository.ApiKeyUsageLogRepository;
 import com.credx.keyforge.repository.ProjectRepository;
+import com.credx.keyforge.dto.usage.PlatformUsageSummaryResponse;
+import com.credx.keyforge.repository.OrganizationRepository;
 import com.credx.keyforge.util.DateFormatUtil;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -32,7 +34,20 @@ public class UsageAnalyticsService {
     private final ApiKeyUsageLogRepository usageLogRepository;
     private final ApiKeyRepository apiKeyRepository;
     private final ProjectRepository projectRepository;
+    private final OrganizationRepository organizationRepository;
     private final OrganizationAccessService accessService;
+
+    public PlatformUsageSummaryResponse getPlatformUsageSummary() {
+        long totalCalls = usageLogRepository.count();
+        long totalErrors = usageLogRepository.countByStatusCodeGreaterThanEqual(400);
+        long activeKeys = apiKeyRepository.countByStatus(ApiKeyStatus.ACTIVE);
+        long totalOrgs = organizationRepository.count();
+        long totalProjects = projectRepository.count();
+
+        double errorRate = totalCalls == 0 ? 0.0 : (totalErrors * 100.0) / totalCalls;
+
+        return new PlatformUsageSummaryResponse(totalCalls, activeKeys, round2(errorRate), totalOrgs, totalProjects);
+    }
 
     /**
      * Calls-per-day breakdown for a single key over the last `windowDays`

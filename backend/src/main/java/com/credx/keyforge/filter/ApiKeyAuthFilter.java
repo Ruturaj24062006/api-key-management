@@ -56,16 +56,25 @@ public class ApiKeyAuthFilter extends OncePerRequestFilter {
         Optional<ApiKey> resolved = validationService.resolveKey(presentedKey);
 
         if (resolved.isEmpty()) {
-            writeError(response, HttpServletResponse.SC_UNAUTHORIZED, "Missing or invalid API key");
+            writeError(response, HttpServletResponse.SC_UNAUTHORIZED, "UNAUTHORIZED", "Missing or invalid API key");
             return;
         }
 
         ApiKey apiKey = resolved.get();
         boolean withinLimit = validationService.recordRequestAndCheckLimit(apiKey);
 
-        // withinLimit is currently informational only - see class javadoc.
-        // A future rate-limit filter should short-circuit here with 429 when
-        // withinLimit is false.
+        if (!withinLimit) {
+            long elapsed = System.currentTimeMillis() - start;
+            int status = 429;
+            writeError(response, status, "TOO_MANY_REQUESTS", "Rate limit exceeded");
+            usageLoggingService.recordUsage(
+                    apiKey,
+                    request.getRequestURI(),
+                    request.getMethod(),
+                    status,
+                    elapsed);
+            return;
+        }
 
         filterChain.doFilter(request, response);
 
@@ -78,12 +87,12 @@ public class ApiKeyAuthFilter extends OncePerRequestFilter {
                 elapsed);
     }
 
-    private void writeError(HttpServletResponse response, int status, String message) throws IOException {
+    private void writeError(HttpServletResponse response, int status, String error, String message) throws IOException {
         response.setStatus(status);
         response.setContentType("application/json");
         response.getWriter().write(objectMapper.writeValueAsString(Map.of(
                 "status", status,
-                "error", "UNAUTHORIZED",
+                "error", error,
                 "message", message)));
     }
 }

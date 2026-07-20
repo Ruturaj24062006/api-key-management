@@ -26,6 +26,8 @@ public interface ApiKeyRepository extends JpaRepository<ApiKey, String> {
 
     Optional<ApiKey> findByHashedKey(String hashedKey);
 
+    long countByStatus(com.credx.keyforge.entity.ApiKeyStatus status);
+
     @Modifying
     @Query("update ApiKey k set k.lastUsedAt = :now where k.id = :id")
     void touchLastUsedAt(@Param("id") String id, @Param("now") java.time.Instant now);

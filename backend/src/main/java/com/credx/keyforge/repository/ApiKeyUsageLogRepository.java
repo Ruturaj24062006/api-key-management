@@ -21,6 +21,8 @@ public interface ApiKeyUsageLogRepository extends JpaRepository<ApiKeyUsageLog, 
     long countByApiKeyIdAndOccurredAtAfterAndStatusCodeGreaterThanEqual(
             String apiKeyId, Instant after, Integer statusCode);
 
+    long countByStatusCodeGreaterThanEqual(Integer statusCode);
+
     @Query("select count(u) from ApiKeyUsageLog u where u.apiKey.project.id = :projectId and u.occurredAt >= :since")
     long countByProjectIdSince(@Param("projectId") String projectId, @Param("since") Instant since);
 }

@@ -12,12 +12,14 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequiredArgsConstructor
+@SuppressWarnings("null")
 public class UsageLogController {
 
     private final ApiKeyUsageLogRepository usageLogRepository;
@@ -25,6 +27,7 @@ public class UsageLogController {
     private final OrganizationAccessService accessService;
     private final CurrentUserProvider currentUserProvider;
 
+    @Transactional(readOnly = true)
     @GetMapping("/api/organizations/{organizationId}/keys/{apiKeyId}/usage-logs")
     public ResponseEntity<Page<UsageLogResponse>> listUsageLogs(
             @PathVariable String organizationId,
