@@ -1,4 +1,4 @@
-import { Component, DestroyRef, inject, OnInit, signal } from '@angular/core';
+import { Component, DestroyRef, inject, signal, effect } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { MatCardModule } from '@angular/material/card';
 import { MatIconModule } from '@angular/material/icon';
@@ -113,7 +113,7 @@ const POLL_INTERVAL_MS = 15000;
     }
   `],
 })
-export class DashboardComponent implements OnInit {
+export class DashboardComponent {
   private readonly usageService = inject(UsageService);
   private readonly sessionState = inject(SessionStateService);
   private readonly destroyRef = inject(DestroyRef);
@@ -121,27 +121,32 @@ export class DashboardComponent implements OnInit {
   stats = signal<DashboardStats | null>(null);
   loading = signal(true);
 
-  ngOnInit(): void {
-    const orgId = this.sessionState.currentOrgId();
-    if (!orgId) {
-      this.loading.set(false);
-      return;
-    }
-
-    interval(POLL_INTERVAL_MS)
-      .pipe(
-        startWith(0),
-        switchMap(() => this.usageService.getDashboardStats(orgId)),
-        takeUntilDestroyed(this.destroyRef)
-      )
-      .subscribe({
-        next: (data) => {
-          this.stats.set(data);
-          this.loading.set(false);
-        },
-        error: () => {
-          this.loading.set(false);
-        },
-      });
+  constructor() {
+    // Use effect to reactively start polling when org becomes available.
+    // This handles both the "org already set" case and the "org arrives after
+    // component init" race condition.
+    effect(() => {
+      const orgId = this.sessionState.currentOrgId();
+      if (!orgId) {
+        this.loading.set(false);
+        return;
+      }
+      this.loading.set(true);
+      interval(POLL_INTERVAL_MS)
+        .pipe(
+          startWith(0),
+          switchMap(() => this.usageService.getDashboardStats(orgId)),
+          takeUntilDestroyed(this.destroyRef)
+        )
+        .subscribe({
+          next: (data) => {
+            this.stats.set(data);
+            this.loading.set(false);
+          },
+          error: () => {
+            this.loading.set(false);
+          },
+        });
+    });
   }
 }

@@ -1,4 +1,4 @@
-import { Component, OnInit, inject, signal } from '@angular/core';
+import { Component, inject, signal, effect } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { MatTableModule } from '@angular/material/table';
 import { MatPaginatorModule, PageEvent } from '@angular/material/paginator';
@@ -105,7 +105,7 @@ import { EmptyStateComponent } from '../../shared/components/empty-state/empty-s
     }
   `],
 })
-export class AuditLogComponent implements OnInit {
+export class AuditLogComponent {
   private readonly orgService = inject(OrganizationService);
   private readonly sessionState = inject(SessionStateService);
 
@@ -117,8 +117,15 @@ export class AuditLogComponent implements OnInit {
 
   displayedColumns = ['createdAt', 'actorEmail', 'action', 'targetType', 'targetId'];
 
-  ngOnInit(): void {
-    this.load();
+  constructor() {
+    effect(() => {
+      const orgId = this.sessionState.currentOrgId();
+      if (orgId) {
+        this.load();
+      } else {
+        this.loading.set(false);
+      }
+    });
   }
 
   load(): void {

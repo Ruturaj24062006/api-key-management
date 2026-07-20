@@ -1,4 +1,4 @@
-import { Component, inject, OnInit, signal } from '@angular/core';
+import { Component, inject, signal, effect } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
 import { MatTableModule } from '@angular/material/table';
@@ -93,7 +93,7 @@ import { ProjectFormDialogComponent } from '../project-form-dialog/project-form-
     }
   `],
 })
-export class ProjectListComponent implements OnInit {
+export class ProjectListComponent {
   private readonly projectService = inject(ProjectService);
   private readonly sessionState = inject(SessionStateService);
   private readonly router = inject(Router);
@@ -103,8 +103,17 @@ export class ProjectListComponent implements OnInit {
   loading = signal(true);
   displayedColumns = ['name', 'environment', 'activeKeys', 'createdAt'];
 
-  ngOnInit(): void {
-    this.load();
+  constructor() {
+    // Reactively reload whenever the selected org changes (fixes race condition
+    // where the org list arrives after this component initialises).
+    effect(() => {
+      const orgId = this.sessionState.currentOrgId();
+      if (orgId) {
+        this.load();
+      } else {
+        this.loading.set(false);
+      }
+    });
   }
 
   load(): void {
