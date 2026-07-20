@@ -46,13 +46,22 @@ export class SessionStateService {
 
   setOrganizations(orgs: Organization[]): void {
     this.organizationsSignal.set(orgs);
-    if (!this.currentOrgIdSignal() && orgs.length > 0) {
-      this.setCurrentOrg(orgs[0].id);
+    if (orgs.length > 0) {
+      const currentExists = orgs.some((org) => org.id === this.currentOrgIdSignal());
+      if (!currentExists) {
+        this.setCurrentOrg(orgs[0].id);
+      }
+    } else {
+      this.setCurrentOrg(null);
     }
   }
 
-  setCurrentOrg(orgId: string): void {
-    localStorage.setItem(ORG_KEY, orgId);
+  setCurrentOrg(orgId: string | null): void {
+    if (orgId) {
+      localStorage.setItem(ORG_KEY, orgId);
+    } else {
+      localStorage.removeItem(ORG_KEY);
+    }
     this.currentOrgIdSignal.set(orgId);
   }
 
