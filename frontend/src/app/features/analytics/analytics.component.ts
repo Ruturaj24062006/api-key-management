@@ -119,10 +119,7 @@ export class AnalyticsComponent implements OnInit {
     this.usageService.getKeyAnalytics(orgId, this.apiKeyId, this.windowDays()).subscribe({
       next: (data) => {
         this.analytics.set(data);
-        // loading is left true here on the happy path - only the error
-        // handler below resets it, so a slow-but-successful request leaves
-        // the spinner and the (now populated) table stacked on top of each
-        // other until the next fetch.
+        this.loading.set(false);
       },
       error: () => {
         this.loading.set(false);

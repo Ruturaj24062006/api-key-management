@@ -71,6 +71,7 @@ public class ApiKeyService {
      * Lists API keys for a project, paginated. Called from the API Keys list
      * page in the dashboard.
      */
+    @Transactional(readOnly = true)
     public Page<ApiKeyResponse> listApiKeys(String userId, String organizationId, String projectId, Pageable pageable) {
         accessService.requireMembership(userId, organizationId);
 
@@ -92,6 +93,7 @@ public class ApiKeyService {
      * revoke action to confirm what's being revoked before showing a
      * confirmation dialog.
      */
+    @Transactional(readOnly = true)
     public ApiKeyResponse getApiKey(String userId, String apiKeyId) {
         ApiKey apiKey = apiKeyRepository.findById(apiKeyId)
                 .orElseThrow(() -> new ResourceNotFoundException("API key not found"));
@@ -124,6 +126,7 @@ public class ApiKeyService {
      * user-facing endpoints - loads every key for a project into memory.
      */
     @Deprecated
+    @Transactional(readOnly = true)
     public List<ApiKeyResponse> listAllApiKeysUnpaged(String projectId) {
         return apiKeyRepository.findAllByProjectId(projectId).stream()
                 .map(this::toResponse)
