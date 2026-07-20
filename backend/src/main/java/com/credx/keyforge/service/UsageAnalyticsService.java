@@ -16,6 +16,7 @@ import com.credx.keyforge.repository.OrganizationRepository;
 import com.credx.keyforge.util.DateFormatUtil;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Instant;
 import java.time.ZoneOffset;
@@ -37,6 +38,7 @@ public class UsageAnalyticsService {
     private final OrganizationRepository organizationRepository;
     private final OrganizationAccessService accessService;
 
+    @Transactional(readOnly = true)
     public PlatformUsageSummaryResponse getPlatformUsageSummary() {
         long totalCalls = usageLogRepository.count();
         long totalErrors = usageLogRepository.countByStatusCodeGreaterThanEqual(400);
@@ -57,6 +59,7 @@ public class UsageAnalyticsService {
      * while this endpoint was being built out. Works fine against the seed
      * data; something to revisit if a key legitimately sees high volume.
      */
+    @Transactional(readOnly = true)
     public UsageAnalyticsResponse getKeyAnalytics(String userId, String organizationId, String apiKeyId, int windowDays) {
         accessService.requireMembership(userId, organizationId);
 
@@ -92,6 +95,7 @@ public class UsageAnalyticsService {
         return new UsageAnalyticsResponse(apiKeyId, days, totalCalls, totalErrors, breakdown);
     }
 
+    @Transactional(readOnly = true)
     public DashboardStatsResponse getDashboardStats(String userId, String organizationId) {
         accessService.requireMembership(userId, organizationId);
 
