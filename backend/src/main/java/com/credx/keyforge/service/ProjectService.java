@@ -8,6 +8,7 @@ import com.credx.keyforge.entity.MembershipRole;
 import com.credx.keyforge.entity.Organization;
 import com.credx.keyforge.entity.Project;
 import com.credx.keyforge.exception.ResourceNotFoundException;
+import com.credx.keyforge.repository.ApiKeyRepository;
 import com.credx.keyforge.repository.OrganizationRepository;
 import com.credx.keyforge.repository.ProjectRepository;
 import lombok.RequiredArgsConstructor;
@@ -22,6 +23,7 @@ public class ProjectService {
 
     private final ProjectRepository projectRepository;
     private final OrganizationRepository organizationRepository;
+    private final ApiKeyRepository apiKeyRepository;
     private final OrganizationAccessService accessService;
 
     @Transactional
@@ -42,6 +44,7 @@ public class ProjectService {
         return toResponse(project);
     }
 
+    @Transactional(readOnly = true)
     public List<ProjectResponse> listProjects(String userId, String organizationId) {
         accessService.requireMembership(userId, organizationId);
         return projectRepository.findAllByOrganizationId(organizationId).stream()
@@ -49,6 +52,7 @@ public class ProjectService {
                 .toList();
     }
 
+    @Transactional(readOnly = true)
     public ProjectResponse getProject(String userId, String organizationId, String projectId) {
         accessService.requireMembership(userId, organizationId);
         Project project = findProjectInOrg(organizationId, projectId);
@@ -84,8 +88,7 @@ public class ProjectService {
     }
 
     private ProjectResponse toResponse(Project project) {
-        long activeKeys = project.getApiKeys() == null ? 0 :
-                project.getApiKeys().stream().filter(k -> k.getStatus() == ApiKeyStatus.ACTIVE).count();
+        long activeKeys = apiKeyRepository.countByProjectIdAndStatus(project.getId(), ApiKeyStatus.ACTIVE);
 
         return new ProjectResponse(
                 project.getId(),
