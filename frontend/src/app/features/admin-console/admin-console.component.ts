@@ -1,4 +1,4 @@
-import { Component, OnInit, inject, signal } from '@angular/core';
+import { Component, OnInit, OnDestroy, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { MatCardModule } from '@angular/material/card';
 import { MatTableModule } from '@angular/material/table';
@@ -8,6 +8,7 @@ import { AdminService } from '../../core/services/admin.service';
 import { PlatformUsageSummary, UserSummary } from '../../core/models/admin.model';
 import { LoadingSpinnerComponent } from '../../shared/components/loading-spinner/loading-spinner.component';
 import { EmptyStateComponent } from '../../shared/components/empty-state/empty-state.component';
+import { Subscription, interval } from 'rxjs';
 
 @Component({
   selector: 'kf-admin-console',
@@ -28,6 +29,10 @@ import { EmptyStateComponent } from '../../shared/components/empty-state/empty-s
           <h1>Admin Console</h1>
           <p class="kf-page-subtitle">Cross-organization platform metrics, access controls, and user active access summary.</p>
         </div>
+        <span class="live-polling-indicator">
+          <mat-icon class="live-polling-dot">fiber_manual_record</mat-icon>
+          Live (polling every 10s)
+        </span>
       </div>
 
       @if (loading()) {
@@ -144,6 +149,21 @@ import { EmptyStateComponent } from '../../shared/components/empty-state/empty-s
       margin-top: 4px;
     }
 
+    .live-polling-indicator {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      font-size: 12px;
+      color: rgba(0, 0, 0, 0.6);
+    }
+
+    .live-polling-dot {
+      font-size: 10px;
+      width: 10px;
+      height: 10px;
+      color: #7b1fa2;
+    }
+
     .kf-stat-card {
       padding: 20px;
       display: flex;
@@ -242,8 +262,9 @@ import { EmptyStateComponent } from '../../shared/components/empty-state/empty-s
     }
   `],
 })
-export class AdminConsoleComponent implements OnInit {
+export class AdminConsoleComponent implements OnInit, OnDestroy {
   private readonly adminService = inject(AdminService);
+  private pollSubscription?: Subscription;
 
   loading = signal(true);
   summary = signal<PlatformUsageSummary | null>(null);
@@ -253,10 +274,23 @@ export class AdminConsoleComponent implements OnInit {
 
   ngOnInit(): void {
     this.load();
+
+    // Keep data fresh by polling every 10 seconds
+    this.pollSubscription = interval(10000).subscribe(() => {
+      this.refreshData();
+    });
+  }
+
+  ngOnDestroy(): void {
+    this.pollSubscription?.unsubscribe();
   }
 
   load(): void {
     this.loading.set(true);
+    this.refreshData();
+  }
+
+  refreshData(): void {
     this.adminService.getPlatformUsageSummary().subscribe({
       next: (summaryData) => {
         this.summary.set(summaryData);

@@ -62,6 +62,7 @@ public class DataSeeder implements CommandLineRunner {
         Organization acme = createOrganization("Acme Corp", "acme-corp", PlanTier.PRO, alice);
         addMember(alice, acme, MembershipRole.OWNER);
         addMember(bob, acme, MembershipRole.MEMBER);
+        addMember(admin, acme, MembershipRole.ADMIN);
 
         Organization northwind = createOrganization("Northwind Traders", "northwind-traders", PlanTier.FREE, carol);
         addMember(carol, northwind, MembershipRole.OWNER);
