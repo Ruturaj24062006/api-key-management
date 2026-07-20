@@ -147,6 +147,9 @@ public class UsageAnalyticsService {
             for (ApiKey key : keys) {
                 List<ApiKeyUsageLog> logs = usageLogRepository.findAllByApiKeyIdAndOccurredAtAfter(key.getId(), startOfToday);
                 long blockedCount = 0;
+                int currentCount = key.getCurrentWindowCount() == null ? 0 : key.getCurrentWindowCount();
+                int limit = key.getRateLimitPerMinute();
+
                 for (ApiKeyUsageLog log : logs) {
                     if (log.getStatusCode() != null && log.getStatusCode() >= 400) {
                         totalErrorsToday++;
@@ -157,27 +160,33 @@ public class UsageAnalyticsService {
                             otherErrorsToday++;
                         }
 
+                        String reason = log.getStatusCode() == 429
+                                ? "Rate limit exceeded (" + currentCount + "/" + limit + " req/min)"
+                                : "HTTP Error " + log.getStatusCode();
+
+                        Instant time = log.getOccurredAt() != null ? log.getOccurredAt() : Instant.now();
+
                         recentLogs.add(new ErrorLogItem(
-                                log.getId(),
-                                key.getName(),
-                                key.getKeyPrefix(),
-                                log.getEndpoint(),
-                                log.getHttpMethod(),
+                                log.getId() != null ? log.getId() : java.util.UUID.randomUUID().toString(),
+                                key.getName() != null ? key.getName() : "API Key",
+                                key.getKeyPrefix() != null ? key.getKeyPrefix() : "kf_",
+                                log.getEndpoint() != null ? log.getEndpoint() : "/api",
+                                log.getHttpMethod() != null ? log.getHttpMethod() : "GET",
                                 log.getStatusCode(),
-                                log.getStatusCode() == 429 ? "Rate limit exceeded (" + key.getCurrentWindowCount() + "/" + key.getRateLimitPerMinute() + " req/min)" : "HTTP Error " + log.getStatusCode(),
-                                log.getOccurredAt()
+                                reason,
+                                time
                         ));
                     }
                 }
 
-                boolean isRateLimited = key.getCurrentWindowCount() != null && key.getCurrentWindowCount() >= key.getRateLimitPerMinute();
+                boolean isRateLimited = currentCount >= limit;
                 if (blockedCount > 0 || isRateLimited || logs.stream().anyMatch(l -> l.getStatusCode() != null && l.getStatusCode() >= 400)) {
                     keySummaries.add(new KeyErrorSummary(
                             key.getId(),
-                            key.getName(),
-                            key.getKeyPrefix(),
-                            key.getRateLimitPerMinute(),
-                            key.getCurrentWindowCount() == null ? 0 : key.getCurrentWindowCount(),
+                            key.getName() != null ? key.getName() : "API Key",
+                            key.getKeyPrefix() != null ? key.getKeyPrefix() : "kf_",
+                            limit,
+                            currentCount,
                             blockedCount,
                             isRateLimited,
                             key.getLastUsedAt()
@@ -186,7 +195,13 @@ public class UsageAnalyticsService {
             }
         }
 
-        recentLogs.sort((a, b) -> b.occurredAt().compareTo(a.occurredAt()));
+        recentLogs.sort((a, b) -> {
+            if (a.occurredAt() == null && b.occurredAt() == null) return 0;
+            if (a.occurredAt() == null) return 1;
+            if (b.occurredAt() == null) return -1;
+            return b.occurredAt().compareTo(a.occurredAt());
+        });
+
         if (recentLogs.size() > 20) {
             recentLogs = recentLogs.subList(0, 20);
         }
