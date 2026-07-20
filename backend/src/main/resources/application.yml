@@ -1,0 +1,46 @@
+spring:
+  application:
+    name: keyforge
+  datasource:
+    url: ${DB_URL:jdbc:postgresql://localhost:5432/keyforge}
+    username: ${DB_USERNAME:keyforge_user}
+    password: ${DB_PASSWORD:keyforge_pass}
+    driver-class-name: org.postgresql.Driver
+  jpa:
+    hibernate:
+      ddl-auto: ${JPA_DDL_AUTO:update}
+    show-sql: ${JPA_SHOW_SQL:false}
+    properties:
+      hibernate:
+        format_sql: true
+        jdbc:
+          batch_size: 20
+        default_batch_fetch_size: 20
+    open-in-view: false
+  servlet:
+    multipart:
+      max-file-size: 5MB
+
+server:
+  port: ${SERVER_PORT:8080}
+
+keyforge:
+  jwt:
+    secret: ${JWT_SECRET:this-is-a-dev-only-secret-key-please-override-in-prod-min-256-bits}
+    expiration-ms: ${JWT_EXPIRATION_MS:86400000}
+  cors:
+    allowed-origins: ${CORS_ALLOWED_ORIGINS:http://localhost:4200}
+  api-key:
+    prefix-live: kf_live_
+    prefix-test: kf_test_
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info
+
+logging:
+  level:
+    com.credx.keyforge: ${LOG_LEVEL:INFO}
+    org.hibernate.SQL: ${SQL_LOG_LEVEL:WARN}

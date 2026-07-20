@@ -1,0 +1,8 @@
+/dist
+/node_modules
+/.angular
+npm-debug.log
+*.log
+.DS_Store
+.vscode/
+.idea/

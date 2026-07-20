@@ -1,0 +1,65 @@
+html, body {
+  height: 100%;
+  margin: 0;
+}
+
+body {
+  font-family: 'Inter', 'Roboto', sans-serif;
+  background-color: #f5f6f8;
+  color: #1a1d24;
+}
+
+code, .kf-mono {
+  font-family: 'Roboto Mono', monospace;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+.kf-page {
+  padding: 24px;
+  max-width: 1280px;
+  margin: 0 auto;
+}
+
+.kf-page-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 24px;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.kf-page-header h1 {
+  font-size: 22px;
+  font-weight: 600;
+  margin: 0;
+}
+
+.kf-card-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 16px;
+  margin-bottom: 24px;
+}
+
+.kf-status-chip-active {
+  background-color: #e3f6e9 !important;
+  color: #1c7c3f !important;
+}
+
+.kf-status-chip-revoked {
+  background-color: #fdeaea !important;
+  color: #b3261e !important;
+}
+
+.kf-status-chip-expired {
+  background-color: #fff3e0 !important;
+  color: #a66300 !important;
+}
+
+.kf-full-width {
+  width: 100%;
+}
