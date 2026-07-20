@@ -162,7 +162,7 @@ public class ApiKeyService {
                 .name(oldKey.getName())
                 .keyPrefix(generated.keyPrefix())
                 .hashedKey(generated.hashedKey())
-                .scopes(oldKey.getScopes())
+                .scopes(new java.util.ArrayList<>(oldKey.getScopes()))
                 .status(ApiKeyStatus.ACTIVE)
                 .expiresAt(null)
                 .rateLimitPerMinute(oldKey.getRateLimitPerMinute())
