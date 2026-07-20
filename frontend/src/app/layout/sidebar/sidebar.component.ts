@@ -1,8 +1,9 @@
-import { Component } from '@angular/core';
+import { Component, inject } from '@angular/core';
 import { RouterLink, RouterLinkActive } from '@angular/router';
 import { MatListModule } from '@angular/material/list';
 import { MatIconModule } from '@angular/material/icon';
 import { MatDividerModule } from '@angular/material/divider';
+import { SessionStateService } from '../../core/state/session-state.service';
 
 interface NavItem {
   label: string;
@@ -27,6 +28,14 @@ interface NavItem {
         <mat-icon matListItemIcon>history</mat-icon>
         <span matListItemTitle>Audit Log</span>
       </a>
+
+      @if (sessionState.currentUser()?.role === 'ADMIN') {
+        <mat-divider style="margin: 8px 0;"></mat-divider>
+        <a mat-list-item routerLink="/admin-console" routerLinkActive="kf-sidebar__item--active">
+          <mat-icon matListItemIcon style="color: #673ab7;">admin_panel_settings</mat-icon>
+          <span matListItemTitle style="color: #673ab7; font-weight: 500;">Admin Console</span>
+        </a>
+      }
     </mat-nav-list>
   `,
   styles: [`
@@ -41,6 +50,8 @@ interface NavItem {
   `],
 })
 export class SidebarComponent {
+  protected readonly sessionState = inject(SessionStateService);
+
   readonly navItems: NavItem[] = [
     { label: 'Dashboard', icon: 'dashboard', route: '/dashboard' },
     { label: 'Projects', icon: 'folder', route: '/projects' },

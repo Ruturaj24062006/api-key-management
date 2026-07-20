@@ -23,3 +23,14 @@ export const guestGuard: CanActivateFn = () => {
 
   return router.createUrlTree(['/dashboard']);
 };
+
+export const adminGuard: CanActivateFn = () => {
+  const sessionState = inject(SessionStateService);
+  const router = inject(Router);
+
+  if (sessionState.isAuthenticated() && sessionState.currentUser()?.role === 'ADMIN') {
+    return true;
+  }
+
+  return router.createUrlTree(['/dashboard']);
+};
