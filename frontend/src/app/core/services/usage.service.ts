@@ -42,6 +42,12 @@ export class UsageService {
     );
   }
 
+  getErrorAnalytics(organizationId: string): Observable<any> {
+    return this.http.get<any>(
+      `${environment.apiBaseUrl}/organizations/${organizationId}/error-analytics`
+    );
+  }
+
   streamDashboardStats(organizationId: string): Observable<DashboardStats> {
     const token = this.sessionState.getToken();
     const url = `${environment.apiBaseUrl}/organizations/${organizationId}/dashboard/stream?token=${encodeURIComponent(token ?? '')}`;

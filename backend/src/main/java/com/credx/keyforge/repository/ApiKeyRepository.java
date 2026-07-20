@@ -30,6 +30,9 @@ public interface ApiKeyRepository extends JpaRepository<ApiKey, String> {
 
     long countByProjectIdAndStatus(String projectId, com.credx.keyforge.entity.ApiKeyStatus status);
 
+    @Query("select k from ApiKey k join fetch k.project p join fetch p.organization o join fetch o.owner where k.id = :id")
+    Optional<ApiKey> findWithOrgDetailsById(@Param("id") String id);
+
     @Modifying
     @Query("update ApiKey k set k.lastUsedAt = :now where k.id = :id")
     void touchLastUsedAt(@Param("id") String id, @Param("now") java.time.Instant now);

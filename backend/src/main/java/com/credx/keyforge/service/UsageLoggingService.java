@@ -11,12 +11,15 @@ import java.time.Instant;
 
 import lombok.extern.slf4j.Slf4j;
 
+import com.credx.keyforge.repository.ApiKeyRepository;
+
 @Service
 @RequiredArgsConstructor
 @Slf4j
 public class UsageLoggingService {
 
     private final ApiKeyUsageLogRepository usageLogRepository;
+    private final ApiKeyRepository apiKeyRepository;
     private final DashboardSseService dashboardSseService;
 
     @Transactional
@@ -32,11 +35,13 @@ public class UsageLoggingService {
         usageLogRepository.save(usageLog);
 
         try {
-            if (apiKey.getProject() != null && apiKey.getProject().getOrganization() != null) {
-                String orgId = apiKey.getProject().getOrganization().getId();
-                String ownerId = apiKey.getProject().getOrganization().getOwner().getId();
-                dashboardSseService.notifyUsageEvent(orgId, ownerId);
-            }
+            apiKeyRepository.findWithOrgDetailsById(apiKey.getId()).ifPresent(key -> {
+                if (key.getProject() != null && key.getProject().getOrganization() != null) {
+                    String orgId = key.getProject().getOrganization().getId();
+                    String ownerId = key.getProject().getOrganization().getOwner().getId();
+                    dashboardSseService.notifyUsageEvent(orgId, ownerId);
+                }
+            });
         } catch (Exception e) {
             log.warn("Could not broadcast SSE event: {}", e.getMessage());
         }

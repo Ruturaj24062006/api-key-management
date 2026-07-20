@@ -26,6 +26,13 @@ export const routes: Routes = [
           import('./features/dashboard/dashboard.component').then((m) => m.DashboardComponent),
       },
       {
+        path: 'error-analytics',
+        loadComponent: () =>
+          import('./features/error-analytics/error-analytics.component').then(
+            (m) => m.ErrorAnalyticsComponent
+          ),
+      },
+      {
         path: 'projects',
         loadComponent: () =>
           import('./features/projects/project-list/project-list.component').then(

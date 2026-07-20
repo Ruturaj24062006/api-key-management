@@ -1,5 +1,6 @@
 import { Component, DestroyRef, inject, signal, effect } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { Router } from '@angular/router';
 import { MatCardModule } from '@angular/material/card';
 import { MatIconModule } from '@angular/material/icon';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
@@ -41,8 +42,11 @@ const POLL_INTERVAL_MS = 15000;
             <div class="kf-stat-card__label">Active keys</div>
           </mat-card>
 
-          <mat-card class="kf-stat-card">
-            <mat-icon class="kf-stat-card__icon">error_outline</mat-icon>
+          <mat-card class="kf-stat-card kf-stat-card--clickable" (click)="viewErrorAnalytics()">
+            <div class="kf-stat-card__header">
+              <mat-icon class="kf-stat-card__icon kf-stat-card__icon--error">error_outline</mat-icon>
+              <span class="kf-stat-card__badge">Click for Details ➔</span>
+            </div>
             <div class="kf-stat-card__value">{{ stats()!.errorRatePercent }}%</div>
             <div class="kf-stat-card__label">Error rate (today)</div>
           </mat-card>
@@ -86,9 +90,40 @@ const POLL_INTERVAL_MS = 15000;
       gap: 4px;
     }
 
+    .kf-stat-card--clickable {
+      cursor: pointer;
+      transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+      border: 1px solid rgba(0, 0, 0, 0.08);
+    }
+
+    .kf-stat-card--clickable:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 24px rgba(63, 81, 181, 0.18);
+      border-color: #3f51b5;
+    }
+
+    .kf-stat-card__header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .kf-stat-card__badge {
+      font-size: 11px;
+      font-weight: 600;
+      color: #3f51b5;
+      background: #eef1fb;
+      padding: 2px 8px;
+      border-radius: 12px;
+    }
+
     .kf-stat-card__icon {
       color: #3f51b5;
       margin-bottom: 8px;
+    }
+
+    .kf-stat-card__icon--error {
+      color: #d32f2f;
     }
 
     .kf-stat-card__value {
@@ -117,9 +152,14 @@ export class DashboardComponent {
   private readonly usageService = inject(UsageService);
   private readonly sessionState = inject(SessionStateService);
   private readonly destroyRef = inject(DestroyRef);
+  private readonly router = inject(Router);
 
   stats = signal<DashboardStats | null>(null);
   loading = signal(true);
+
+  viewErrorAnalytics(): void {
+    this.router.navigate(['/error-analytics']);
+  }
 
   constructor() {
     effect(() => {

@@ -11,6 +11,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
+import com.credx.keyforge.dto.usage.ErrorAnalyticsResponse;
+
 @RestController
 @RequiredArgsConstructor
 public class UsageController {
@@ -32,6 +34,12 @@ public class UsageController {
     public ResponseEntity<DashboardStatsResponse> dashboardStats(@PathVariable String organizationId) {
         String userId = currentUserProvider.getUserId();
         return ResponseEntity.ok(usageAnalyticsService.getDashboardStats(userId, organizationId));
+    }
+
+    @GetMapping("/api/organizations/{organizationId}/error-analytics")
+    public ResponseEntity<ErrorAnalyticsResponse> errorAnalytics(@PathVariable String organizationId) {
+        String userId = currentUserProvider.getUserId();
+        return ResponseEntity.ok(usageAnalyticsService.getErrorAnalytics(userId, organizationId));
     }
 
     @GetMapping(value = "/api/organizations/{organizationId}/dashboard/stream", produces = MediaType.TEXT_EVENT_STREAM_VALUE)

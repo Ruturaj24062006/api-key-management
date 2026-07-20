@@ -2,6 +2,10 @@ package com.credx.keyforge.service;
 
 import com.credx.keyforge.dto.usage.DailyUsagePoint;
 import com.credx.keyforge.dto.usage.DashboardStatsResponse;
+import com.credx.keyforge.dto.usage.ErrorAnalyticsResponse;
+import com.credx.keyforge.dto.usage.ErrorLogItem;
+import com.credx.keyforge.dto.usage.KeyErrorSummary;
+import com.credx.keyforge.dto.usage.PlatformUsageSummaryResponse;
 import com.credx.keyforge.dto.usage.UsageAnalyticsResponse;
 import com.credx.keyforge.entity.ApiKey;
 import com.credx.keyforge.entity.ApiKeyStatus;
@@ -120,6 +124,83 @@ public class UsageAnalyticsService {
         double errorRate = totalCallsToday == 0 ? 0.0 : (totalErrorsToday * 100.0) / totalCallsToday;
 
         return new DashboardStatsResponse(totalCallsToday, activeKeyCount, round2(errorRate), projects.size());
+    }
+
+    @Transactional(readOnly = true)
+    public ErrorAnalyticsResponse getErrorAnalytics(String userId, String organizationId) {
+        accessService.requireMembership(userId, organizationId);
+
+        List<Project> projects = projectRepository.findAllByOrganizationId(organizationId);
+        Instant startOfToday = Instant.now().truncatedTo(ChronoUnit.DAYS);
+
+        long totalCallsToday = 0;
+        long totalErrorsToday = 0;
+        long rateLimitErrorsToday = 0;
+        long otherErrorsToday = 0;
+
+        List<KeyErrorSummary> keySummaries = new java.util.ArrayList<>();
+        List<ErrorLogItem> recentLogs = new java.util.ArrayList<>();
+
+        for (Project project : projects) {
+            totalCallsToday += usageLogRepository.countByProjectIdSince(project.getId(), startOfToday);
+            List<ApiKey> keys = apiKeyRepository.findAllByProjectId(project.getId());
+            for (ApiKey key : keys) {
+                List<ApiKeyUsageLog> logs = usageLogRepository.findAllByApiKeyIdAndOccurredAtAfter(key.getId(), startOfToday);
+                long blockedCount = 0;
+                for (ApiKeyUsageLog log : logs) {
+                    if (log.getStatusCode() != null && log.getStatusCode() >= 400) {
+                        totalErrorsToday++;
+                        if (log.getStatusCode() == 429) {
+                            rateLimitErrorsToday++;
+                            blockedCount++;
+                        } else {
+                            otherErrorsToday++;
+                        }
+
+                        recentLogs.add(new ErrorLogItem(
+                                log.getId(),
+                                key.getName(),
+                                key.getKeyPrefix(),
+                                log.getEndpoint(),
+                                log.getHttpMethod(),
+                                log.getStatusCode(),
+                                log.getStatusCode() == 429 ? "Rate limit exceeded (" + key.getCurrentWindowCount() + "/" + key.getRateLimitPerMinute() + " req/min)" : "HTTP Error " + log.getStatusCode(),
+                                log.getOccurredAt()
+                        ));
+                    }
+                }
+
+                boolean isRateLimited = key.getCurrentWindowCount() != null && key.getCurrentWindowCount() >= key.getRateLimitPerMinute();
+                if (blockedCount > 0 || isRateLimited || logs.stream().anyMatch(l -> l.getStatusCode() != null && l.getStatusCode() >= 400)) {
+                    keySummaries.add(new KeyErrorSummary(
+                            key.getId(),
+                            key.getName(),
+                            key.getKeyPrefix(),
+                            key.getRateLimitPerMinute(),
+                            key.getCurrentWindowCount() == null ? 0 : key.getCurrentWindowCount(),
+                            blockedCount,
+                            isRateLimited,
+                            key.getLastUsedAt()
+                    ));
+                }
+            }
+        }
+
+        recentLogs.sort((a, b) -> b.occurredAt().compareTo(a.occurredAt()));
+        if (recentLogs.size() > 20) {
+            recentLogs = recentLogs.subList(0, 20);
+        }
+
+        double errorRate = totalCallsToday == 0 ? 0.0 : (totalErrorsToday * 100.0) / totalCallsToday;
+
+        return new ErrorAnalyticsResponse(
+                totalErrorsToday,
+                rateLimitErrorsToday,
+                otherErrorsToday,
+                round2(errorRate),
+                keySummaries,
+                recentLogs
+        );
     }
 
     private double round2(double value) {
